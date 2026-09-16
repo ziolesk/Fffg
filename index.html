@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bei Poa – Campus Marketplace</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --primary: #0d9488;      /* teal-600 */
+      --primary-dark: #0f766e; /* teal-700 */
+      --accent: #f59e0b;       /* amber */
+      --dark: #134e4a;         /* teal-900 */
+      --light-bg: #f0fdfa;     /* teal-50 */
+    }
+    body { background-color: var(--light-bg); min-height: 100vh; font-family: system-ui, -apple-system, sans-serif; }
+    .navbar {
+      background: linear-gradient(90deg, #0f766e, #0d9488, #14b8a6);
+    }
+    .navbar-brand { font-weight: 800; letter-spacing: -0.5px; }
+    .hero {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%);
+      color: white; padding: 3rem 0 2.5rem;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    .btn-accent {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-accent:hover { background-color: #d97706; border-color: #d97706; color: #fff; }
+    .card-item {
+      border: none; border-radius: 1rem; overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.08);
+      background: #fff;
+    }
+    .card-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 28px rgba(13, 148, 136, 0.15);
+    }
+    .card-img-top { height: 180px; object-fit: cover; }
+    .badge-category, .badge-condition { position: absolute; top: 10px; font-size: .68rem; }
+    .badge-category { left: 10px; background: var(--primary) !important; }
+    .badge-condition { right: 10px; }
+    .price { color: var(--primary); font-weight: 700; font-size: 1.15rem; }
+    .btn-whatsapp { background: #25d366; border: none; color: #fff; }
+    .btn-whatsapp:hover { background: #1da851; color: #fff; }
+    .stat-card {
+      border: none; border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.05); background: #fff;
+    }
+    .stat-card .icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, #0d9488, #14b8a6);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 700;
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+    .empty-state { padding: 3.5rem 1rem; text-align: center; color: #94a3b8; }
+    .empty-state i { font-size: 2.8rem; margin-bottom: .8rem; opacity: .5; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .status-banned { background: #1f2937; color: #fff; }
+    .sidebar-admin {
+      background: #134e4a; min-height: calc(100vh - 56px); color: #ccfbf1;
+    }
+    .sidebar-admin .nav-link {
+      color: #99f6e4; border-radius: .5rem; margin-bottom: .25rem;
+    }
+    .sidebar-admin .nav-link:hover,
+    .sidebar-admin .nav-link.active {
+      background: #0d9488; color: #fff;
+    }
+    .report-card { border-left: 4px solid #ef4444; }
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(240,253,250,0.85);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    .spinner-border { color: var(--primary); }
+    .text-primary { color: var(--primary) !important; }
+    .bg-primary { background-color: var(--primary) !important; }
+    .border-primary { border-color: var(--primary) !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Loading -->
+  <div id="loading" class="loading-overlay d-none">
+    <div class="text-center">
+      <div class="spinner-border" style="width:3rem;height:3rem"></div>
+      <p class="mt-3 text-muted">Loading Bei Poa...</p>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="#" onclick="showSection('marketplace'); return false;">
+        <i class="fas fa-tags me-2"></i>Bei Poa
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" id="nav-marketplace" onclick="showSection('marketplace'); return false;">Marketplace</a>
+          </li>
+          <li class="nav-item d-none" id="nav-dashboard-item">
+            <a class="nav-link" href="#" id="nav-dashboard" onclick="showSection('dashboard'); return false;">My Dashboard</a>
+          </li>
+          <li class="nav-item d-none" id="nav-profile-item">
+            <a class="nav-link" href="#" id="nav-profile" onclick="showSection('profile'); return false;">Profile</a>
+          </li>
+          <li class="nav-item d-none" id="nav-admin-item">
+            <a class="nav-link" href="#" id="nav-admin" onclick="showSection('admin'); return false;">
+              <i class="fas fa-shield-alt me-1"></i>Admin
+            </a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <span id="userGreeting" class="text-white small me-1 d-none"></span>
+          <button id="loginBtn" class="btn btn-light btn-sm" onclick="showAuthModal('login')">Login</button>
+          <button id="registerBtn" class="btn btn-outline-light btn-sm" onclick="showAuthModal('register')">Register</button>
+          <button id="logoutBtn" class="btn btn-outline-light btn-sm d-none" onclick="logout()">Logout</button>
+          <button id="postBtn" class="btn btn-accent btn-sm d-none" onclick="showPostModal()">
+            <i class="fas fa-plus me-1"></i>Sell
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MARKETPLACE -->
+  <div id="section-marketplace" class="section active">
+    <header class="hero text-center">
+      <div class="container">
+        <h1 class="display-6 fw-bold mb-2">Bei Poa</h1>
+        <p class="mb-0 opacity-90">Graduates sell • New students buy — Fair prices, safe deals</p>
+      </div>
+    </header>
+
+    <div class="container my-4">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-3">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label small text-muted mb-1">Search</label>
+              <input id="searchInput" type="text" class="form-control form-control-sm" placeholder="Search items..." oninput="debounceRender()">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small text-muted mb-1">University</label>
+              <select id="filterUniversity" class="form-select form-select-sm" onchange="renderItems()">
+                <option value="">All</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small text-muted mb-1">Category</label>
+              <select id="filterCategory" class="form-select form-select-sm" onchange="renderItems()">
+                <option value="">All</option>
+                <option>Textbooks</option>
+                <option>Electronics</option>
+                <option>Furniture</option>
+                <option>Notes / PDFs</option>
+                <option>Clothing</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small text-muted mb-1">Max Price</label>
+              <input id="filterPrice" type="number" class="form-control form-control-sm" placeholder="Any" oninput="debounceRender()">
+            </div>
+            <div class="col-6 col-md-2">
+              <button class="btn btn-outline-secondary btn-sm w-100" onclick="resetFilters()">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <main class="container pb-5">
+      <div id="itemsGrid" class="row g-3"></div>
+      <div id="noItems" class="empty-state d-none">
+        <i class="fas fa-box-open"></i>
+        <p class="mb-0">No approved items found.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- USER DASHBOARD -->
+  <div id="section-dashboard" class="section">
+    <div class="container py-4">
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+          <h2 class="h4 mb-1 fw-bold">My Dashboard</h2>
+          <p class="text-muted small mb-0">Your listings & activity</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="showPostModal()">
+          <i class="fas fa-plus me-1"></i> New Listing
+        </button>
+      </div>
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-list"></i></div>
+              <div><div class="text-muted small">Total</div><div class="fs-4 fw-bold" id="statTotal">0</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="icon bg-success bg-opacity-10 text-success"><i class="fas fa-check-circle"></i></div>
+              <div><div class="text-muted small">Active</div><div class="fs-4 fw-bold" id="statActive">0</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-clock"></i></div>
+              <div><div class="text-muted small">Pending</div><div class="fs-4 fw-bold" id="statPending">0</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="icon bg-secondary bg-opacity-10 text-secondary"><i class="fas fa-tag"></i></div>
+              <div><div class="text-muted small">Sold</div><div class="fs-4 fw-bold" id="statSold">0</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-0 pt-3 pb-0"><h5 class="mb-0 fw-semibold">My Listings</h5></div>
+        <div class="card-body">
+          <div id="myListings" class="row g-3"></div>
+          <div id="noMyListings" class="empty-state d-none">
+            <i class="fas fa-clipboard-list"></i>
+            <p class="mb-2">No listings yet</p>
+            <button class="btn btn-primary btn-sm" onclick="showPostModal()">Post first item</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="section-profile" class="section">
+    <div class="container py-4">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center gap-4 mb-4">
+                <div class="profile-avatar" id="profileAvatar">U</div>
+                <div>
+                  <h3 class="h5 mb-1 fw-bold" id="profileNameDisplay">User</h3>
+                  <p class="text-muted small mb-0" id="profileEmailDisplay">email@example.com</p>
+                  <span class="badge bg-primary-subtle text-primary mt-1" id="profileRoleBadge">User</span>
+                  <span class="badge bg-secondary-subtle text-secondary mt-1 ms-1" id="profileUniBadge">—</span>
+                </div>
+              </div>
+              <hr>
+              <form id="profileForm" onsubmit="saveProfile(event)">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Full Name</label>
+                    <input type="text" id="profileName" class="form-control" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Email</label>
+                    <input type="email" id="profileEmail" class="form-control" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-semibold">University</label>
+                    <input type="text" id="profileUniversity" class="form-control">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Phone / WhatsApp</label>
+                    <input type="text" id="profilePhone" class="form-control" placeholder="+2547...">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label small fw-semibold">Bio</label>
+                    <textarea id="profileBio" class="form-control" rows="2"></textarea>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="section-admin" class="section">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-3 col-lg-2 sidebar-admin p-3 d-none d-md-block">
+          <h6 class="text-uppercase small text-white-50 mb-3">Moderation</h6>
+          <nav class="nav flex-column">
+            <a class="nav-link active" href="#" onclick="showAdminTab('overview'); return false;" id="atab-overview">
+              <i class="fas fa-chart-pie me-2"></i>Overview
+            </a>
+            <a class="nav-link" href="#" onclick="showAdminTab('listings'); return false;" id="atab-listings">
+              <i class="fas fa-box me-2"></i>Listings
+            </a>
+            <a class="nav-link" href="#" onclick="showAdminTab('reports'); return false;" id="atab-reports">
+              <i class="fas fa-flag me-2"></i>Reports
+            </a>
+            <a class="nav-link" href="#" onclick="showAdminTab('users'); return false;" id="atab-users">
+              <i class="fas fa-users me-2"></i>Users & Team
+            </a>
+          </nav>
+        </div>
+        <div class="col-md-9 col-lg-10 p-4">
+          <div class="d-md-none mb-3">
+            <select class="form-select" onchange="showAdminTab(this.value)">
+              <option value="overview">Overview</option>
+              <option value="listings">Listings</option>
+              <option value="reports">Reports</option>
+              <option value="users">Users & Team</option>
+            </select>
+          </div>
+
+          <div id="admin-overview" class="admin-tab">
+            <h4 class="fw-bold mb-4">Admin Overview</h4>
+            <div class="row g-3 mb-4">
+              <div class="col-6 col-lg-3">
+                <div class="card stat-card"><div class="card-body">
+                  <div class="text-muted small">Total Users</div>
+                  <div class="fs-3 fw-bold" id="aStatUsers">0</div>
+                </div></div>
+              </div>
+              <div class="col-6 col-lg-3">
+                <div class="card stat-card"><div class="card-body">
+                  <div class="text-muted small">Total Listings</div>
+                  <div class="fs-3 fw-bold" id="aStatListings">0</div>
+                </div></div>
+              </div>
+              <div class="col-6 col-lg-3">
+                <div class="card stat-card"><div class="card-body">
+                  <div class="text-muted small">Pending Review</div>
+                  <div class="fs-3 fw-bold text-warning" id="aStatPending">0</div>
+                </div></div>
+              </div>
+              <div class="col-6 col-lg-3">
+                <div class="card stat-card"><div class="card-body">
+                  <div class="text-muted small">Open Reports</div>
+                  <div class="fs-3 fw-bold text-danger" id="aStatReports">0</div>
+                </div></div>
+              </div>
+            </div>
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              Promote trusted users to <strong>moderator</strong> so they can help approve listings and handle reports.
+            </div>
+          </div>
+
+          <div id="admin-listings" class="admin-tab d-none">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="fw-bold mb-0">Listings Moderation</h4>
+              <select id="listingStatusFilter" class="form-select form-select-sm w-auto" onchange="renderAdminListings()">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle bg-white rounded-3 overflow-hidden shadow-sm">
+                <thead class="table-light">
+                  <tr><th>Item</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="adminListingsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="admin-reports" class="admin-tab d-none">
+            <h4 class="fw-bold mb-3">Scam & Abuse Reports</h4>
+            <div id="adminReportsList"></div>
+            <div id="noReports" class="empty-state d-none">
+              <i class="fas fa-flag"></i>
+              <p>No open reports. Great job!</p>
+            </div>
+          </div>
+
+          <div id="admin-users" class="admin-tab d-none">
+            <h4 class="fw-bold mb-3">Users & Team Management</h4>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle bg-white rounded-3 overflow-hidden shadow-sm">
+                <thead class="table-light">
+                  <tr><th>User</th><th>University</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="adminUsersBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div class="modal fade" id="authModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold" id="authTitle">Login</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body pt-2">
+          <form id="authForm" onsubmit="handleAuth(event)">
+            <div class="mb-3" id="nameField">
+              <label class="form-label small fw-semibold">Full Name</label>
+              <input id="authName" type="text" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Email</label>
+              <input id="authEmail" type="email" class="form-control" required placeholder="you@example.com">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Password</label>
+              <input id="authPassword" type="password" class="form-control" required minlength="6">
+            </div>
+            <div class="mb-3 d-none" id="universityField">
+              <label class="form-label small fw-semibold">University</label>
+              <input id="authUniversity" type="text" class="form-control" placeholder="e.g. University of Nairobi">
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2">
+              <span id="authSubmitText">Login</span>
+            </button>
+          </form>
+          <div class="text-center mt-3 small text-muted">
+            <span id="authSwitchText">Don't have an account?</span>
+            <a href="#" id="authSwitchLink" onclick="toggleAuthMode(event)" class="text-primary fw-semibold">Register</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Post Modal -->
+  <div class="modal fade" id="postModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">Sell an Item</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning small py-2">
+            <i class="fas fa-info-circle me-1"></i> New listings go to <strong>Pending</strong> until approved by the team.
+          </div>
+          <form id="postForm" onsubmit="handlePost(event)">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Title *</label>
+              <input id="itemTitle" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Description</label>
+              <textarea id="itemDesc" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label small fw-semibold">Price (KES) *</label>
+                <input id="itemPrice" type="number" class="form-control" required min="0">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-semibold">Category *</label>
+                <select id="itemCategory" class="form-select" required>
+                  <option value="">Select</option>
+                  <option>Textbooks</option>
+                  <option>Electronics</option>
+                  <option>Furniture</option>
+                  <option>Notes / PDFs</option>
+                  <option>Clothing</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-semibold">Condition</label>
+                <select id="itemCondition" class="form-select">
+                  <option>Like New</option>
+                  <option>Good</option>
+                  <option>Fair</option>
+                  <option>Used</option>
+                </select>
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">University *</label>
+                <input id="itemUniversity" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Contact (WhatsApp) *</label>
+                <input id="itemContact" class="form-control" required placeholder="+2547...">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Image URL (optional)</label>
+              <input id="itemImage" type="url" class="form-control" placeholder="https://...">
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2">Submit for Review</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold text-danger"><i class="fas fa-flag me-2"></i>Report Listing</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="reportForm" onsubmit="submitReport(event)">
+            <input type="hidden" id="reportItemId">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Reason *</label>
+              <select id="reportReason" class="form-select" required>
+                <option value="">Select reason</option>
+                <option value="scam">Scam / Fraud</option>
+                <option value="fake">Fake / Misleading</option>
+                <option value="inappropriate">Inappropriate content</option>
+                <option value="wrong_info">Wrong contact / info</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Details</label>
+              <textarea id="reportDetails" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger w-100">Submit Report</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ============================================================
+    //  SUPABASE CONFIG – REPLACE THESE WITH YOUR PROJECT VALUES
+    // ============================================================
+    const SUPABASE_URL = 'https://mnlfiiuqlacjlaiszygr.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_CmrQp0cnfQfiFFcaOYeEng_E2H4bMJ8';
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ============================================================
+    //  STATE
+    // ============================================================
+    let currentUser = null;   // auth user
+    let profile = null;       // profiles row
+    let items = [];
+    let users = [];
+    let reports = [];
+    let authMode = 'login';
+    let debounceTimer = null;
+
+    let authModal, postModal, reportModal;
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      authModal = new bootstrap.Modal(document.getElementById('authModal'));
+      postModal = new bootstrap.Modal(document.getElementById('postModal'));
+      reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+
+      showLoading(true);
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) {
+          currentUser = session.user;
+          await loadProfile();
+        }
+        await loadItems();
+        updateUI();
+        if (profile && isStaff()) await loadAdminData();
+      } catch (err) {
+        console.error(err);
+        alert('Failed to connect to backend. Check your Supabase URL & key.');
+      } finally {
+        showLoading(false);
+      }
+
+      // Realtime subscriptions
+      sb
+        .channel('items-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => loadItems())
+        .subscribe();
+
+      sb
+        .channel('reports-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => {
+          if (isStaff()) loadAdminData();
+        })
+        .subscribe();
+    });
+
+    function showLoading(show) {
+      document.getElementById('loading').classList.toggle('d-none', !show);
+    }
+
+    // ============================================================
+    //  HELPERS
+    // ============================================================
+    function isStaff() {
+      return profile && (profile.role === 'admin' || profile.role === 'moderator');
+    }
+    function isAdmin() {
+      return profile && profile.role === 'admin';
+    }
+    function escapeHtml(t) {
+      if (!t) return '';
+      const d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+    function debounceRender() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(renderItems, 300);
+    }
+
+    // ============================================================
+    //  DATA LOADING
+    // ============================================================
+    async function loadProfile() {
+      if (!currentUser) return;
+      const { data, error } = await sb
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+      if (error) {
+        console.error('Profile load error', error);
+        return;
+      }
+      profile = data;
+      if (profile.status === 'banned') {
+        alert('Your account has been banned.');
+        await logout();
+      }
+    }
+
+    async function loadItems() {
+      const { data, error } = await sb
+        .from('items')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.error(error);
+        return;
+      }
+      items = data || [];
+      populateUniversities();
+      renderItems();
+      if (profile) renderDashboard();
+      if (isStaff()) renderAdminListings();
+    }
+
+    async function loadAdminData() {
+      const [{ data: u }, { data: r }] = await Promise.all([
+        sb.from('profiles').select('*').order('created_at', { ascending: false }),
+        sb.from('reports').select('*').order('created_at', { ascending: false })
+      ]);
+      users = u || [];
+      reports = r || [];
+      renderAdminOverview();
+      renderAdminListings();
+      renderAdminReports();
+      renderAdminUsers();
+    }
+
+    // ============================================================
+    //  NAVIGATION
+    // ============================================================
+    function showSection(name) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('section-' + name).classList.add('active');
+      document.querySelectorAll('.navbar-nav .nav-link').forEach(l => l.classList.remove('active'));
+      const nl = document.getElementById('nav-' + name);
+      if (nl) nl.classList.add('active');
+
+      if (name === 'dashboard' && profile) renderDashboard();
+      if (name === 'profile' && profile) loadProfileForm();
+      if (name === 'admin' && isStaff()) {
+        showAdminTab('overview');
+        loadAdminData();
+      }
+      if (name === 'marketplace') renderItems();
+
+      const col = document.getElementById('navMenu');
+      if (col.classList.contains('show')) bootstrap.Collapse.getInstance(col)?.hide();
+    }
+
+    function showAdminTab(tab) {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('d-none'));
+      document.getElementById('admin-' + tab).classList.remove('d-none');
+      document.querySelectorAll('.sidebar-admin .nav-link').forEach(l => l.classList.remove('active'));
+      const link = document.getElementById('atab-' + tab);
+      if (link) link.classList.add('active');
+      if (tab === 'listings') renderAdminListings();
+      if (tab === 'reports') renderAdminReports();
+      if (tab === 'users') renderAdminUsers();
+      if (tab === 'overview') renderAdminOverview();
+    }
+
+    // ============================================================
+    //  AUTH
+    // ============================================================
+    function showAuthModal(mode) {
+      authMode = mode;
+      updateAuthModalUI();
+      authModal.show();
+    }
+    function toggleAuthMode(e) {
+      e.preventDefault();
+      authMode = authMode === 'login' ? 'register' : 'login';
+      updateAuthModalUI();
+    }
+    function updateAuthModalUI() {
+      const isLogin = authMode === 'login';
+      document.getElementById('authTitle').textContent = isLogin ? 'Login' : 'Create Account';
+      document.getElementById('authSubmitText').textContent = isLogin ? 'Login' : 'Register';
+      document.getElementById('nameField').classList.toggle('d-none', isLogin);
+      document.getElementById('universityField').classList.toggle('d-none', isLogin);
+      document.getElementById('authSwitchText').textContent = isLogin ? "Don't have an account?" : 'Already have an account?';
+      document.getElementById('authSwitchLink').textContent = isLogin ? 'Register' : 'Login';
+      document.getElementById('authName').required = !isLogin;
+    }
+
+    async function handleAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value.trim().toLowerCase();
+      const password = document.getElementById('authPassword').value;
+      const name = document.getElementById('authName').value.trim();
+      const university = document.getElementById('authUniversity').value.trim();
+
+      showLoading(true);
+      try {
+        if (authMode === 'register') {
+          if (!name) { alert('Please enter your name'); return; }
+          const { data, error } = await sb.auth.signUp({
+            email,
+            password,
+            options: { data: { name, university } }
+          });
+          if (error) throw error;
+
+          // Profile is auto-created by the database trigger.
+          // If email confirmation is OFF, we get a session immediately.
+          if (data.session) {
+            currentUser = data.user;
+            await loadProfile();
+            authModal.hide();
+            document.getElementById('authForm').reset();
+            updateUI();
+            showSection('dashboard');
+            alert('Welcome to Bei Poa! Your account is ready.');
+          } else {
+            // Email confirmation is required
+            alert('Account created successfully!\n\nPlease check your email and click the confirmation link, then come back and Login.\n\n(Tip: You can turn off email confirmation in Supabase → Authentication → Providers → Email)');
+            authMode = 'login';
+            updateAuthModalUI();
+            document.getElementById('authEmail').value = email;
+          }
+        } else {
+          const { data, error } = await sb.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          currentUser = data.user;
+          await loadProfile();
+          authModal.hide();
+          document.getElementById('authForm').reset();
+          updateUI();
+          showSection(isStaff() ? 'admin' : 'dashboard');
+        }
+      } catch (err) {
+        alert(err.message || 'Authentication failed');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function logout() {
+      if (!confirm('Logout?')) return;
+      await sb.auth.signOut();
+      currentUser = null;
+      profile = null;
+      updateUI();
+      showSection('marketplace');
+    }
+
+    // ============================================================
+    //  PROFILE
+    // ============================================================
+    function loadProfileForm() {
+      if (!profile) return;
+      document.getElementById('profileName').value = profile.name || '';
+      document.getElementById('profileEmail').value = profile.email || '';
+      document.getElementById('profileUniversity').value = profile.university || '';
+      document.getElementById('profilePhone').value = profile.phone || '';
+      document.getElementById('profileBio').value = profile.bio || '';
+      document.getElementById('profileNameDisplay').textContent = profile.name;
+      document.getElementById('profileEmailDisplay').textContent = profile.email;
+      document.getElementById('profileRoleBadge').textContent = (profile.role || 'user').toUpperCase();
+      document.getElementById('profileUniBadge').textContent = profile.university || '—';
+      document.getElementById('profileAvatar').textContent = (profile.name || 'U').charAt(0).toUpperCase();
+    }
+
+    async function saveProfile(e) {
+      e.preventDefault();
+      if (!profile) return;
+      const updates = {
+        name: document.getElementById('profileName').value.trim(),
+        university: document.getElementById('profileUniversity').value.trim(),
+        phone: document.getElementById('profilePhone').value.trim(),
+        bio: document.getElementById('profileBio').value.trim()
+      };
+      showLoading(true);
+      const { error } = await sb.from('profiles').update(updates).eq('id', profile.id);
+      showLoading(false);
+      if (error) { alert(error.message); return; }
+      profile = { ...profile, ...updates };
+      updateUI();
+      loadProfileForm();
+      alert('Profile saved!');
+    }
+
+    // ============================================================
+    //  POST ITEM
+    // ============================================================
+    function showPostModal() {
+      if (!currentUser) { alert('Please login first'); showAuthModal('login'); return; }
+      if (profile?.status === 'banned') { alert('You are banned'); return; }
+      document.getElementById('itemUniversity').value = profile?.university || '';
+      document.getElementById('itemContact').value = profile?.phone || '';
+      postModal.show();
+    }
+
+    async function handlePost(e) {
+      e.preventDefault();
+      const newItem = {
+        title: document.getElementById('itemTitle').value.trim(),
+        description: document.getElementById('itemDesc').value.trim(),
+        price: Number(document.getElementById('itemPrice').value),
+        category: document.getElementById('itemCategory').value,
+        condition: document.getElementById('itemCondition').value,
+        university: document.getElementById('itemUniversity').value.trim(),
+        image_url: document.getElementById('itemImage').value.trim() || null,
+        contact: document.getElementById('itemContact').value.trim(),
+        seller_id: currentUser.id,
+        seller_name: profile.name,
+        seller_email: profile.email,
+        status: isStaff() ? 'approved' : 'pending',
+        sold: false
+      };
+      showLoading(true);
+      const { error } = await sb.from('items').insert(newItem);
+      showLoading(false);
+      if (error) { alert(error.message); return; }
+      postModal.hide();
+      document.getElementById('postForm').reset();
+      await loadItems();
+      alert(newItem.status === 'pending' ? 'Submitted for review!' : 'Posted successfully!');
+    }
+
+    // ============================================================
+    //  MARKETPLACE RENDER
+    // ============================================================
+    function renderItems() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const uni = document.getElementById('filterUniversity').value;
+      const cat = document.getElementById('filterCategory').value;
+      const maxP = document.getElementById('filterPrice').value;
+
+      const filtered = items.filter(item => {
+        if (item.status !== 'approved' || item.sold) return false;
+        if (search && !item.title.toLowerCase().includes(search) && !(item.description||'').toLowerCase().includes(search)) return false;
+        if (uni && item.university !== uni) return false;
+        if (cat && item.category !== cat) return false;
+        if (maxP && item.price > Number(maxP)) return false;
+        return true;
+      });
+
+      const grid = document.getElementById('itemsGrid');
+      const no = document.getElementById('noItems');
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        no.classList.remove('d-none');
+        return;
+      }
+      no.classList.add('d-none');
+
+      grid.innerHTML = filtered.map(item => `
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+          <div class="card card-item h-100">
+            <div class="position-relative">
+              <img src="${item.image_url || 'https://via.placeholder.com/400x300?text=No+Image'}" class="card-img-top" alt=""
+                   onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">
+              <span class="badge badge-category">${escapeHtml(item.category)}</span>
+              <span class="badge bg-dark badge-condition">${escapeHtml(item.condition)}</span>
+            </div>
+            <div class="card-body d-flex flex-column">
+              <h6 class="card-title text-truncate mb-1">${escapeHtml(item.title)}</h6>
+              <p class="card-text text-muted small flex-grow-1 mb-2" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+                ${escapeHtml(item.description || 'No description')}
+              </p>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="price">KES ${Number(item.price).toLocaleString()}</span>
+                <small class="text-muted text-truncate" style="max-width:40%">${escapeHtml(item.university)}</small>
+              </div>
+              <div class="d-flex gap-1">
+                <a href="https://wa.me/${(item.contact||'').replace(/\D/g,'')}" target="_blank" class="btn btn-whatsapp btn-sm flex-grow-1">
+                  <i class="fab fa-whatsapp"></i> Contact
+                </a>
+                <button class="btn btn-outline-danger btn-sm" onclick="openReport('${item.id}')" title="Report">
+                  <i class="fas fa-flag"></i>
+                </button>
+              </div>
+              <small class="text-muted mt-2">Seller: ${escapeHtml(item.seller_name)}</small>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ============================================================
+    //  USER DASHBOARD
+    // ============================================================
+    function renderDashboard() {
+      if (!profile) return;
+      const mine = items.filter(i => i.seller_id === currentUser.id);
+      const active = mine.filter(i => i.status === 'approved' && !i.sold);
+      const pending = mine.filter(i => i.status === 'pending');
+      const sold = mine.filter(i => i.sold);
+
+      document.getElementById('statTotal').textContent = mine.length;
+      document.getElementById('statActive').textContent = active.length;
+      document.getElementById('statPending').textContent = pending.length;
+      document.getElementById('statSold').textContent = sold.length;
+
+      const cont = document.getElementById('myListings');
+      const empty = document.getElementById('noMyListings');
+      if (mine.length === 0) {
+        cont.innerHTML = '';
+        empty.classList.remove('d-none');
+        return;
+      }
+      empty.classList.add('d-none');
+
+      cont.innerHTML = mine.map(item => `
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm rounded-3">
+            <div class="row g-0">
+              <div class="col-4">
+                <img src="${item.image_url || 'https://via.placeholder.com/150?text=No+Image'}" class="img-fluid rounded-start h-100" style="object-fit:cover;min-height:110px"
+                     onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+              </div>
+              <div class="col-8">
+                <div class="card-body py-2 px-3">
+                  <h6 class="card-title text-truncate mb-1 small fw-semibold">${escapeHtml(item.title)}</h6>
+                  <div class="text-primary fw-bold small">KES ${Number(item.price).toLocaleString()}</div>
+                  <div class="mb-2">
+                    <span class="badge status-${item.status}">${item.status}</span>
+                    ${item.sold ? '<span class="badge bg-secondary ms-1">Sold</span>' : ''}
+                  </div>
+                  <div class="d-flex gap-1 flex-wrap">
+                    ${item.status === 'approved' && !item.sold ? `<button class="btn btn-outline-warning btn-sm" onclick="markSold('${item.id}')">Sold</button>` : ''}
+                    <button class="btn btn-outline-danger btn-sm" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function markSold(id) {
+      const { error } = await sb.from('items').update({ sold: true }).eq('id', id);
+      if (error) alert(error.message);
+      else await loadItems();
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('Delete this listing?')) return;
+      const { error } = await sb.from('items').delete().eq('id', id);
+      if (error) alert(error.message);
+      else await loadItems();
+    }
+
+    // ============================================================
+    //  REPORTS
+    // ============================================================
+    function openReport(itemId) {
+      if (!currentUser) { alert('Please login to report'); showAuthModal('login'); return; }
+      document.getElementById('reportItemId').value = itemId;
+      document.getElementById('reportReason').value = '';
+      document.getElementById('reportDetails').value = '';
+      reportModal.show();
+    }
+
+    async function submitReport(e) {
+      e.preventDefault();
+      const itemId = document.getElementById('reportItemId').value;
+      const item = items.find(i => i.id === itemId);
+      if (!item) return;
+
+      const report = {
+        item_id: itemId,
+        item_title: item.title,
+        seller_id: item.seller_id,
+        seller_name: item.seller_name,
+        seller_email: item.seller_email,
+        reason: document.getElementById('reportReason').value,
+        details: document.getElementById('reportDetails').value.trim(),
+        reporter_id: currentUser.id,
+        reporter_name: profile.name,
+        status: 'open'
+      };
+      showLoading(true);
+      const { error } = await sb.from('reports').insert(report);
+      showLoading(false);
+      if (error) { alert(error.message); return; }
+      reportModal.hide();
+      alert('Report submitted. Our team will review it.');
+    }
+
+    // ============================================================
+    //  ADMIN
+    // ============================================================
+    function renderAdminOverview() {
+      document.getElementById('aStatUsers').textContent = users.length;
+      document.getElementById('aStatListings').textContent = items.length;
+      document.getElementById('aStatPending').textContent = items.filter(i => i.status === 'pending').length;
+      document.getElementById('aStatReports').textContent = reports.filter(r => r.status === 'open').length;
+    }
+
+    function renderAdminListings() {
+      const filter = document.getElementById('listingStatusFilter')?.value || '';
+      let list = [...items];
+      if (filter) list = list.filter(i => i.status === filter);
+
+      const body = document.getElementById('adminListingsBody');
+      if (list.length === 0) {
+        body.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No listings</td></tr>';
+        return;
+      }
+      body.innerHTML = list.map(item => `
+        <tr>
+          <td>
+            <div class="fw-semibold small">${escapeHtml(item.title)}</div>
+            <div class="text-muted" style="font-size:.75rem">${escapeHtml(item.category)} • ${escapeHtml(item.university)}</div>
+          </td>
+          <td class="small">${escapeHtml(item.seller_name)}<br><span class="text-muted">${escapeHtml(item.seller_email)}</span></td>
+          <td class="small">KES ${Number(item.price).toLocaleString()}</td>
+          <td><span class="badge status-${item.status}">${item.status}</span></td>
+          <td>
+            ${item.status === 'pending' ? `
+              <button class="btn btn-success btn-sm me-1" onclick="moderateItem('${item.id}','approved')">Approve</button>
+              <button class="btn btn-outline-danger btn-sm me-1" onclick="moderateItem('${item.id}','rejected')">Reject</button>
+            ` : ''}
+            <button class="btn btn-outline-secondary btn-sm" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function moderateItem(id, status) {
+      const { error } = await sb.from('items').update({ status }).eq('id', id);
+      if (error) alert(error.message);
+      else await loadItems();
+    }
+
+    function renderAdminReports() {
+      const open = reports.filter(r => r.status === 'open');
+      const list = document.getElementById('adminReportsList');
+      const empty = document.getElementById('noReports');
+      if (open.length === 0) {
+        list.innerHTML = '';
+        empty.classList.remove('d-none');
+        return;
+      }
+      empty.classList.add('d-none');
+      list.innerHTML = open.map(r => `
+        <div class="card report-card mb-3 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+              <div>
+                <span class="badge bg-danger mb-1">${escapeHtml(r.reason)}</span>
+                <h6 class="mb-1">${escapeHtml(r.item_title)}</h6>
+                <p class="small text-muted mb-1">Seller: ${escapeHtml(r.seller_name)} (${escapeHtml(r.seller_email)})</p>
+                <p class="small mb-1">${escapeHtml(r.details) || 'No details'}</p>
+                <p class="small text-muted mb-0">By ${escapeHtml(r.reporter_name)} • ${new Date(r.created_at).toLocaleString()}</p>
+              </div>
+              <div class="d-flex flex-column gap-1">
+                <button class="btn btn-sm btn-outline-success" onclick="resolveReport('${r.id}','resolved')">Resolve</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="banUser('${r.seller_id}')">Ban Seller</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="resolveReport('${r.id}','dismissed')">Dismiss</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function resolveReport(id, status) {
+      const { error } = await sb.from('reports').update({ status }).eq('id', id);
+      if (error) alert(error.message);
+      else await loadAdminData();
+    }
+
+    async function banUser(userId) {
+      if (!confirm('Ban this user?')) return;
+      const { error } = await sb.from('profiles').update({ status: 'banned' }).eq('id', userId);
+      if (error) alert(error.message);
+      else {
+        await sb.from('items').update({ status: 'rejected' }).eq('seller_id', userId).eq('status', 'pending');
+        await loadAdminData();
+        alert('User banned.');
+      }
+    }
+
+    function renderAdminUsers() {
+      const body = document.getElementById('adminUsersBody');
+      body.innerHTML = users.map(u => `
+        <tr>
+          <td>
+            <div class="fw-semibold small">${escapeHtml(u.name)}</div>
+            <div class="text-muted" style="font-size:.75rem">${escapeHtml(u.email)}</div>
+          </td>
+          <td class="small">${escapeHtml(u.university || '—')}</td>
+          <td>
+            <span class="badge ${u.role === 'admin' ? 'bg-danger' : u.role === 'moderator' ? 'bg-warning text-dark' : 'bg-secondary'}">
+              ${u.role}
+            </span>
+          </td>
+          <td><span class="badge ${u.status === 'banned' ? 'status-banned' : 'bg-success'}">${u.status}</span></td>
+          <td>
+            ${isAdmin() && u.id !== currentUser.id ? `
+              ${u.role !== 'admin' ? `<button class="btn btn-outline-primary btn-sm me-1" onclick="setRole('${u.id}','moderator')">Make Mod</button>` : ''}
+              ${u.role === 'moderator' ? `<button class="btn btn-outline-secondary btn-sm me-1" onclick="setRole('${u.id}','user')">Demote</button>` : ''}
+              ${u.status === 'active'
+                ? `<button class="btn btn-outline-danger btn-sm" onclick="banUser('${u.id}')">Ban</button>`
+                : `<button class="btn btn-outline-success btn-sm" onclick="unbanUser('${u.id}')">Unban</button>`}
+            ` : u.id === currentUser.id ? '<span class="text-muted small">You</span>' : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function setRole(userId, role) {
+      const { error } = await sb.from('profiles').update({ role }).eq('id', userId);
+      if (error) alert(error.message);
+      else { await loadAdminData(); alert('Role updated'); }
+    }
+    async function unbanUser(userId) {
+      const { error } = await sb.from('profiles').update({ status: 'active' }).eq('id', userId);
+      if (error) alert(error.message);
+      else await loadAdminData();
+    }
+
+    // ============================================================
+    //  UI
+    // ============================================================
+    function updateUI() {
+      const logged = !!currentUser && !!profile;
+      document.getElementById('loginBtn').classList.toggle('d-none', logged);
+      document.getElementById('registerBtn').classList.toggle('d-none', logged);
+      document.getElementById('logoutBtn').classList.toggle('d-none', !logged);
+      document.getElementById('postBtn').classList.toggle('d-none', !logged);
+      document.getElementById('nav-dashboard-item').classList.toggle('d-none', !logged);
+      document.getElementById('nav-profile-item').classList.toggle('d-none', !logged);
+      document.getElementById('nav-admin-item').classList.toggle('d-none', !isStaff());
+
+      const g = document.getElementById('userGreeting');
+      if (logged) {
+        g.textContent = `Hi, ${profile.name.split(' ')[0]}`;
+        g.classList.remove('d-none');
+      } else g.classList.add('d-none');
+    }
+
+    function populateUniversities() {
+      const unis = [...new Set(items.filter(i => i.status === 'approved').map(i => i.university).filter(Boolean))].sort();
+      const sel = document.getElementById('filterUniversity');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">All</option>' + unis.map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
+      sel.value = cur;
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterUniversity').value = '';
+      document.getElementById('filterCategory').value = '';
+      document.getElementById('filterPrice').value = '';
+      renderItems();
+    }
+  </script>
+</body>
+</html>
