@@ -434,6 +434,20 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body pt-2">
+          <!-- Social Logins -->
+          <div class="d-grid gap-2 mb-3">
+            <button type="button" class="btn btn-outline-dark d-flex align-items-center justify-content-center gap-2" onclick="loginWithGoogle()">
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="Google">
+              Continue with Google
+            </button>
+            <button type="button" class="btn btn-outline-success d-flex align-items-center justify-content-center gap-2" onclick="showPhoneLogin()">
+              <i class="fas fa-phone"></i>
+              Continue with Phone
+            </button>
+          </div>
+
+          <div class="text-center text-muted small mb-3">— or use email —</div>
+
           <form id="authForm" onsubmit="handleAuth(event)">
             <div class="mb-3" id="nameField">
               <label class="form-label small fw-semibold">Full Name</label>
@@ -455,7 +469,24 @@
               <span id="authSubmitText">Login</span>
             </button>
           </form>
-          <div class="text-center mt-3 small text-muted">
+
+          <!-- Phone Login Form (hidden by default) -->
+          <div id="phoneLoginSection" class="d-none">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Phone Number</label>
+              <input id="phoneNumber" type="tel" class="form-control" placeholder="+2547XXXXXXXX">
+            </div>
+            <div class="mb-3 d-none" id="otpField">
+              <label class="form-label small fw-semibold">Enter OTP Code</label>
+              <input id="otpCode" type="text" class="form-control" placeholder="123456" maxlength="6">
+            </div>
+            <button type="button" id="phoneSubmitBtn" class="btn btn-success w-100 py-2" onclick="handlePhoneAuth()">
+              Send OTP
+            </button>
+            <button type="button" class="btn btn-link btn-sm w-100 mt-2" onclick="hidePhoneLogin()">← Back to Email</button>
+          </div>
+
+          <div class="text-center mt-3 small text-muted" id="authSwitchArea">
             <span id="authSwitchText">Don't have an account?</span>
             <a href="#" id="authSwitchLink" onclick="toggleAuthMode(event)" class="text-primary fw-semibold">Register</a>
           </div>
@@ -819,6 +850,100 @@
       profile = null;
       updateUI();
       showSection('marketplace');
+    }
+
+    // ============================================================
+    //  GOOGLE & PHONE LOGIN
+    // ============================================================
+    async function loginWithGoogle() {
+      showLoading(true);
+      try {
+        const { error } = await sb.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin
+          }
+        });
+        if (error) throw error;
+      } catch (err) {
+        showLoading(false);
+        alert(err.message || 'Google login failed. Make sure Google provider is enabled in Supabase.');
+      }
+    }
+
+    function showPhoneLogin() {
+      document.getElementById('authForm').classList.add('d-none');
+      document.getElementById('authSwitchArea').classList.add('d-none');
+      document.getElementById('phoneLoginSection').classList.remove('d-none');
+      document.querySelector('.d-grid.gap-2.mb-3')?.classList.add('d-none');
+      document.querySelector('.text-center.text-muted.small.mb-3')?.classList.add('d-none');
+    }
+
+    function hidePhoneLogin() {
+      document.getElementById('authForm').classList.remove('d-none');
+      document.getElementById('authSwitchArea').classList.remove('d-none');
+      document.getElementById('phoneLoginSection').classList.add('d-none');
+      document.getElementById('otpField').classList.add('d-none');
+      document.getElementById('phoneSubmitBtn').textContent = 'Send OTP';
+      document.getElementById('phoneSubmitBtn').onclick = handlePhoneAuth;
+      document.querySelector('.d-grid.gap-2.mb-3')?.classList.remove('d-none');
+      document.querySelector('.text-center.text-muted.small.mb-3')?.classList.remove('d-none');
+    }
+
+    let phoneStep = 'send'; // 'send' or 'verify'
+
+    async function handlePhoneAuth() {
+      const phone = document.getElementById('phoneNumber').value.trim();
+      if (!phone) {
+        alert('Please enter your phone number with country code (e.g. +2547...)');
+        return;
+      }
+
+      showLoading(true);
+      try {
+        if (phoneStep === 'send') {
+          const { error } = await sb.auth.signInWithOtp({ phone });
+          if (error) throw error;
+          document.getElementById('otpField').classList.remove('d-none');
+          document.getElementById('phoneSubmitBtn').textContent = 'Verify OTP';
+          phoneStep = 'verify';
+          alert('OTP sent! Check your SMS.');
+        } else {
+          const token = document.getElementById('otpCode').value.trim();
+          if (!token) {
+            alert('Please enter the OTP code');
+            return;
+          }
+          const { data, error } = await sb.auth.verifyOtp({
+            phone,
+            token,
+            type: 'sms'
+          });
+          if (error) throw error;
+          currentUser = data.user;
+          await loadProfile();
+          authModal.hide();
+          updateUI();
+          showSection('dashboard');
+          alert('Welcome to Bei Poa!');
+          phoneStep = 'send';
+        }
+      } catch (err) {
+        alert(err.message || 'Phone login failed. Make sure Phone provider is enabled and SMS is configured.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Handle redirect back from Google OAuth
+    async function handleAuthRedirect() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        await loadProfile();
+        updateUI();
+        // If profile is incomplete, we could prompt for university etc.
+      }
     }
 
     // ============================================================
