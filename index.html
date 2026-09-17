@@ -1,1630 +1,935 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bei Poa – Campus Marketplace</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --navy: #0b1220;
-      --navy-2: #111827;
-      --orange: #f97316;
-      --orange-dark: #ea580c;
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --radius: 14px;
-      --shadow: 0 4px 20px rgba(15,23,42,.06);
-      --shadow-lg: 0 16px 40px rgba(15,23,42,.12);
-      --primary: #0b1220;
-      --primary-hover: #1e293b;
-      --accent: #f97316;
-    }
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: #0f172a;
-      min-height: 100vh;
-    }
-    .navbar, .main-nav {
-      background: #fff !important;
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(0,0,0,.03);
-    }
-    .navbar.navbar-dark, nav.navbar {
-      background: #0b1220 !important;
-    }
-    .navbar-brand, .brand {
-      font-weight: 800; letter-spacing: -0.02em;
-      display: flex; align-items: center; gap: .5rem;
-    }
-    .brand-mark, .brand-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, #f97316, #fb923c);
-      color: #fff; display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: .9rem;
-    }
-    .hero {
-      background: linear-gradient(135deg, #0b1220 0%, #1e3a5f 55%, #0f766e 100%) !important;
-      color: #fff; padding: 3.5rem 0 3rem; position: relative; overflow: hidden;
-    }
-    .hero h1 { font-weight: 800; letter-spacing: -.03em; }
-    .hero h1 span, .hero .text-accent { color: #f97316; }
-    .btn-primary, .btn-navy {
-      background: #0b1220 !important; border-color: #0b1220 !important;
-      font-weight: 600; border-radius: 10px;
-    }
-    .btn-primary:hover { background: #1e293b !important; border-color: #1e293b !important; }
-    .btn-accent, .btn-orange {
-      background: #f97316 !important; border-color: #f97316 !important; color: #fff !important;
-      font-weight: 600; border-radius: 10px;
-    }
-    .btn-accent:hover, .btn-orange:hover {
-      background: #ea580c !important; border-color: #ea580c !important; color: #fff !important;
-    }
-    .card-item, .product-card {
-      border: 1px solid var(--border) !important;
-      border-radius: var(--radius) !important;
-      overflow: hidden; background: #fff;
-      box-shadow: var(--shadow);
-      transition: transform .2s, box-shadow .2s;
-    }
-    .card-item:hover, .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-    }
-    .card-img-top { height: 170px; object-fit: cover; background: #f1f5f9; }
-    .price { color: #0b1220; font-weight: 800; font-size: 1.1rem; }
-    .btn-whatsapp, .btn-wa {
-      background: #25d366 !important; border: none; color: #fff !important;
-      border-radius: 10px; font-weight: 600;
-    }
-    .stat-card, .stat-tile {
-      border: 1px solid var(--border);
-      border-radius: 14px; background: #fff;
-      box-shadow: var(--shadow); height: 100%;
-    }
-    .stat-card .icon {
-      width: 48px; height: 48px; border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .dashboard-grid {
-      display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.25rem;
-    }
-    .dashboard-stats {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; grid-column: 1 / -1;
-    }
-    .dashboard-main { grid-column: 1 / -1; }
-    .dashboard-side { grid-column: 1 / -1; }
-    @media (min-width: 992px) {
-      .dashboard-main { grid-column: 1 / 9; }
-      .dashboard-side { grid-column: 9 / 13; }
-    }
-    @media (max-width: 991px) {
-      .dashboard-stats { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 575px) {
-      .dashboard-stats { grid-template-columns: 1fr; }
-    }
-    .profile-avatar {
-      width: 88px; height: 88px; border-radius: 50%;
-      background: linear-gradient(135deg, #f97316, #fb923c);
-      color: #fff; display: flex; align-items: center; justify-content: center;
-      font-size: 2rem; font-weight: 700;
-      box-shadow: 0 8px 20px rgba(249,115,22,.3);
-    }
-    .section { display: none; }
-    .section.active { display: block; }
-    .empty-state { padding: 3rem 1rem; text-align: center; color: #94a3b8; }
-    .empty-state i { font-size: 2.5rem; opacity: .45; margin-bottom: .5rem; }
-    .filter-bar, .card.border-0.shadow-sm {
-      border: 1px solid var(--border) !important;
-      border-radius: var(--radius) !important;
-      box-shadow: var(--shadow) !important;
-    }
-    .modal-content { border: none; border-radius: 18px; box-shadow: var(--shadow-lg); }
-    .form-control, .form-select {
-      border-radius: 10px; border-color: var(--border); padding: .6rem .85rem;
-    }
-    .form-control:focus, .form-select:focus {
-      border-color: #f97316;
-      box-shadow: 0 0 0 3px rgba(249,115,22,.15);
-    }
-    footer {
-      background: #0b1220 !important;
-      color: #94a3b8 !important;
-      border-top: none !important;
-    }
-    footer a { color: #cbd5e1 !important; }
-    footer a:hover { color: #f97316 !important; }
-    .sidebar-admin, .admin-side, .dash-sidebar {
-      background: #0b1220 !important;
-      min-height: calc(100vh - 56px);
-    }
-    .sidebar-admin .nav-link, .admin-side .nav-link {
-      color: #94a3b8; border-radius: 10px; font-weight: 500;
-    }
-    .sidebar-admin .nav-link:hover, .sidebar-admin .nav-link.active,
-    .admin-side .nav-link:hover, .admin-side .nav-link.active {
-      background: #f97316 !important; color: #fff !important;
-    }
-    .status-pending { background: #fef3c7; color: #92400e; }
-    .status-approved { background: #d1fae5; color: #065f46; }
-    .status-rejected { background: #fee2e2; color: #991b1b; }
-    .status-banned { background: #1f2937; color: #fff; }
-    .report-card { border-left: 4px solid #ef4444; border-radius: 12px; }
-    .loading-overlay {
-      position: fixed; inset: 0; background: rgba(241,245,249,.92);
-      display: flex; align-items: center; justify-content: center; z-index: 9999;
-      backdrop-filter: blur(4px);
-    }
-    .guest-cta-box {
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.2);
-      border-radius: 16px; padding: 1.25rem 1.5rem;
-      display: inline-block; margin-top: 1rem;
-    }
-    .cat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: .85rem;
-    }
-    .cat-card {
-      background: #fff; border: 1px solid var(--border); border-radius: 14px;
-      padding: 1rem .5rem; text-align: center; cursor: pointer;
-      transition: all .2s; text-decoration: none; color: inherit;
-    }
-    .cat-card:hover {
-      border-color: #f97316; box-shadow: var(--shadow);
-      transform: translateY(-3px); color: inherit;
-    }
-    .cat-icon {
-      width: 48px; height: 48px; border-radius: 12px; margin: 0 auto .55rem;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; background: #fff7ed; color: #f97316;
-    }
-    .promo-banner {
-      background: linear-gradient(90deg, #0b1220, #1e3a5f);
-      border-radius: 16px; color: #fff; padding: 1.5rem 1.75rem;
-    }
-    .text-primary { color: #0b1220 !important; }
-    .bg-primary { background-color: #0b1220 !important; }
-    .spinner-border { color: #f97316; }
-    .badge-category { background: #0b1220 !important; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bei Poa – Campus Marketplace</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#0a1628;--navy2:#0f1c2e;--navy3:#1a2740;
+  --orange:#f97316;--orange2:#ea580c;
+  --bg:#f4f6f9;--card:#fff;--muted:#64748b;--border:#e2e8f0;
+  --radius:14px;--shadow:0 4px 20px rgba(10,22,40,.06);
+}
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:#0f172a;margin:0;min-height:100vh}
+a{text-decoration:none}
+.section{display:none}.section.active{display:block}
+/* TOP NAV */
+.topnav{background:var(--navy);color:#fff;padding:.4rem 0;font-size:.78rem}
+.topnav a{color:#94a3b8}.topnav a:hover{color:#fff}
+.mainnav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1000;padding:.65rem 0}
+.brand{display:flex;align-items:center;gap:.5rem;font-weight:800;font-size:1.2rem;color:var(--navy)}
+.brand-ico{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#f97316,#fb923c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem}
+.searchbar{background:#f8fafc;border:1px solid var(--border);border-radius:999px;padding:.4rem 1rem;display:flex;align-items:center;gap:.5rem;flex:1;max-width:400px}
+.searchbar input{border:0;background:transparent;outline:0;width:100%;font-size:.88rem}
+.nav-a{color:#475569;font-weight:500;font-size:.88rem;padding:.35rem .65rem;border-radius:8px}
+.nav-a:hover,.nav-a.active{color:var(--navy);background:#f1f5f9}
+.btn-or{background:var(--orange);color:#fff;border:0;font-weight:600;border-radius:10px;padding:.45rem 1rem}
+.btn-or:hover{background:var(--orange2);color:#fff}
+.btn-nv{background:var(--navy);color:#fff;border:0;font-weight:600;border-radius:10px;padding:.45rem 1rem}
+.btn-nv:hover{background:var(--navy3);color:#fff}
+.btn-out{border:1.5px solid var(--border);background:#fff;color:#334155;font-weight:500;border-radius:10px;padding:.4rem .9rem}
+.btn-out:hover{border-color:#94a3b8}
+.btn-wa{background:#25d366;color:#fff;border:0;border-radius:10px;font-weight:600}
+.btn-wa:hover{background:#1da851;color:#fff}
+/* HERO */
+.hero{background:linear-gradient(125deg,#0a1628 0%,#12263f 40%,#0c4a6e 100%);color:#fff;padding:3.2rem 0 2.8rem;position:relative;overflow:hidden}
+.hero h1{font-weight:800;letter-spacing:-.03em;font-size:clamp(1.85rem,4vw,2.7rem);line-height:1.15}
+.hero h1 em{color:var(--orange);font-style:normal}
+.hero-art{background:rgba(255,255,255,.08);border-radius:20px;padding:1.5rem;backdrop-filter:blur(8px)}
+.stat-row{display:flex;flex-wrap:wrap;gap:1.75rem;margin-top:1.75rem}
+.stat-row strong{display:block;font-size:1.3rem;font-weight:800}
+.stat-row span{font-size:.75rem;opacity:.7}
+/* CATEGORIES */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.75rem}
+.cat{background:#fff;border:1px solid var(--border);border-radius:14px;padding:.9rem .4rem;text-align:center;cursor:pointer;transition:.2s}
+.cat:hover{border-color:var(--orange);box-shadow:var(--shadow);transform:translateY(-3px)}
+.cat i{width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:#fff7ed;color:var(--orange);font-size:1.15rem;margin-bottom:.4rem}
+.cat .t{font-weight:600;font-size:.78rem}
+.cat .c{font-size:.65rem;color:var(--muted)}
+/* PRODUCT CARD */
+.pcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:100%;transition:.2s;box-shadow:var(--shadow);cursor:pointer}
+.pcard:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(10,22,40,.12)}
+.pcard img{width:100%;height:160px;object-fit:cover;background:#f1f5f9}
+.pcard .bd{padding:.9rem}
+.price{font-weight:800;color:var(--navy);font-size:1.05rem}
+.badge-g{background:#d1fae5;color:#065f46;font-size:.68rem;font-weight:600;border-radius:6px;padding:.2em .5em}
+.badge-f{background:#fef3c7;color:#92400e;font-size:.68rem;font-weight:600;border-radius:6px;padding:.2em .5em}
+/* DASHBOARD SIDEBAR */
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 64px)}
+@media(max-width:991px){.shell{grid-template-columns:1fr}.side{display:none!important}}
+.side{background:var(--navy);color:#94a3b8;padding:1.25rem 1rem}
+.side .u{display:flex;align-items:center;gap:.7rem;padding:.7rem;border-radius:12px;background:rgba(255,255,255,.06);margin-bottom:1rem}
+.side .av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#f97316,#fb923c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.side .nl{display:block;color:#94a3b8;padding:.6rem .8rem;border-radius:10px;font-size:.88rem;font-weight:500;margin-bottom:.15rem}
+.side .nl:hover,.side .nl.on{background:rgba(249,115,22,.18);color:#fff}
+.side .nl i{width:22px}
+.main{padding:1.5rem;background:var(--bg)}
+.tile{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.1rem;box-shadow:var(--shadow)}
+.tile .n{font-size:1.5rem;font-weight:800}
+/* ADMIN */
+.admin-shell{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px)}
+@media(max-width:991px){.admin-shell{grid-template-columns:1fr}.aside{display:none!important}}
+.aside{background:var(--navy);padding:1.2rem 1rem;color:#94a3b8}
+.aside .nl{display:block;color:#94a3b8;padding:.55rem .75rem;border-radius:10px;font-size:.85rem;margin-bottom:.12rem}
+.aside .nl:hover,.aside .nl.on{background:var(--orange);color:#fff}
+.amain{padding:1.5rem;background:#f8fafc}
+/* AUTH */
+.auth-grid{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 80px)}
+@media(max-width:991px){.auth-grid{grid-template-columns:1fr}.auth-l{display:none!important}}
+.auth-l{background:linear-gradient(160deg,#0a1628,#1e3a5f);color:#fff;padding:3rem;display:flex;flex-direction:column;justify-content:center}
+.auth-r{display:flex;align-items:center;justify-content:center;padding:2rem;background:#fff}
+.auth-box{width:100%;max-width:390px}
+/* PRODUCT DETAIL */
+.pd-img{border-radius:16px;overflow:hidden;background:#f1f5f9}
+.pd-img img{width:100%;max-height:420px;object-fit:cover}
+.safety li{margin-bottom:.4rem;font-size:.88rem;color:#475569}
+/* MESSAGES */
+.msg-layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 120px);background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--border)}
+@media(max-width:767px){.msg-layout{grid-template-columns:1fr}}
+.msg-list{border-right:1px solid var(--border);overflow-y:auto}
+.msg-item{padding:.85rem 1rem;border-bottom:1px solid var(--border);cursor:pointer}
+.msg-item:hover,.msg-item.on{background:#f8fafc}
+.msg-chat{display:flex;flex-direction:column;height:100%}
+.msg-body{flex:1;overflow-y:auto;padding:1rem;background:#f8fafc}
+.bubble{max-width:75%;padding:.65rem .9rem;border-radius:14px;font-size:.9rem;margin-bottom:.5rem}
+.bubble.me{background:#0a1628;color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.bubble.them{background:#fff;border:1px solid var(--border);border-bottom-left-radius:4px}
+.msg-input{padding:.75rem;border-top:1px solid var(--border);display:flex;gap:.5rem}
+/* MISC */
+.form-control,.form-select{border-radius:10px;border-color:var(--border);padding:.6rem .85rem}
+.form-control:focus,.form-select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(249,115,22,.15)}
+.modal-content{border:0;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.15)}
+.empty{text-align:center;padding:3rem 1rem;color:#94a3b8}
+.empty i{font-size:2.4rem;opacity:.4;margin-bottom:.5rem}
+.status-pending{background:#fef3c7;color:#92400e}
+.status-approved{background:#d1fae5;color:#065f46}
+.status-rejected{background:#fee2e2;color:#991b1b}
+.status-banned{background:#1f2937;color:#fff}
+.loading-overlay{position:fixed;inset:0;background:rgba(244,246,249,.92);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
+footer{background:var(--navy);color:#94a3b8;padding:2.2rem 0 1.5rem;margin-top:auto}
+footer a{color:#cbd5e1}footer a:hover{color:var(--orange)}
+.promo{background:linear-gradient(90deg,#0a1628,#1e3a5f);border-radius:16px;color:#fff;padding:1.6rem 1.8rem}
+.chk-step{width:28px;height:28px;border-radius:50%;background:#e2e8f0;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700}
+.chk-step.on{background:var(--orange);color:#fff}
+</style>
 </head>
 <body>
+<div id="loading" class="loading-overlay d-none"><div class="text-center"><div class="spinner-border" style="color:var(--orange);width:2.8rem;height:2.8rem"></div><p class="mt-3 text-muted mb-0">Loading Bei Poa...</p></div></div>
 
-  <!-- Loading -->
-  <div id="loading" class="loading-overlay d-none">
-    <div class="text-center">
-      <div class="spinner-border" style="width:3rem;height:3rem"></div>
-      <p class="mt-3 text-muted">Loading Bei Poa...</p>
-    </div>
-  </div>
+<!-- TOP BAR -->
+<div class="topnav d-none d-md-block"><div class="container d-flex justify-content-between">
+<span>Buy, sell &amp; trade campus items · Safe · Moderated</span>
+<div class="d-flex gap-3"><a href="#" onclick="showSec('terms');return false">Terms</a><a href="#" onclick="showSec('privacy');return false">Privacy</a></div>
+</div></div>
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
-    <div class="container">
-      <a class="navbar-brand" href="#" onclick="showSection('marketplace'); return false;">
-        <span class="brand-mark">BP</span> Bei Poa
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="#" id="nav-marketplace" onclick="showSection('marketplace'); return false;">Marketplace</a>
-          </li>
-          <li class="nav-item d-none" id="nav-dashboard-item">
-            <a class="nav-link" href="#" id="nav-dashboard" onclick="showSection('dashboard'); return false;">My Dashboard</a>
-          </li>
-          <li class="nav-item d-none" id="nav-profile-item">
-            <a class="nav-link" href="#" id="nav-profile" onclick="showSection('profile'); return false;">Profile</a>
-          </li>
-          <li class="nav-item d-none" id="nav-admin-item">
-            <a class="nav-link" href="#" id="nav-admin" onclick="showSection('admin'); return false;">
-              <i class="fas fa-shield-alt me-1"></i>Admin
-            </a>
-          </li>
+<!-- MAIN NAV -->
+<nav class="mainnav"><div class="container d-flex align-items-center justify-content-between gap-2 flex-wrap">
+<a class="brand" href="#" onclick="showSec('home');return false"><span class="brand-ico">BP</span> Bei Poa</a>
+<div class="searchbar d-none d-lg-flex" id="searchWrap"><i class="fas fa-search text-muted"></i><input id="navSearch" placeholder="Search products, brands, or categories..." oninput="onSearch(this.value)"></div>
+<div class="d-flex align-items-center gap-1 gap-md-2">
+<a class="nav-a d-none d-md-inline active" id="n-home" href="#" onclick="showSec('home');return false">Home</a>
+<a class="nav-a d-none" id="n-market" href="#" onclick="showSec('marketplace');return false">Marketplace</a>
+<a class="nav-a d-none" id="n-cats" href="#" onclick="showSec('categories');return false">Categories</a>
+<a class="nav-a d-none" id="n-dash" href="#" onclick="showSec('dashboard');return false">Dashboard</a>
+<a class="nav-a d-none" id="n-msg" href="#" onclick="showSec('messages');return false">Messages</a>
+<a class="nav-a d-none" id="n-admin" href="#" onclick="showSec('admin');return false">Admin</a>
+<span id="greet" class="small text-muted d-none d-xl-inline me-1"></span>
+<button id="btnLogin" class="btn-out btn-sm" onclick="showAuth('login')">Login</button>
+<button id="btnReg" class="btn-or btn-sm" onclick="showAuth('register')">Sign Up</button>
+<button id="btnSell" class="btn-nv btn-sm d-none" onclick="openPost()"><i class="fas fa-plus me-1"></i>Sell</button>
+<button id="btnOut" class="btn-out btn-sm d-none" onclick="logout()">Logout</button>
+</div></div></nav>
+
+<!-- ========== 1. HOME ========== -->
+<div id="sec-home" class="section active">
+<section class="hero"><div class="container"><div class="row align-items-center g-4">
+<div class="col-lg-6">
+<p class="text-uppercase small fw-semibold mb-2 opacity-75" style="letter-spacing:.08em">Campus Marketplace</p>
+<h1>Give Good Products a<br><em>Second Life</em></h1>
+<p class="mt-3 mb-4 opacity-90" style="max-width:460px">Buy and sell quality second-hand campus items at the best prices. Safe. Easy. Trusted by students.</p>
+<div class="d-flex flex-wrap gap-2">
+<button class="btn-or btn-lg" onclick="goMarket()">Browse Now</button>
+<button class="btn btn-outline-light btn-lg" onclick="goSell()">Start Selling</button>
+</div>
+<div class="stat-row">
+<div><strong id="hUsers">—</strong><span>Active Users</span></div>
+<div><strong id="hItems">—</strong><span>Items Listed</span></div>
+<div><strong>Safe</strong><span>Moderated</span></div>
+<div><strong>4.8★</strong><span>Community</span></div>
+</div>
+</div>
+<div class="col-lg-6 d-none d-lg-block">
+<div class="hero-art">
+<div class="row g-2">
+<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-laptop fa-lg mb-2 text-info"></i><div class="small">Laptops</div></div></div>
+<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-book fa-lg mb-2 text-warning"></i><div class="small">Books</div></div></div>
+<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-couch fa-lg mb-2 text-success"></i><div class="small">Furniture</div></div></div>
+<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-mobile-alt fa-lg mb-2 text-danger"></i><div class="small">Phones</div></div></div>
+<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-shirt fa-lg mb-2"></i><div class="small">Fashion</div></div></div>
+<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-bicycle fa-lg mb-2 text-primary"></i><div class="small">Sports</div></div></div>
+</div>
+</div>
+</div>
+</div></div></section>
+
+<div class="container py-5">
+<h2 class="fw-bold mb-3" style="letter-spacing:-.02em">Shop by Category</h2>
+<div class="cat-grid mb-5">
+<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-mobile-alt"></i><div class="t">Phones &amp; Tablets</div></div>
+<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-laptop"></i><div class="t">Laptops</div></div>
+<div class="cat" onclick="filterCat('Clothing')"><i class="fas fa-shirt"></i><div class="t">Fashion</div></div>
+<div class="cat" onclick="filterCat('Furniture')"><i class="fas fa-couch"></i><div class="t">Furniture</div></div>
+<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-plug"></i><div class="t">Electronics</div></div>
+<div class="cat" onclick="filterCat('Other')"><i class="fas fa-motorcycle"></i><div class="t">Vehicles</div></div>
+<div class="cat" onclick="filterCat('Textbooks')"><i class="fas fa-book"></i><div class="t">Books</div></div>
+<div class="cat" onclick="filterCat('Other')"><i class="fas fa-football-ball"></i><div class="t">Sports</div></div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h2 class="fw-bold mb-0" style="letter-spacing:-.02em">Featured Products</h2>
+<button class="btn-out btn-sm" onclick="goMarket()">View All</button>
+</div>
+<div id="featured" class="row g-3 mb-5"></div>
+
+<div class="promo d-flex align-items-center justify-content-between flex-wrap gap-3">
+<div>
+<div class="fw-bold h5 mb-1">Second-Hand Deals You'll Love</div>
+<div class="small opacity-75">Quality products. Lower prices. Bigger smiles on campus.</div>
+</div>
+<button class="btn-or" onclick="goMarket()">Explore Deals</button>
+</div>
+</div>
+</div>
+
+<!-- ========== MARKETPLACE ========== -->
+<div id="sec-marketplace" class="section">
+<div class="container py-4">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+<div><h2 class="fw-bold mb-0">Marketplace</h2><p class="text-muted small mb-0">Approved campus listings</p></div>
+<button class="btn-or btn-sm" onclick="openPost()"><i class="fas fa-plus me-1"></i>Sell</button>
+</div>
+<div class="card border-0 shadow-sm rounded-4 mb-4"><div class="card-body p-3">
+<div class="row g-2 align-items-end">
+<div class="col-md-4"><label class="form-label small text-muted mb-1">Search</label><input id="searchInput" class="form-control form-control-sm" placeholder="Search..." oninput="debounceRender()"></div>
+<div class="col-6 col-md-2"><label class="form-label small text-muted mb-1">University</label><select id="filterUniversity" class="form-select form-select-sm" onchange="renderItems()"><option value="">All</option></select></div>
+<div class="col-6 col-md-2"><label class="form-label small text-muted mb-1">Category</label>
+<select id="filterCategory" class="form-select form-select-sm" onchange="renderItems()">
+<option value="">All</option><option>Textbooks</option><option>Electronics</option><option>Furniture</option><option>Notes / PDFs</option><option>Clothing</option><option>Other</option>
+</select></div>
+<div class="col-6 col-md-2"><label class="form-label small text-muted mb-1">Max price</label><input id="filterPrice" type="number" class="form-control form-control-sm" placeholder="Any" oninput="debounceRender()"></div>
+<div class="col-6 col-md-2"><button class="btn-out btn-sm w-100" onclick="resetFilters()">Reset</button></div>
+</div></div></div>
+<div id="itemsGrid" class="row g-3"></div>
+<div id="noItems" class="empty d-none"><i class="fas fa-box-open"></i><p>No items found.</p></div>
+</div></div>
+
+<!-- ========== 3. CATEGORIES ========== -->
+<div id="sec-categories" class="section">
+<div class="container py-4">
+<h2 class="fw-bold mb-1">Shop by Category</h2>
+<p class="text-muted mb-4">Find exactly what you need from our wide range of second-hand campus products.</p>
+<div class="row g-3 mb-4">
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-mobile-alt"></i><div class="t">Phones &amp; Tablets</div><div class="c">Electronics</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-laptop"></i><div class="t">Laptops &amp; Computers</div><div class="c">Electronics</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Clothing')"><i class="fas fa-shirt"></i><div class="t">Fashion &amp; Clothing</div><div class="c">Clothing</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Furniture')"><i class="fas fa-couch"></i><div class="t">Furniture &amp; Home</div><div class="c">Furniture</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-tv"></i><div class="t">Electronics &amp; Appliances</div><div class="c">Electronics</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Other')"><i class="fas fa-motorcycle"></i><div class="t">Vehicles &amp; Motorbikes</div><div class="c">Other</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Textbooks')"><i class="fas fa-book"></i><div class="t">Books &amp; Stationery</div><div class="c">Textbooks</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Other')"><i class="fas fa-running"></i><div class="t">Sports &amp; Outdoors</div><div class="c">Other</div></div></div>
+</div>
+<div class="promo d-flex justify-content-between align-items-center flex-wrap gap-3">
+<div><div class="fw-bold h5 mb-1">Up to 70% off campus deals</div><div class="small opacity-75">Quality products. Lower prices.</div></div>
+<button class="btn-or" onclick="goMarket()">Explore Deals</button>
+</div>
+</div></div>
+
+<!-- ========== 2. PRODUCT DETAIL ========== -->
+<div id="sec-product" class="section">
+<div class="container py-4">
+<button class="btn-out btn-sm mb-3" onclick="showSec('marketplace')"><i class="fas fa-arrow-left me-1"></i>Back to listings</button>
+<div class="row g-4" id="productDetail"></div>
+</div></div>
+
+<!-- ========== 4. DASHBOARD ========== -->
+<div id="sec-dashboard" class="section">
+<div class="shell">
+<aside class="side">
+<div class="u"><div class="av" id="dAv">U</div><div><div class="text-white fw-semibold small" id="dName">User</div><div style="font-size:.68rem" id="dRole">Buyer &amp; Seller</div></div></div>
+<a class="nl on" href="#" onclick="showSec('dashboard');return false"><i class="fas fa-home me-2"></i>Dashboard</a>
+<a class="nl" href="#" onclick="showSec('marketplace');return false"><i class="fas fa-store me-2"></i>My Listings</a>
+<a class="nl" href="#" onclick="showSec('messages');return false"><i class="fas fa-comments me-2"></i>Messages</a>
+<a class="nl" href="#" onclick="showSec('profile');return false"><i class="fas fa-user me-2"></i>Profile</a>
+<a class="nl" href="#" onclick="openPost();return false"><i class="fas fa-plus me-2"></i>Sell Item</a>
+<a class="nl" href="#" onclick="logout();return false"><i class="fas fa-sign-out-alt me-2"></i>Log Out</a>
+</aside>
+<div class="main">
+<h2 class="fw-bold mb-1">Good day, <span id="dHello">there</span> 👋</h2>
+<p class="text-muted small mb-4">Here's what's happening on your account.</p>
+<div class="row g-3 mb-4">
+<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">My Listings</div><div class="n" id="statTotal">0</div></div></div>
+<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Active</div><div class="n text-success" id="statActive">0</div></div></div>
+<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Pending</div><div class="n text-warning" id="statPending">0</div></div></div>
+<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Sold</div><div class="n" id="statSold">0</div></div></div>
+</div>
+<div class="card border-0 shadow-sm rounded-4"><div class="card-header bg-white border-0 pt-3"><h5 class="fw-bold mb-0">Recent Listings</h5></div>
+<div class="card-body"><div id="myListings" class="row g-3"></div>
+<div id="noMyListings" class="empty d-none"><i class="fas fa-clipboard-list"></i><p class="mb-2">No listings yet</p><button class="btn-or btn-sm" onclick="openPost()">Post first item</button></div>
+</div></div>
+</div></div></div>
+
+<!-- ========== 5. MESSAGES ========== -->
+<div id="sec-messages" class="section">
+<div class="container py-4">
+<h2 class="fw-bold mb-3">Messages</h2>
+<div class="msg-layout">
+<div class="msg-list" id="msgList">
+<div class="empty p-4"><i class="fas fa-comments"></i><p class="small mb-0">Chat with sellers via WhatsApp from product pages. In-app messaging coming soon.</p></div>
+</div>
+<div class="msg-chat d-none d-md-flex">
+<div class="p-3 border-bottom fw-semibold" id="msgTitle">Select a conversation</div>
+<div class="msg-body" id="msgBody"></div>
+<div class="msg-input">
+<input class="form-control" id="msgInput" placeholder="Type a message..." disabled>
+<button class="btn-or" disabled><i class="fas fa-paper-plane"></i></button>
+</div>
+</div>
+</div>
+<p class="small text-muted mt-3"><i class="fas fa-info-circle me-1"></i>For now, contact sellers directly with the <strong>WhatsApp</strong> button on each listing. Full in-app chat can be added next.</p>
+</div></div>
+
+<!-- ========== PROFILE ========== -->
+<div id="sec-profile" class="section">
+<div class="container py-4" style="max-width:700px">
+<h2 class="fw-bold mb-4">Profile</h2>
+<div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+<div class="d-flex align-items-center gap-3 mb-4">
+<div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center" style="width:72px;height:72px;background:linear-gradient(135deg,#f97316,#fb923c);font-size:1.5rem" id="pAv">U</div>
+<div><h3 class="h5 fw-bold mb-0" id="pName">User</h3><p class="text-muted small mb-1" id="pEmail">email</p>
+<span class="badge bg-dark" id="pRole">USER</span> <span class="badge bg-secondary" id="pUni">—</span></div>
+</div>
+<form onsubmit="saveProfile(event)">
+<div class="row g-3">
+<div class="col-md-6"><label class="form-label small fw-semibold">Full name</label><input id="profileName" class="form-control" required></div>
+<div class="col-md-6"><label class="form-label small fw-semibold">Email</label><input id="profileEmail" class="form-control" readonly></div>
+<div class="col-md-6"><label class="form-label small fw-semibold">University</label><input id="profileUniversity" class="form-control"></div>
+<div class="col-md-6"><label class="form-label small fw-semibold">Phone / WhatsApp</label><input id="profilePhone" class="form-control" placeholder="+2547..."></div>
+<div class="col-12"><label class="form-label small fw-semibold">Bio</label><textarea id="profileBio" class="form-control" rows="2"></textarea></div>
+</div>
+<button class="btn-or mt-3">Save changes</button>
+</form>
+</div></div></div></div>
+
+<!-- ========== 6. ADMIN ========== -->
+<div id="sec-admin" class="section">
+<div class="admin-shell">
+<aside class="aside">
+<div class="text-white fw-bold mb-3 px-2">Admin Panel</div>
+<a class="nl on" href="#" id="at-overview" onclick="adminTab('overview');return false"><i class="fas fa-chart-pie me-2"></i>Dashboard</a>
+<a class="nl" href="#" id="at-listings" onclick="adminTab('listings');return false"><i class="fas fa-box me-2"></i>Products</a>
+<a class="nl" href="#" id="at-reports" onclick="adminTab('reports');return false"><i class="fas fa-flag me-2"></i>Reports</a>
+<a class="nl" href="#" id="at-users" onclick="adminTab('users');return false"><i class="fas fa-users me-2"></i>Users</a>
+</aside>
+<div class="amain">
+<div class="d-md-none mb-3"><select class="form-select" onchange="adminTab(this.value)"><option value="overview">Dashboard</option><option value="listings">Products</option><option value="reports">Reports</option><option value="users">Users</option></select></div>
+<div id="admin-overview">
+<h2 class="fw-bold mb-4">Admin Dashboard</h2>
+<div class="row g-3 mb-4">
+<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Total Users</div><div class="n" id="aUsers">0</div></div></div>
+<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Products</div><div class="n" id="aItems">0</div></div></div>
+<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Pending Approvals</div><div class="n text-warning" id="aPend">0</div></div></div>
+<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Open Reports</div><div class="n text-danger" id="aRep">0</div></div></div>
+</div>
+<div class="alert alert-light border">Promote trusted users to <strong>moderator</strong> to help approve listings and handle reports.</div>
+</div>
+<div id="admin-listings" class="d-none">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+<h2 class="fw-bold mb-0">Products</h2>
+<div class="d-flex gap-2">
+<button class="btn btn-success btn-sm" onclick="approveAll()">Approve all pending</button>
+<select id="listingStatusFilter" class="form-select form-select-sm w-auto" onchange="renderAdminListings()">
+<option value="">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
+</select></div></div>
+<div class="table-responsive bg-white rounded-4 shadow-sm"><table class="table table-hover align-middle mb-0">
+<thead class="table-light"><tr><th>Item</th><th>Seller</th><th>Price</th><th>Status</th><th></th></tr></thead>
+<tbody id="adminListingsBody"></tbody></table></div>
+</div>
+<div id="admin-reports" class="d-none">
+<h2 class="fw-bold mb-3">Reports</h2>
+<div id="adminReportsList"></div>
+<div id="noReports" class="empty d-none"><i class="fas fa-flag"></i><p>No open reports.</p></div>
+</div>
+<div id="admin-users" class="d-none">
+<h2 class="fw-bold mb-3">Users</h2>
+<div class="table-responsive bg-white rounded-4 shadow-sm"><table class="table table-hover align-middle mb-0">
+<thead class="table-light"><tr><th>User</th><th>University</th><th>Role</th><th>Status</th><th></th></tr></thead>
+<tbody id="adminUsersBody"></tbody></table></div>
+</div>
+</div></div></div>
+
+<!-- ========== 8. CHECKOUT (contact flow) ========== -->
+<div id="sec-checkout" class="section">
+<div class="container py-4" style="max-width:800px">
+<h2 class="fw-bold mb-4">Complete your deal</h2>
+<div class="d-flex align-items-center gap-2 mb-4">
+<span class="chk-step on">1</span><span class="small fw-semibold me-2">Contact</span>
+<span class="text-muted">—</span>
+<span class="chk-step">2</span><span class="small text-muted me-2">Meet</span>
+<span class="text-muted">—</span>
+<span class="chk-step">3</span><span class="small text-muted">Pay &amp; collect</span>
+</div>
+<div class="row g-4" id="checkoutBox"></div>
+</div></div>
+
+<!-- TERMS -->
+<div id="sec-terms" class="section"><div class="container py-5" style="max-width:760px">
+<button class="btn-out btn-sm mb-3" onclick="showSec('home')"><i class="fas fa-arrow-left me-1"></i>Back</button>
+<h1 class="h3 fw-bold">Terms and Conditions</h1>
+<p class="text-muted small">Last updated: 17 September 2026 · Bei Poa</p>
+<div class="card border-0 shadow-sm rounded-4 mt-3"><div class="card-body p-4">
+<p>By using Bei Poa you agree to these Terms. Bei Poa is a campus marketplace. We provide the platform only; we are not the seller and we do not hold payments.</p>
+<h5 class="fw-bold mt-3">Accounts</h5><p>Provide accurate info. Keep passwords safe. We may suspend accounts used for fraud or abuse.</p>
+<h5 class="fw-bold mt-3">Listings</h5><p>Only list items you may sell. Be honest. Listings may be reviewed. We can remove content.</p>
+<h5 class="fw-bold mt-3">Deals</h5><p>Buyers and sellers arrange payment and delivery. Meet safely. Bei Poa does not guarantee quality or payment.</p>
+<h5 class="fw-bold mt-3">Prohibited</h5><p>No scams, illegal goods, or harassment. Violations may lead to bans.</p>
+<h5 class="fw-bold mt-3">Liability</h5><p>Service is provided “as is”. We limit liability to the fullest extent allowed by Kenyan law.</p>
+<p class="small text-muted mb-0 mt-3">Continued use means you accept these Terms.</p>
+</div></div></div></div>
+
+<!-- PRIVACY -->
+<div id="sec-privacy" class="section"><div class="container py-5" style="max-width:760px">
+<button class="btn-out btn-sm mb-3" onclick="showSec('home')"><i class="fas fa-arrow-left me-1"></i>Back</button>
+<h1 class="h3 fw-bold">Privacy Policy</h1>
+<p class="text-muted small">Last updated: 17 September 2026 · Bei Poa</p>
+<div class="card border-0 shadow-sm rounded-4 mt-3"><div class="card-body p-4">
+<p>We collect account data (name, email, university, phone), listing content, and reports to run the marketplace. We use Supabase and hosting providers to operate the service.</p>
+<p>We do not sell your personal data. Other users see listing details you publish. You can update your profile in the app.</p>
+<p class="small text-muted mb-0 mt-3">Using Bei Poa means you acknowledge this policy.</p>
+</div></div></div></div>
+
+<!-- AUTH MODAL -->
+<div class="modal fade" id="authModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+<div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold" id="authTitle">Login</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<button type="button" class="btn btn-outline-dark w-100 mb-3 d-flex align-items-center justify-content-center gap-2" onclick="loginGoogle()">
+<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt=""> Continue with Google
+</button>
+<div class="text-center text-muted small mb-3">or use email</div>
+<form id="authForm" onsubmit="handleAuth(event)">
+<div class="mb-3" id="nameField"><label class="form-label small fw-semibold">Full name</label><input id="authName" class="form-control"></div>
+<div class="mb-3"><label class="form-label small fw-semibold">Email</label><input id="authEmail" type="email" class="form-control" required></div>
+<div class="mb-3"><label class="form-label small fw-semibold">Password</label><input id="authPassword" type="password" class="form-control" required minlength="6"></div>
+<div class="mb-3 d-none" id="universityField"><label class="form-label small fw-semibold">University</label><input id="authUniversity" class="form-control" placeholder="e.g. University of Nairobi"></div>
+<button class="btn-or w-100 py-2" type="submit"><span id="authSubmitText">Login</span></button>
+</form>
+<p class="small text-muted text-center mt-3 mb-1">By continuing you agree to our <a href="#" onclick="authModal.hide();showSec('terms');return false">Terms</a> and <a href="#" onclick="authModal.hide();showSec('privacy');return false">Privacy Policy</a>.</p>
+<div class="text-center small text-muted"><span id="authSwitchText">Don't have an account?</span> <a href="#" id="authSwitchLink" onclick="toggleAuth(event)" style="color:var(--orange);font-weight:600">Register</a></div>
+</div></div></div></div>
+
+<!-- POST MODAL -->
+<div class="modal fade" id="postModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
+<div class="modal-header border-0"><h5 class="modal-title fw-bold">Sell an item</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<div class="alert alert-warning small py-2">New listings go to <strong>Pending</strong> until approved.</div>
+<form id="postForm" onsubmit="handlePost(event)">
+<div class="mb-3"><label class="form-label small fw-semibold">Title *</label><input id="itemTitle" class="form-control" required></div>
+<div class="mb-3"><label class="form-label small fw-semibold">Description</label><textarea id="itemDesc" class="form-control" rows="2"></textarea></div>
+<div class="row g-3 mb-3">
+<div class="col-md-4"><label class="form-label small fw-semibold">Price (KES) *</label><input id="itemPrice" type="number" class="form-control" required min="0"></div>
+<div class="col-md-4"><label class="form-label small fw-semibold">Category *</label>
+<select id="itemCategory" class="form-select" required><option value="">Select</option><option>Textbooks</option><option>Electronics</option><option>Furniture</option><option>Notes / PDFs</option><option>Clothing</option><option>Other</option></select></div>
+<div class="col-md-4"><label class="form-label small fw-semibold">Condition</label>
+<select id="itemCondition" class="form-select"><option>Like New</option><option>Good</option><option>Fair</option><option>Used</option></select></div>
+</div>
+<div class="row g-3 mb-3">
+<div class="col-md-6"><label class="form-label small fw-semibold">University *</label><input id="itemUniversity" class="form-control" required></div>
+<div class="col-md-6"><label class="form-label small fw-semibold">WhatsApp *</label><input id="itemContact" class="form-control" required placeholder="+2547..."></div>
+</div>
+<div class="mb-3"><label class="form-label small fw-semibold">Image URL</label><input id="itemImage" type="url" class="form-control" placeholder="https://..."></div>
+<button class="btn-or w-100 py-2" type="submit">Submit for review</button>
+</form>
+</div></div></div></div>
+
+<!-- REPORT -->
+<div class="modal fade" id="reportModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+<div class="modal-header border-0"><h5 class="modal-title fw-bold text-danger"><i class="fas fa-flag me-2"></i>Report</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<form onsubmit="submitReport(event)">
+<input type="hidden" id="reportItemId">
+<div class="mb-3"><label class="form-label small fw-semibold">Reason *</label>
+<select id="reportReason" class="form-select" required>
+<option value="">Select</option><option value="scam">Scam / Fraud</option><option value="fake">Fake / Misleading</option>
+<option value="inappropriate">Inappropriate</option><option value="wrong_info">Wrong contact</option><option value="other">Other</option>
+</select></div>
+<div class="mb-3"><label class="form-label small fw-semibold">Details</label><textarea id="reportDetails" class="form-control" rows="3"></textarea></div>
+<button class="btn btn-danger w-100" type="submit">Submit report</button>
+</form>
+</div></div></div></div>
+
+<footer>
+<div class="container">
+<div class="row gy-3">
+<div class="col-md-5"><div class="d-flex align-items-center gap-2 text-white fw-bold mb-2"><span class="brand-ico" style="width:28px;height:28px;font-size:.75rem">BP</span> Bei Poa</div>
+<p class="small mb-0">Campus marketplace for Kenyan students. Graduates sell, newcomers buy — fairly and safely.</p></div>
+<div class="col-md-3"><div class="text-white fw-semibold small mb-2">Explore</div>
+<a href="#" class="d-block small mb-1" onclick="showSec('home');return false">Home</a>
+<a href="#" class="d-block small mb-1" onclick="goMarket();return false">Marketplace</a>
+<a href="#" class="d-block small mb-1" onclick="showSec('categories');return false">Categories</a></div>
+<div class="col-md-4"><div class="text-white fw-semibold small mb-2">Legal</div>
+<a href="#" class="d-block small mb-1" onclick="showSec('terms');return false">Terms &amp; Conditions</a>
+<a href="#" class="d-block small mb-1" onclick="showSec('privacy');return false">Privacy Policy</a></div>
+</div>
+<hr class="border-secondary my-3 opacity-25">
+<div class="small">© 2026 Bei Poa. All rights reserved.</div>
+</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const SUPABASE_URL='https://mnlfiiuqlacjlaiszygr.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_CmrQp0cnfQfiFFcaOYeEng_E2H4bMJ8';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let currentUser=null,profile=null,items=[],users=[],reports=[],authMode='login',debounceTimer=null,selectedItem=null;
+let authModal,postModal,reportModal;
+
+document.addEventListener('DOMContentLoaded',async()=>{
+  authModal=new bootstrap.Modal(document.getElementById('authModal'));
+  postModal=new bootstrap.Modal(document.getElementById('postModal'));
+  reportModal=new bootstrap.Modal(document.getElementById('reportModal'));
+  showLoading(true);
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(session){currentUser=session.user;await loadProfile()}
+    await loadItems();updateUI();
+    if(profile&&isStaff())await loadAdminData();
+    showSec('home');
+  }catch(e){console.error(e);alert('Backend connection failed')}
+  finally{showLoading(false)}
+  sb.channel('items').on('postgres_changes',{event:'*',schema:'public',table:'items'},()=>loadItems()).subscribe();
+});
+
+function showLoading(s){document.getElementById('loading').classList.toggle('d-none',!s)}
+function isStaff(){return profile&&(profile.role==='admin'||profile.role==='moderator')}
+function isAdmin(){return profile&&profile.role==='admin'}
+function esc(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+function debounceRender(){clearTimeout(debounceTimer);debounceTimer=setTimeout(renderItems,280)}
+function onSearch(v){const s=document.getElementById('searchInput');if(s){s.value=v;debounceRender()}if(currentUser)showSec('marketplace')}
+function goMarket(){if(!currentUser){showAuth('login');return}showSec('marketplace')}
+function goSell(){if(!currentUser){showAuth('register');return}openPost()}
+function filterCat(c){if(!currentUser){showAuth('login');return}showSec('marketplace');document.getElementById('filterCategory').value=c;renderItems()}
+
+async function loadProfile(){
+  if(!currentUser)return;
+  const {data,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  if(error)return;profile=data;
+  if(profile.status==='banned'){alert('Account banned.');await logout()}
+}
+async function loadItems(){
+  const {data}=await sb.from('items').select('*').order('created_at',{ascending:false});
+  items=data||[];populateUniversities();renderItems();renderFeatured();
+  if(profile)renderDashboard();if(isStaff())renderAdminListings();
+  document.getElementById('hItems').textContent=items.filter(i=>i.status==='approved').length||'0';
+  document.getElementById('hUsers').textContent=users.length||'—';
+}
+async function loadAdminData(){
+  const [{data:u},{data:r}]=await Promise.all([
+    sb.from('profiles').select('*').order('created_at',{ascending:false}),
+    sb.from('reports').select('*').order('created_at',{ascending:false})
+  ]);
+  users=u||[];reports=r||[];
+  renderAdminOverview();renderAdminListings();renderAdminReports();renderAdminUsers();
+  document.getElementById('hUsers').textContent=users.length||'—';
+}
+
+function showSec(name){
+  const pub=['home','terms','privacy','categories'];
+  if(!currentUser&&!pub.includes(name)){showAuth('login');return}
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+name)?.classList.add('active');
+  document.querySelectorAll('.nav-a').forEach(a=>a.classList.remove('active'));
+  const map={home:'n-home',marketplace:'n-market',categories:'n-cats',dashboard:'n-dash',messages:'n-msg',admin:'n-admin'};
+  document.getElementById(map[name])?.classList.add('active');
+  if(name==='dashboard'&&profile)renderDashboard();
+  if(name==='profile'&&profile)loadProfileForm();
+  if(name==='admin'&&isStaff()){adminTab('overview');loadAdminData()}
+  if(name==='marketplace')renderItems();
+  if(name==='home')renderFeatured();
+  window.scrollTo(0,0);
+}
+
+function adminTab(t){
+  ['overview','listings','reports','users'].forEach(x=>{
+    const el=document.getElementById('admin-'+x);
+    if(el)el.classList.toggle('d-none',x!==t);
+    document.getElementById('at-'+x)?.classList.toggle('on',x===t);
+  });
+  if(t==='listings')renderAdminListings();
+  if(t==='reports')renderAdminReports();
+  if(t==='users')renderAdminUsers();
+  if(t==='overview')renderAdminOverview();
+}
+
+function showAuth(m){authMode=m;updateAuthUI();authModal.show()}
+function toggleAuth(e){e.preventDefault();authMode=authMode==='login'?'register':'login';updateAuthUI()}
+function updateAuthUI(){
+  const L=authMode==='login';
+  document.getElementById('authTitle').textContent=L?'Login':'Create account';
+  document.getElementById('authSubmitText').textContent=L?'Login':'Sign up';
+  document.getElementById('nameField').classList.toggle('d-none',L);
+  document.getElementById('universityField').classList.toggle('d-none',L);
+  document.getElementById('authSwitchText').textContent=L?"Don't have an account?":'Already have an account?';
+  document.getElementById('authSwitchLink').textContent=L?'Register':'Login';
+  document.getElementById('authName').required=!L;
+}
+
+async function handleAuth(e){
+  e.preventDefault();
+  const email=document.getElementById('authEmail').value.trim().toLowerCase();
+  const password=document.getElementById('authPassword').value;
+  const name=document.getElementById('authName').value.trim();
+  const university=document.getElementById('authUniversity').value.trim();
+  showLoading(true);
+  try{
+    if(authMode==='register'){
+      if(!name){alert('Enter your name');return}
+      const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,university}}});
+      if(error)throw error;
+      if(data.session){currentUser=data.user;await loadProfile();authModal.hide();document.getElementById('authForm').reset();updateUI();showSec('home');alert('Welcome to Bei Poa!')}
+      else{alert('Account created! You can login.');authMode='login';updateAuthUI();document.getElementById('authEmail').value=email}
+    }else{
+      const {data,error}=await sb.auth.signInWithPassword({email,password});
+      if(error)throw error;
+      currentUser=data.user;await loadProfile();authModal.hide();document.getElementById('authForm').reset();updateUI();showSec(isStaff()?'admin':'home');
+    }
+  }catch(err){alert(err.message||'Auth failed')}
+  finally{showLoading(false)}
+}
+async function loginGoogle(){
+  showLoading(true);
+  try{const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin}});if(error)throw error}
+  catch(err){showLoading(false);alert(err.message||'Google login failed')}
+}
+async function logout(){
+  if(!confirm('Logout?'))return;
+  await sb.auth.signOut();currentUser=null;profile=null;updateUI();showSec('home');
+}
+
+function loadProfileForm(){
+  if(!profile)return;
+  document.getElementById('profileName').value=profile.name||'';
+  document.getElementById('profileEmail').value=profile.email||'';
+  document.getElementById('profileUniversity').value=profile.university||'';
+  document.getElementById('profilePhone').value=profile.phone||'';
+  document.getElementById('profileBio').value=profile.bio||'';
+  document.getElementById('pName').textContent=profile.name;
+  document.getElementById('pEmail').textContent=profile.email;
+  document.getElementById('pRole').textContent=(profile.role||'user').toUpperCase();
+  document.getElementById('pUni').textContent=profile.university||'—';
+  document.getElementById('pAv').textContent=(profile.name||'U').charAt(0).toUpperCase();
+}
+async function saveProfile(e){
+  e.preventDefault();if(!profile)return;
+  const updates={name:document.getElementById('profileName').value.trim(),university:document.getElementById('profileUniversity').value.trim(),phone:document.getElementById('profilePhone').value.trim(),bio:document.getElementById('profileBio').value.trim()};
+  showLoading(true);
+  const {error}=await sb.from('profiles').update(updates).eq('id',profile.id);
+  showLoading(false);
+  if(error){alert(error.message);return}
+  profile={...profile,...updates};updateUI();loadProfileForm();alert('Saved!');
+}
+
+function openPost(){
+  if(!currentUser){showAuth('login');return}
+  document.getElementById('itemUniversity').value=profile?.university||'';
+  document.getElementById('itemContact').value=profile?.phone||'';
+  postModal.show();
+}
+async function handlePost(e){
+  e.preventDefault();
+  const newItem={
+    title:document.getElementById('itemTitle').value.trim(),
+    description:document.getElementById('itemDesc').value.trim(),
+    price:Number(document.getElementById('itemPrice').value),
+    category:document.getElementById('itemCategory').value,
+    condition:document.getElementById('itemCondition').value,
+    university:document.getElementById('itemUniversity').value.trim(),
+    image_url:document.getElementById('itemImage').value.trim()||null,
+    contact:document.getElementById('itemContact').value.trim(),
+    seller_id:currentUser.id,seller_name:profile.name,seller_email:profile.email,
+    status:isStaff()?'approved':'pending',sold:false
+  };
+  showLoading(true);
+  const {error}=await sb.from('items').insert(newItem);
+  showLoading(false);
+  if(error){alert(error.message);return}
+  postModal.hide();document.getElementById('postForm').reset();await loadItems();
+  alert(newItem.status==='pending'?'Submitted for review!':'Posted!');
+}
+
+function cardHtml(item){
+  const cond=item.condition==='Like New'||item.condition==='Good'?'badge-g':'badge-f';
+  return `<div class="col-6 col-md-4 col-lg-3">
+    <div class="pcard" onclick="openProduct('${item.id}')">
+      <img src="${item.image_url||'https://via.placeholder.com/400x300?text=Bei+Poa'}" alt="" onerror="this.src='https://via.placeholder.com/400x300?text=Bei+Poa'">
+      <div class="bd">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <span class="price">KSh ${Number(item.price).toLocaleString()}</span>
+          <span class="${cond}">${esc(item.condition)}</span>
+        </div>
+        <div class="fw-semibold small text-truncate">${esc(item.title)}</div>
+        <div class="text-muted" style="font-size:.72rem">${esc(item.university||'')}</div>
+      </div>
+    </div></div>`;
+}
+
+function renderFeatured(){
+  const list=items.filter(i=>i.status==='approved'&&!i.sold).slice(0,4);
+  const g=document.getElementById('featured');
+  if(!currentUser){
+    g.innerHTML=`<div class="col-12"><div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+      <p class="text-muted mb-3">Login to browse featured campus deals</p>
+      <div><button class="btn-or me-2" onclick="showAuth('login')">Login</button>
+      <button class="btn-out" onclick="showAuth('register')">Sign Up</button></div></div></div>`;
+    return;
+  }
+  if(!list.length){g.innerHTML='<div class="col-12 text-muted small">No featured items yet.</div>';return}
+  g.innerHTML=list.map(cardHtml).join('');
+}
+
+function renderItems(){
+  if(!currentUser)return;
+  const search=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  const uni=document.getElementById('filterUniversity')?.value||'';
+  const cat=document.getElementById('filterCategory')?.value||'';
+  const maxP=document.getElementById('filterPrice')?.value||'';
+  const filtered=items.filter(item=>{
+    if(item.status!=='approved'||item.sold)return false;
+    if(search&&!item.title.toLowerCase().includes(search)&&!(item.description||'').toLowerCase().includes(search))return false;
+    if(uni&&item.university!==uni)return false;
+    if(cat&&item.category!==cat)return false;
+    if(maxP&&item.price>Number(maxP))return false;
+    return true;
+  });
+  const grid=document.getElementById('itemsGrid');
+  const no=document.getElementById('noItems');
+  if(!filtered.length){grid.innerHTML='';no.classList.remove('d-none');return}
+  no.classList.add('d-none');grid.innerHTML=filtered.map(cardHtml).join('');
+}
+
+function openProduct(id){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  selectedItem=item;
+  const phone=(item.contact||'').replace(/\D/g,'');
+  document.getElementById('productDetail').innerHTML=`
+    <div class="col-lg-6"><div class="pd-img"><img src="${item.image_url||'https://via.placeholder.com/600x400?text=Bei+Poa'}" alt="" onerror="this.src='https://via.placeholder.com/600x400?text=Bei+Poa'"></div></div>
+    <div class="col-lg-6">
+      <div class="d-flex gap-2 mb-2"><span class="badge bg-dark">${esc(item.condition)}</span><span class="badge bg-secondary">${esc(item.category)}</span></div>
+      <h1 class="h3 fw-bold">${esc(item.title)}</h1>
+      <div class="d-flex align-items-baseline gap-2 mb-3">
+        <span class="price" style="font-size:1.6rem">KSh ${Number(item.price).toLocaleString()}</span>
+      </div>
+      <p class="text-muted small mb-1"><i class="fas fa-map-marker-alt me-1"></i>${esc(item.university||'Kenya')}</p>
+      <p class="text-muted small mb-3">Seller: <strong>${esc(item.seller_name)}</strong></p>
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="https://wa.me/${phone}" target="_blank" class="btn-wa px-3 py-2"><i class="fab fa-whatsapp me-1"></i>WhatsApp</a>
+        <button class="btn-or px-3 py-2" onclick="startCheckout()">Contact / Deal</button>
+        <button class="btn-out" onclick="openReport('${item.id}')"><i class="fas fa-flag me-1"></i>Report</button>
+      </div>
+      <h6 class="fw-bold">Product details</h6>
+      <p class="text-muted">${esc(item.description||'No description provided.')}</p>
+      <div class="card border-0 bg-light rounded-3 p-3 mt-3">
+        <h6 class="fw-bold small">Safety tips</h6>
+        <ul class="safety mb-0 ps-3">
+          <li>Meet in a public place on campus</li>
+          <li>Check the item before payment</li>
+          <li>Use secure payment methods</li>
+          <li>Report suspicious activity</li>
         </ul>
-        <div class="d-flex align-items-center gap-2">
-          <span id="userGreeting" class="text-white small me-1 d-none"></span>
-          <button id="loginBtn" class="btn btn-light btn-sm" onclick="showAuthModal('login')">Login</button>
-          <button id="registerBtn" class="btn btn-outline-light btn-sm" onclick="showAuthModal('register')">Register</button>
-          <button id="logoutBtn" class="btn btn-outline-light btn-sm d-none" onclick="logout()">Logout</button>
-          <button id="postBtn" class="btn btn-accent btn-sm d-none" onclick="showPostModal()">
-            <i class="fas fa-plus me-1"></i>Sell
-          </button>
-        </div>
       </div>
+    </div>`;
+  showSec('product');
+}
+
+function startCheckout(){
+  if(!selectedItem)return;
+  const item=selectedItem;
+  const phone=(item.contact||'').replace(/\D/g,'');
+  document.getElementById('checkoutBox').innerHTML=`
+    <div class="col-md-7">
+      <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+        <h5 class="fw-bold mb-3">How campus deals work</h5>
+        <ol class="mb-4">
+          <li class="mb-2">Message the seller on WhatsApp</li>
+          <li class="mb-2">Agree on price, meeting place &amp; time</li>
+          <li class="mb-2">Inspect the item, then pay (M-Pesa / cash)</li>
+        </ol>
+        <a href="https://wa.me/${phone}?text=${encodeURIComponent('Hi, I saw your "'+item.title+'" on Bei Poa. Is it still available?')}" target="_blank" class="btn-wa w-100 py-2 mb-2 d-inline-block text-center"><i class="fab fa-whatsapp me-1"></i>Message seller on WhatsApp</a>
+        <button class="btn-out w-100" onclick="showSec('product')">Back to product</button>
+      </div></div>
     </div>
-  </nav>
-
-  <!-- MARKETPLACE -->
-  <div id="section-marketplace" class="section active">
-    <header class="hero text-center">
-      <div class="container position-relative" style="z-index:1">
-        <p class="text-uppercase small fw-semibold mb-2 opacity-75" style="letter-spacing:0.08em">Campus Marketplace</p>
-        <h1 class="display-5 fw-bold mb-3" style="letter-spacing:-0.03em">Buy &amp; sell smarter on campus</h1>
-        <p class="lead mb-0 opacity-90 mx-auto" style="max-width:520px">
-          Graduates sell. New students buy. Fair prices, moderated listings, safer deals.
-        </p>
-        <div id="guestCta" class="guest-cta-box d-none">
-          <p class="mb-3 fw-medium">Login or register to browse listings</p>
-          <button class="btn btn-light me-2" onclick="showAuthModal('login')">Login</button>
-          <button class="btn btn-outline-light" onclick="showAuthModal('register')">Create account</button>
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
+        <h6 class="fw-bold">Order summary</h6>
+        <div class="d-flex gap-3 mb-3">
+          <img src="${item.image_url||'https://via.placeholder.com/80'}" width="72" height="72" class="rounded-3 object-fit-cover" style="object-fit:cover" onerror="this.src='https://via.placeholder.com/80'">
+          <div><div class="fw-semibold small">${esc(item.title)}</div><div class="price">KSh ${Number(item.price).toLocaleString()}</div></div>
         </div>
-      </div>
-    </header>
+        <hr>
+        <div class="d-flex justify-content-between"><span class="text-muted">Item</span><span>KSh ${Number(item.price).toLocaleString()}</span></div>
+        <div class="d-flex justify-content-between mt-2 fw-bold"><span>Total</span><span>KSh ${Number(item.price).toLocaleString()}</span></div>
+        <p class="small text-muted mt-3 mb-0">Payment happens directly between you and the seller. Bei Poa does not process payments.</p>
+      </div></div>
+    </div>`;
+  showSec('checkout');
+}
 
-    <div class="container my-4">
-      <div class="card filter-bar border-0">
-        <div class="card-body p-3">
-          <div class="row g-2 align-items-end">
-            <div class="col-md-4">
-              <label class="form-label small text-muted mb-1">Search</label>
-              <input id="searchInput" type="text" class="form-control form-control-sm" placeholder="Search items..." oninput="debounceRender()">
-            </div>
-            <div class="col-6 col-md-2">
-              <label class="form-label small text-muted mb-1">University</label>
-              <select id="filterUniversity" class="form-select form-select-sm" onchange="renderItems()">
-                <option value="">All</option>
-              </select>
-            </div>
-            <div class="col-6 col-md-2">
-              <label class="form-label small text-muted mb-1">Category</label>
-              <select id="filterCategory" class="form-select form-select-sm" onchange="renderItems()">
-                <option value="">All</option>
-                <option>Textbooks</option>
-                <option>Electronics</option>
-                <option>Furniture</option>
-                <option>Notes / PDFs</option>
-                <option>Clothing</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div class="col-6 col-md-2">
-              <label class="form-label small text-muted mb-1">Max Price</label>
-              <input id="filterPrice" type="number" class="form-control form-control-sm" placeholder="Any" oninput="debounceRender()">
-            </div>
-            <div class="col-6 col-md-2">
-              <button class="btn btn-outline-secondary btn-sm w-100" onclick="resetFilters()">Reset</button>
-            </div>
-          </div>
+function renderDashboard(){
+  if(!profile)return;
+  const mine=items.filter(i=>i.seller_id===currentUser.id);
+  document.getElementById('statTotal').textContent=mine.length;
+  document.getElementById('statActive').textContent=mine.filter(i=>i.status==='approved'&&!i.sold).length;
+  document.getElementById('statPending').textContent=mine.filter(i=>i.status==='pending').length;
+  document.getElementById('statSold').textContent=mine.filter(i=>i.sold).length;
+  document.getElementById('dName').textContent=profile.name;
+  document.getElementById('dHello').textContent=profile.name.split(' ')[0];
+  document.getElementById('dAv').textContent=(profile.name||'U').charAt(0).toUpperCase();
+  document.getElementById('dRole').textContent=profile.role||'user';
+  const cont=document.getElementById('myListings'),empty=document.getElementById('noMyListings');
+  if(!mine.length){cont.innerHTML='';empty.classList.remove('d-none');return}
+  empty.classList.add('d-none');
+  cont.innerHTML=mine.map(item=>`<div class="col-md-6 col-xl-4">
+    <div class="card border-0 shadow-sm h-100 rounded-3"><div class="row g-0">
+      <div class="col-4"><img src="${item.image_url||'https://via.placeholder.com/120'}" class="img-fluid rounded-start h-100" style="object-fit:cover;min-height:90px" onerror="this.src='https://via.placeholder.com/120'"></div>
+      <div class="col-8"><div class="card-body py-2 px-3">
+        <div class="fw-semibold small text-truncate">${esc(item.title)}</div>
+        <div class="small fw-bold">KSh ${Number(item.price).toLocaleString()}</div>
+        <span class="badge status-${item.status}">${item.status}</span>
+        ${item.sold?'<span class="badge bg-secondary ms-1">Sold</span>':''}
+        <div class="mt-1">
+          ${item.status==='approved'&&!item.sold?`<button class="btn btn-outline-warning btn-sm me-1" onclick="markSold('${item.id}')">Sold</button>`:''}
+          <button class="btn btn-outline-danger btn-sm" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
         </div>
-      </div>
-    </div>
-
-    <main class="container pb-5">
-      <div id="itemsGrid" class="row g-3"></div>
-      <div id="noItems" class="empty-state d-none">
-        <i class="fas fa-box-open"></i>
-        <p class="mb-0">No approved items found.</p>
-      </div>
-    </main>
-  </div>
-
-  <!-- USER DASHBOARD (CSS Grid layout) -->
-  <div id="section-dashboard" class="section">
-    <div class="container py-4">
-      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-          <h2 class="h4 mb-1 fw-bold">My Dashboard</h2>
-          <p class="text-muted small mb-0">Your listings & activity</p>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="showPostModal()">
-          <i class="fas fa-plus me-1"></i> New Listing
-        </button>
-      </div>
-
-      <div class="dashboard-grid">
-        <!-- Stats row (CSS Grid) -->
-        <div class="dashboard-stats">
-          <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-              <div class="icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-list"></i></div>
-              <div><div class="text-muted small">Total</div><div class="fs-4 fw-bold" id="statTotal">0</div></div>
-            </div>
-          </div>
-          <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-              <div class="icon bg-success bg-opacity-10 text-success"><i class="fas fa-check-circle"></i></div>
-              <div><div class="text-muted small">Active</div><div class="fs-4 fw-bold" id="statActive">0</div></div>
-            </div>
-          </div>
-          <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-              <div class="icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-clock"></i></div>
-              <div><div class="text-muted small">Pending</div><div class="fs-4 fw-bold" id="statPending">0</div></div>
-            </div>
-          </div>
-          <div class="card stat-card">
-            <div class="card-body d-flex align-items-center gap-3">
-              <div class="icon bg-secondary bg-opacity-10 text-secondary"><i class="fas fa-tag"></i></div>
-              <div><div class="text-muted small">Sold</div><div class="fs-4 fw-bold" id="statSold">0</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Main listings -->
-        <div class="dashboard-main">
-          <div class="card border-0 shadow-sm rounded-4 h-100">
-            <div class="card-header bg-white border-0 pt-3 pb-0">
-              <h5 class="mb-0 fw-semibold">My Listings</h5>
-            </div>
-            <div class="card-body">
-              <div id="myListings" class="row g-3"></div>
-              <div id="noMyListings" class="empty-state d-none">
-                <i class="fas fa-clipboard-list"></i>
-                <p class="mb-2">No listings yet</p>
-                <button class="btn btn-primary btn-sm" onclick="showPostModal()">Post first item</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Side quick actions -->
-        <div class="dashboard-side">
-          <div class="card border-0 shadow-sm rounded-4 mb-3">
-            <div class="card-body">
-              <h6 class="fw-semibold mb-3">Quick Actions</h6>
-              <div class="d-grid gap-2">
-                <button class="btn btn-primary btn-sm text-start" onclick="showPostModal()">
-                  <i class="fas fa-plus me-2"></i> Post new item
-                </button>
-                <button class="btn btn-outline-secondary btn-sm text-start" onclick="showSection('marketplace')">
-                  <i class="fas fa-store me-2"></i> Browse marketplace
-                </button>
-                <button class="btn btn-outline-secondary btn-sm text-start" onclick="showSection('profile')">
-                  <i class="fas fa-user me-2"></i> Edit profile
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body">
-              <h6 class="fw-semibold mb-2">Tips</h6>
-              <ul class="small text-muted mb-0 ps-3">
-                <li class="mb-1">Clear photos sell faster</li>
-                <li class="mb-1">Use a real WhatsApp number</li>
-                <li>Pending items need admin approval</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PROFILE -->
-  <div id="section-profile" class="section">
-    <div class="container py-4">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4 legal-content">
-              <div class="d-flex align-items-center gap-4 mb-4">
-                <div class="profile-avatar" id="profileAvatar">U</div>
-                <div>
-                  <h3 class="h5 mb-1 fw-bold" id="profileNameDisplay">User</h3>
-                  <p class="text-muted small mb-0" id="profileEmailDisplay">email@example.com</p>
-                  <span class="badge bg-primary-subtle text-primary mt-1" id="profileRoleBadge">User</span>
-                  <span class="badge bg-secondary-subtle text-secondary mt-1 ms-1" id="profileUniBadge">—</span>
-                </div>
-              </div>
-              <hr>
-              <form id="profileForm" onsubmit="saveProfile(event)">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label small fw-semibold">Full Name</label>
-                    <input type="text" id="profileName" class="form-control" required>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label small fw-semibold">Email</label>
-                    <input type="email" id="profileEmail" class="form-control" readonly>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label small fw-semibold">University</label>
-                    <input type="text" id="profileUniversity" class="form-control">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label small fw-semibold">Phone / WhatsApp</label>
-                    <input type="text" id="profilePhone" class="form-control" placeholder="+2547...">
-                  </div>
-                  <div class="col-12">
-                    <label class="form-label small fw-semibold">Bio</label>
-                    <textarea id="profileBio" class="form-control" rows="2"></textarea>
-                  </div>
-                </div>
-                <div class="mt-4">
-                  <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Changes</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ADMIN -->
-  <div id="section-admin" class="section">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-3 col-lg-2 sidebar-admin p-3 d-none d-md-block">
-          <h6 class="text-uppercase small text-white-50 mb-3">Moderation</h6>
-          <nav class="nav flex-column">
-            <a class="nav-link active" href="#" onclick="showAdminTab('overview'); return false;" id="atab-overview">
-              <i class="fas fa-chart-pie me-2"></i>Overview
-            </a>
-            <a class="nav-link" href="#" onclick="showAdminTab('listings'); return false;" id="atab-listings">
-              <i class="fas fa-box me-2"></i>Listings
-            </a>
-            <a class="nav-link" href="#" onclick="showAdminTab('reports'); return false;" id="atab-reports">
-              <i class="fas fa-flag me-2"></i>Reports
-            </a>
-            <a class="nav-link" href="#" onclick="showAdminTab('users'); return false;" id="atab-users">
-              <i class="fas fa-users me-2"></i>Users & Team
-            </a>
-          </nav>
-        </div>
-        <div class="col-md-9 col-lg-10 p-4">
-          <div class="d-md-none mb-3">
-            <select class="form-select" onchange="showAdminTab(this.value)">
-              <option value="overview">Overview</option>
-              <option value="listings">Listings</option>
-              <option value="reports">Reports</option>
-              <option value="users">Users & Team</option>
-            </select>
-          </div>
-
-          <div id="admin-overview" class="admin-tab">
-            <h4 class="fw-bold mb-4">Admin Overview</h4>
-            <div class="row g-3 mb-4">
-              <div class="col-6 col-lg-3">
-                <div class="card stat-card"><div class="card-body">
-                  <div class="text-muted small">Total Users</div>
-                  <div class="fs-3 fw-bold" id="aStatUsers">0</div>
-                </div></div>
-              </div>
-              <div class="col-6 col-lg-3">
-                <div class="card stat-card"><div class="card-body">
-                  <div class="text-muted small">Total Listings</div>
-                  <div class="fs-3 fw-bold" id="aStatListings">0</div>
-                </div></div>
-              </div>
-              <div class="col-6 col-lg-3">
-                <div class="card stat-card"><div class="card-body">
-                  <div class="text-muted small">Pending Review</div>
-                  <div class="fs-3 fw-bold text-warning" id="aStatPending">0</div>
-                </div></div>
-              </div>
-              <div class="col-6 col-lg-3">
-                <div class="card stat-card"><div class="card-body">
-                  <div class="text-muted small">Open Reports</div>
-                  <div class="fs-3 fw-bold text-danger" id="aStatReports">0</div>
-                </div></div>
-              </div>
-            </div>
-            <div class="alert alert-info">
-              <i class="fas fa-info-circle me-2"></i>
-              Promote trusted users to <strong>moderator</strong> so they can help approve listings and handle reports.
-            </div>
-          </div>
-
-          <div id="admin-listings" class="admin-tab d-none">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4 class="fw-bold mb-0">Listings Moderation</h4>
-              <select id="listingStatusFilter" class="form-select form-select-sm w-auto" onchange="renderAdminListings()">
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-hover align-middle bg-white rounded-3 overflow-hidden shadow-sm">
-                <thead class="table-light">
-                  <tr><th>Item</th><th>Seller</th><th>Price</th><th>Status</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="adminListingsBody"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div id="admin-reports" class="admin-tab d-none">
-            <h4 class="fw-bold mb-3">Scam & Abuse Reports</h4>
-            <div id="adminReportsList"></div>
-            <div id="noReports" class="empty-state d-none">
-              <i class="fas fa-flag"></i>
-              <p>No open reports. Great job!</p>
-            </div>
-          </div>
-
-          <div id="admin-users" class="admin-tab d-none">
-            <h4 class="fw-bold mb-3">Users & Team Management</h4>
-            <div class="table-responsive">
-              <table class="table table-hover align-middle bg-white rounded-3 overflow-hidden shadow-sm">
-                <thead class="table-light">
-                  <tr><th>User</th><th>University</th><th>Role</th><th>Status</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="adminUsersBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Auth Modal -->
-  <div class="modal fade" id="authModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 rounded-4 shadow">
-        <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold" id="authTitle">Login</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body pt-2">
-          <!-- Social Logins -->
-          <div class="d-grid gap-2 mb-3">
-            <button type="button" class="btn btn-outline-dark d-flex align-items-center justify-content-center gap-2" onclick="loginWithGoogle()">
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="Google">
-              Continue with Google
-            </button>
-          </div>
-          <div class="text-center text-muted small mb-3">— or use email —</div>
-
-          <form id="authForm" onsubmit="handleAuth(event)">
-            <div class="mb-3" id="nameField">
-              <label class="form-label small fw-semibold">Full Name</label>
-              <input id="authName" type="text" class="form-control">
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Email</label>
-              <input id="authEmail" type="email" class="form-control" required placeholder="you@example.com">
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Password</label>
-              <input id="authPassword" type="password" class="form-control" required minlength="6">
-            </div>
-            <div class="mb-3 d-none" id="universityField">
-              <label class="form-label small fw-semibold">University</label>
-              <input id="authUniversity" type="text" class="form-control" placeholder="e.g. University of Nairobi">
-            </div>
-            <button type="submit" class="btn btn-primary w-100 py-2">
-              <span id="authSubmitText">Login</span>
-            </button>
-          </form>
-          <p class="small text-muted text-center mt-3 mb-1">
-            By continuing you agree to our
-            <a href="#" onclick="authModal.hide(); showSection('terms'); return false;">Terms</a>
-            and
-            <a href="#" onclick="authModal.hide(); showSection('privacy'); return false;">Privacy Policy</a>.
-          </p>
-          <div class="text-center mt-2 small text-muted">
-            <span id="authSwitchText">Don't have an account?</span>
-            <a href="#" id="authSwitchLink" onclick="toggleAuthMode(event)" class="text-primary fw-semibold">Register</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Post Modal -->
-  <div class="modal fade" id="postModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content border-0 rounded-4 shadow">
-        <div class="modal-header border-0">
-          <h5 class="modal-title fw-bold">Sell an Item</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <div class="alert alert-warning small py-2">
-            <i class="fas fa-info-circle me-1"></i> New listings go to <strong>Pending</strong> until approved by the team.
-          </div>
-          <form id="postForm" onsubmit="handlePost(event)">
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Title *</label>
-              <input id="itemTitle" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Description</label>
-              <textarea id="itemDesc" class="form-control" rows="2"></textarea>
-            </div>
-            <div class="row g-3 mb-3">
-              <div class="col-md-4">
-                <label class="form-label small fw-semibold">Price (KES) *</label>
-                <input id="itemPrice" type="number" class="form-control" required min="0">
-              </div>
-              <div class="col-md-4">
-                <label class="form-label small fw-semibold">Category *</label>
-                <select id="itemCategory" class="form-select" required>
-                  <option value="">Select</option>
-                  <option>Textbooks</option>
-                  <option>Electronics</option>
-                  <option>Furniture</option>
-                  <option>Notes / PDFs</option>
-                  <option>Clothing</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label small fw-semibold">Condition</label>
-                <select id="itemCondition" class="form-select">
-                  <option>Like New</option>
-                  <option>Good</option>
-                  <option>Fair</option>
-                  <option>Used</option>
-                </select>
-              </div>
-            </div>
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label class="form-label small fw-semibold">University *</label>
-                <input id="itemUniversity" class="form-control" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-semibold">Contact (WhatsApp) *</label>
-                <input id="itemContact" class="form-control" required placeholder="+2547...">
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Image URL (optional)</label>
-              <input id="itemImage" type="url" class="form-control" placeholder="https://...">
-            </div>
-            <button type="submit" class="btn btn-primary w-100 py-2">Submit for Review</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Report Modal -->
-  <div class="modal fade" id="reportModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 rounded-4 shadow">
-        <div class="modal-header border-0">
-          <h5 class="modal-title fw-bold text-danger"><i class="fas fa-flag me-2"></i>Report Listing</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form id="reportForm" onsubmit="submitReport(event)">
-            <input type="hidden" id="reportItemId">
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Reason *</label>
-              <select id="reportReason" class="form-select" required>
-                <option value="">Select reason</option>
-                <option value="scam">Scam / Fraud</option>
-                <option value="fake">Fake / Misleading</option>
-                <option value="inappropriate">Inappropriate content</option>
-                <option value="wrong_info">Wrong contact / info</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Details</label>
-              <textarea id="reportDetails" class="form-control" rows="3"></textarea>
-            </div>
-            <button type="submit" class="btn btn-danger w-100">Submit Report</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // ============================================================
-    //  SUPABASE CONFIG – REPLACE THESE WITH YOUR PROJECT VALUES
-    // ============================================================
-    const SUPABASE_URL = 'https://mnlfiiuqlacjlaiszygr.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_CmrQp0cnfQfiFFcaOYeEng_E2H4bMJ8';
-
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // ============================================================
-    //  STATE
-    // ============================================================
-    let currentUser = null;   // auth user
-    let profile = null;       // profiles row
-    let items = [];
-    let users = [];
-    let reports = [];
-    let authMode = 'login';
-    let debounceTimer = null;
-
-    let authModal, postModal, reportModal;
-
-    // ============================================================
-    //  INIT
-    // ============================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-      authModal = new bootstrap.Modal(document.getElementById('authModal'));
-      postModal = new bootstrap.Modal(document.getElementById('postModal'));
-      reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
-
-      showLoading(true);
-      try {
-        const { data: { session } } = await sb.auth.getSession();
-        if (session) {
-          currentUser = session.user;
-          await loadProfile();
-        }
-        await loadItems();
-        updateUI();
-        if (profile && isStaff()) await loadAdminData();
-      } catch (err) {
-        console.error(err);
-        alert('Failed to connect to backend. Check your Supabase URL & key.');
-      } finally {
-        showLoading(false);
-      }
-
-      // Realtime subscriptions
-      sb
-        .channel('items-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'items' }, () => loadItems())
-        .subscribe();
-
-      sb
-        .channel('reports-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => {
-          if (isStaff()) loadAdminData();
-        })
-        .subscribe();
-    });
-
-    function showLoading(show) {
-      document.getElementById('loading').classList.toggle('d-none', !show);
-    }
-
-    // ============================================================
-    //  HELPERS
-    // ============================================================
-    function isStaff() {
-      return profile && (profile.role === 'admin' || profile.role === 'moderator');
-    }
-    function isAdmin() {
-      return profile && profile.role === 'admin';
-    }
-    function escapeHtml(t) {
-      if (!t) return '';
-      const d = document.createElement('div');
-      d.textContent = t;
-      return d.innerHTML;
-    }
-    function debounceRender() {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(renderItems, 300);
-    }
-
-    // ============================================================
-    //  DATA LOADING
-    // ============================================================
-    async function loadProfile() {
-      if (!currentUser) return;
-      const { data, error } = await sb
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
-      if (error) {
-        console.error('Profile load error', error);
-        return;
-      }
-      profile = data;
-      if (profile.status === 'banned') {
-        alert('Your account has been banned.');
-        await logout();
-      }
-    }
-
-    async function loadItems() {
-      const { data, error } = await sb
-        .from('items')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) {
-        console.error(error);
-        return;
-      }
-      items = data || [];
-      populateUniversities();
-      renderItems();
-      if (profile) renderDashboard();
-      if (isStaff()) renderAdminListings();
-    }
-
-    async function loadAdminData() {
-      const [{ data: u }, { data: r }] = await Promise.all([
-        sb.from('profiles').select('*').order('created_at', { ascending: false }),
-        sb.from('reports').select('*').order('created_at', { ascending: false })
-      ]);
-      users = u || [];
-      reports = r || [];
-      renderAdminOverview();
-      renderAdminListings();
-      renderAdminReports();
-      renderAdminUsers();
-    }
-
-    // ============================================================
-    //  NAVIGATION
-    // ============================================================
-    function goHome() {
-      if (currentUser && profile) showSection('marketplace');
-      else showSection('marketplace'); // still marketplace with guest CTA
-    }
-
-    function showSection(name) {
-      // Legal pages are always allowed
-      const publicPages = ['terms', 'privacy'];
-      if (!currentUser && !publicPages.includes(name)) {
-        if (name === 'dashboard' || name === 'profile' || name === 'admin' || name === 'marketplace') {
-          // marketplace shows guest CTA; other protected pages need login
-          if (name !== 'marketplace') {
-            showAuthModal('login');
-            return;
-          }
-        }
-      }
-
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      const el = document.getElementById('section-' + name);
-      if (el) el.classList.add('active');
-      document.querySelectorAll('.navbar-nav .nav-link').forEach(l => l.classList.remove('active'));
-      const nl = document.getElementById('nav-' + name);
-      if (nl) nl.classList.add('active');
-
-      if (name === 'dashboard' && profile) renderDashboard();
-      if (name === 'profile' && profile) loadProfileForm();
-      if (name === 'admin' && isStaff()) {
-        showAdminTab('overview');
-        loadAdminData();
-      }
-      if (name === 'marketplace') renderItems();
-
-      // Scroll to top for legal pages
-      if (publicPages.includes(name)) window.scrollTo(0, 0);
-
-      const col = document.getElementById('navMenu');
-      if (col.classList.contains('show')) bootstrap.Collapse.getInstance(col)?.hide();
-    }
-
-    function showAdminTab(tab) {
-      document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('d-none'));
-      document.getElementById('admin-' + tab).classList.remove('d-none');
-      document.querySelectorAll('.sidebar-admin .nav-link').forEach(l => l.classList.remove('active'));
-      const link = document.getElementById('atab-' + tab);
-      if (link) link.classList.add('active');
-      if (tab === 'listings') renderAdminListings();
-      if (tab === 'reports') renderAdminReports();
-      if (tab === 'users') renderAdminUsers();
-      if (tab === 'overview') renderAdminOverview();
-    }
-
-    // ============================================================
-    //  AUTH
-    // ============================================================
-    function showAuthModal(mode) {
-      authMode = mode;
-      updateAuthModalUI();
-      authModal.show();
-    }
-    function toggleAuthMode(e) {
-      e.preventDefault();
-      authMode = authMode === 'login' ? 'register' : 'login';
-      updateAuthModalUI();
-    }
-    function updateAuthModalUI() {
-      const isLogin = authMode === 'login';
-      document.getElementById('authTitle').textContent = isLogin ? 'Login' : 'Create Account';
-      document.getElementById('authSubmitText').textContent = isLogin ? 'Login' : 'Register';
-      document.getElementById('nameField').classList.toggle('d-none', isLogin);
-      document.getElementById('universityField').classList.toggle('d-none', isLogin);
-      document.getElementById('authSwitchText').textContent = isLogin ? "Don't have an account?" : 'Already have an account?';
-      document.getElementById('authSwitchLink').textContent = isLogin ? 'Register' : 'Login';
-      document.getElementById('authName').required = !isLogin;
-    }
-
-    async function handleAuth(e) {
-      e.preventDefault();
-      const email = document.getElementById('authEmail').value.trim().toLowerCase();
-      const password = document.getElementById('authPassword').value;
-      const name = document.getElementById('authName').value.trim();
-      const university = document.getElementById('authUniversity').value.trim();
-
-      showLoading(true);
-      try {
-        if (authMode === 'register') {
-          if (!name) { alert('Please enter your name'); return; }
-          const { data, error } = await sb.auth.signUp({
-            email,
-            password,
-            options: { data: { name, university } }
-          });
-          if (error) throw error;
-
-          // Profile is auto-created by the database trigger.
-          // If email confirmation is OFF, we get a session immediately.
-          if (data.session) {
-            currentUser = data.user;
-            await loadProfile();
-            authModal.hide();
-            document.getElementById('authForm').reset();
-            updateUI();
-            showSection('dashboard');
-            alert('Welcome to Bei Poa! Your account is ready.');
-          } else {
-            // Email confirmation is required
-            alert('Account created successfully!\n\nPlease check your email and click the confirmation link, then come back and Login.\n\n(Tip: You can turn off email confirmation in Supabase → Authentication → Providers → Email)');
-            authMode = 'login';
-            updateAuthModalUI();
-            document.getElementById('authEmail').value = email;
-          }
-        } else {
-          const { data, error } = await sb.auth.signInWithPassword({ email, password });
-          if (error) throw error;
-          currentUser = data.user;
-          await loadProfile();
-          authModal.hide();
-          document.getElementById('authForm').reset();
-          updateUI();
-          showSection(isStaff() ? 'admin' : 'dashboard');
-        }
-      } catch (err) {
-        alert(err.message || 'Authentication failed');
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    async function logout() {
-      if (!confirm('Logout?')) return;
-      await sb.auth.signOut();
-      currentUser = null;
-      profile = null;
-      updateUI();
-      showSection('marketplace');
-    }
-
-    // ============================================================
-    //  GOOGLE & PHONE LOGIN
-    // ============================================================
-    async function loginWithGoogle() {
-      showLoading(true);
-      try {
-        const { error } = await sb.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin
-          }
-        });
-        if (error) throw error;
-      } catch (err) {
-        showLoading(false);
-        alert(err.message || 'Google login failed. Make sure Google provider is enabled in Supabase.');
-      }
-    }
-
-    // ============================================================
-    //  PROFILE
-    // ============================================================
-    function loadProfileForm() {
-      if (!profile) return;
-      document.getElementById('profileName').value = profile.name || '';
-      document.getElementById('profileEmail').value = profile.email || '';
-      document.getElementById('profileUniversity').value = profile.university || '';
-      document.getElementById('profilePhone').value = profile.phone || '';
-      document.getElementById('profileBio').value = profile.bio || '';
-      document.getElementById('profileNameDisplay').textContent = profile.name;
-      document.getElementById('profileEmailDisplay').textContent = profile.email;
-      document.getElementById('profileRoleBadge').textContent = (profile.role || 'user').toUpperCase();
-      document.getElementById('profileUniBadge').textContent = profile.university || '—';
-      document.getElementById('profileAvatar').textContent = (profile.name || 'U').charAt(0).toUpperCase();
-    }
-
-    async function saveProfile(e) {
-      e.preventDefault();
-      if (!profile) return;
-      const updates = {
-        name: document.getElementById('profileName').value.trim(),
-        university: document.getElementById('profileUniversity').value.trim(),
-        phone: document.getElementById('profilePhone').value.trim(),
-        bio: document.getElementById('profileBio').value.trim()
-      };
-      showLoading(true);
-      const { error } = await sb.from('profiles').update(updates).eq('id', profile.id);
-      showLoading(false);
-      if (error) { alert(error.message); return; }
-      profile = { ...profile, ...updates };
-      updateUI();
-      loadProfileForm();
-      alert('Profile saved!');
-    }
-
-    // ============================================================
-    //  POST ITEM
-    // ============================================================
-    function showPostModal() {
-      if (!currentUser) { alert('Please login first'); showAuthModal('login'); return; }
-      if (profile?.status === 'banned') { alert('You are banned'); return; }
-      document.getElementById('itemUniversity').value = profile?.university || '';
-      document.getElementById('itemContact').value = profile?.phone || '';
-      postModal.show();
-    }
-
-    async function handlePost(e) {
-      e.preventDefault();
-      const newItem = {
-        title: document.getElementById('itemTitle').value.trim(),
-        description: document.getElementById('itemDesc').value.trim(),
-        price: Number(document.getElementById('itemPrice').value),
-        category: document.getElementById('itemCategory').value,
-        condition: document.getElementById('itemCondition').value,
-        university: document.getElementById('itemUniversity').value.trim(),
-        image_url: document.getElementById('itemImage').value.trim() || null,
-        contact: document.getElementById('itemContact').value.trim(),
-        seller_id: currentUser.id,
-        seller_name: profile.name,
-        seller_email: profile.email,
-        status: isStaff() ? 'approved' : 'pending',
-        sold: false
-      };
-      showLoading(true);
-      const { error } = await sb.from('items').insert(newItem);
-      showLoading(false);
-      if (error) { alert(error.message); return; }
-      postModal.hide();
-      document.getElementById('postForm').reset();
-      await loadItems();
-      alert(newItem.status === 'pending' ? 'Submitted for review!' : 'Posted successfully!');
-    }
-
-    // ============================================================
-    //  MARKETPLACE RENDER
-    // ============================================================
-    function renderItems() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const uni = document.getElementById('filterUniversity').value;
-      const cat = document.getElementById('filterCategory').value;
-      const maxP = document.getElementById('filterPrice').value;
-
-      const filtered = items.filter(item => {
-        if (item.status !== 'approved' || item.sold) return false;
-        if (search && !item.title.toLowerCase().includes(search) && !(item.description||'').toLowerCase().includes(search)) return false;
-        if (uni && item.university !== uni) return false;
-        if (cat && item.category !== cat) return false;
-        if (maxP && item.price > Number(maxP)) return false;
-        return true;
-      });
-
-      const grid = document.getElementById('itemsGrid');
-      const no = document.getElementById('noItems');
-      if (filtered.length === 0) {
-        grid.innerHTML = '';
-        no.classList.remove('d-none');
-        return;
-      }
-      no.classList.add('d-none');
-
-      grid.innerHTML = filtered.map(item => `
-        <div class="col-sm-6 col-lg-4 col-xl-3">
-          <div class="card card-item h-100">
-            <div class="position-relative">
-              <img src="${item.image_url || 'https://via.placeholder.com/400x300?text=No+Image'}" class="card-img-top" alt=""
-                   onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">
-              <span class="badge badge-category">${escapeHtml(item.category)}</span>
-              <span class="badge bg-dark badge-condition">${escapeHtml(item.condition)}</span>
-            </div>
-            <div class="card-body d-flex flex-column">
-              <h6 class="card-title text-truncate mb-1">${escapeHtml(item.title)}</h6>
-              <p class="card-text text-muted small flex-grow-1 mb-2" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
-                ${escapeHtml(item.description || 'No description')}
-              </p>
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="price">KES ${Number(item.price).toLocaleString()}</span>
-                <small class="text-muted text-truncate" style="max-width:40%">${escapeHtml(item.university)}</small>
-              </div>
-              <div class="d-flex gap-1">
-                <a href="https://wa.me/${(item.contact||'').replace(/\D/g,'')}" target="_blank" class="btn btn-whatsapp btn-sm flex-grow-1">
-                  <i class="fab fa-whatsapp"></i> Contact
-                </a>
-                <button class="btn btn-outline-danger btn-sm" onclick="openReport('${item.id}')" title="Report">
-                  <i class="fas fa-flag"></i>
-                </button>
-              </div>
-              <small class="text-muted mt-2">Seller: ${escapeHtml(item.seller_name)}</small>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // ============================================================
-    //  USER DASHBOARD
-    // ============================================================
-    function renderDashboard() {
-      if (!profile) return;
-      const mine = items.filter(i => i.seller_id === currentUser.id);
-      const active = mine.filter(i => i.status === 'approved' && !i.sold);
-      const pending = mine.filter(i => i.status === 'pending');
-      const sold = mine.filter(i => i.sold);
-
-      document.getElementById('statTotal').textContent = mine.length;
-      document.getElementById('statActive').textContent = active.length;
-      document.getElementById('statPending').textContent = pending.length;
-      document.getElementById('statSold').textContent = sold.length;
-
-      const cont = document.getElementById('myListings');
-      const empty = document.getElementById('noMyListings');
-      if (mine.length === 0) {
-        cont.innerHTML = '';
-        empty.classList.remove('d-none');
-        return;
-      }
-      empty.classList.add('d-none');
-
-      cont.innerHTML = mine.map(item => `
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm rounded-3">
-            <div class="row g-0">
-              <div class="col-4">
-                <img src="${item.image_url || 'https://via.placeholder.com/150?text=No+Image'}" class="img-fluid rounded-start h-100" style="object-fit:cover;min-height:110px"
-                     onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
-              </div>
-              <div class="col-8">
-                <div class="card-body py-2 px-3">
-                  <h6 class="card-title text-truncate mb-1 small fw-semibold">${escapeHtml(item.title)}</h6>
-                  <div class="text-primary fw-bold small">KES ${Number(item.price).toLocaleString()}</div>
-                  <div class="mb-2">
-                    <span class="badge status-${item.status}">${item.status}</span>
-                    ${item.sold ? '<span class="badge bg-secondary ms-1">Sold</span>' : ''}
-                  </div>
-                  <div class="d-flex gap-1 flex-wrap">
-                    ${item.status === 'approved' && !item.sold ? `<button class="btn btn-outline-warning btn-sm" onclick="markSold('${item.id}')">Sold</button>` : ''}
-                    <button class="btn btn-outline-danger btn-sm" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    async function markSold(id) {
-      const { error } = await sb.from('items').update({ sold: true }).eq('id', id);
-      if (error) alert(error.message);
-      else await loadItems();
-    }
-
-    async function deleteItem(id) {
-      if (!confirm('Delete this listing?')) return;
-      const { error } = await sb.from('items').delete().eq('id', id);
-      if (error) alert(error.message);
-      else await loadItems();
-    }
-
-    // ============================================================
-    //  REPORTS
-    // ============================================================
-    function openReport(itemId) {
-      if (!currentUser) { alert('Please login to report'); showAuthModal('login'); return; }
-      document.getElementById('reportItemId').value = itemId;
-      document.getElementById('reportReason').value = '';
-      document.getElementById('reportDetails').value = '';
-      reportModal.show();
-    }
-
-    async function submitReport(e) {
-      e.preventDefault();
-      const itemId = document.getElementById('reportItemId').value;
-      const item = items.find(i => i.id === itemId);
-      if (!item) return;
-
-      const report = {
-        item_id: itemId,
-        item_title: item.title,
-        seller_id: item.seller_id,
-        seller_name: item.seller_name,
-        seller_email: item.seller_email,
-        reason: document.getElementById('reportReason').value,
-        details: document.getElementById('reportDetails').value.trim(),
-        reporter_id: currentUser.id,
-        reporter_name: profile.name,
-        status: 'open'
-      };
-      showLoading(true);
-      const { error } = await sb.from('reports').insert(report);
-      showLoading(false);
-      if (error) { alert(error.message); return; }
-      reportModal.hide();
-      alert('Report submitted. Our team will review it.');
-    }
-
-    // ============================================================
-    //  ADMIN
-    // ============================================================
-    function renderAdminOverview() {
-      document.getElementById('aStatUsers').textContent = users.length;
-      document.getElementById('aStatListings').textContent = items.length;
-      document.getElementById('aStatPending').textContent = items.filter(i => i.status === 'pending').length;
-      document.getElementById('aStatReports').textContent = reports.filter(r => r.status === 'open').length;
-    }
-
-    function renderAdminListings() {
-      const filter = document.getElementById('listingStatusFilter')?.value || '';
-      let list = [...items];
-      if (filter) list = list.filter(i => i.status === filter);
-
-      const body = document.getElementById('adminListingsBody');
-      if (list.length === 0) {
-        body.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No listings</td></tr>';
-        return;
-      }
-      body.innerHTML = list.map(item => `
-        <tr>
-          <td>
-            <div class="fw-semibold small">${escapeHtml(item.title)}</div>
-            <div class="text-muted" style="font-size:.75rem">${escapeHtml(item.category)} • ${escapeHtml(item.university)}</div>
-          </td>
-          <td class="small">${escapeHtml(item.seller_name)}<br><span class="text-muted">${escapeHtml(item.seller_email)}</span></td>
-          <td class="small">KES ${Number(item.price).toLocaleString()}</td>
-          <td><span class="badge status-${item.status}">${item.status}</span></td>
-          <td>
-            ${item.status === 'pending' ? `
-              <button class="btn btn-success btn-sm me-1" onclick="moderateItem('${item.id}','approved')">Approve</button>
-              <button class="btn btn-outline-danger btn-sm me-1" onclick="moderateItem('${item.id}','rejected')">Reject</button>
-            ` : ''}
-            <button class="btn btn-outline-secondary btn-sm" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    async function moderateItem(id, status) {
-      const { error } = await sb.from('items').update({ status }).eq('id', id);
-      if (error) alert(error.message);
-      else await loadItems();
-    }
-
-    function renderAdminReports() {
-      const open = reports.filter(r => r.status === 'open');
-      const list = document.getElementById('adminReportsList');
-      const empty = document.getElementById('noReports');
-      if (open.length === 0) {
-        list.innerHTML = '';
-        empty.classList.remove('d-none');
-        return;
-      }
-      empty.classList.add('d-none');
-      list.innerHTML = open.map(r => `
-        <div class="card report-card mb-3 shadow-sm">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-              <div>
-                <span class="badge bg-danger mb-1">${escapeHtml(r.reason)}</span>
-                <h6 class="mb-1">${escapeHtml(r.item_title)}</h6>
-                <p class="small text-muted mb-1">Seller: ${escapeHtml(r.seller_name)} (${escapeHtml(r.seller_email)})</p>
-                <p class="small mb-1">${escapeHtml(r.details) || 'No details'}</p>
-                <p class="small text-muted mb-0">By ${escapeHtml(r.reporter_name)} • ${new Date(r.created_at).toLocaleString()}</p>
-              </div>
-              <div class="d-flex flex-column gap-1">
-                <button class="btn btn-sm btn-outline-success" onclick="resolveReport('${r.id}','resolved')">Resolve</button>
-                <button class="btn btn-sm btn-outline-danger" onclick="banUser('${r.seller_id}')">Ban Seller</button>
-                <button class="btn btn-sm btn-outline-secondary" onclick="resolveReport('${r.id}','dismissed')">Dismiss</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    async function resolveReport(id, status) {
-      const { error } = await sb.from('reports').update({ status }).eq('id', id);
-      if (error) alert(error.message);
-      else await loadAdminData();
-    }
-
-    async function banUser(userId) {
-      if (!confirm('Ban this user?')) return;
-      const { error } = await sb.from('profiles').update({ status: 'banned' }).eq('id', userId);
-      if (error) alert(error.message);
-      else {
-        await sb.from('items').update({ status: 'rejected' }).eq('seller_id', userId).eq('status', 'pending');
-        await loadAdminData();
-        alert('User banned.');
-      }
-    }
-
-    function renderAdminUsers() {
-      const body = document.getElementById('adminUsersBody');
-      body.innerHTML = users.map(u => `
-        <tr>
-          <td>
-            <div class="fw-semibold small">${escapeHtml(u.name)}</div>
-            <div class="text-muted" style="font-size:.75rem">${escapeHtml(u.email)}</div>
-          </td>
-          <td class="small">${escapeHtml(u.university || '—')}</td>
-          <td>
-            <span class="badge ${u.role === 'admin' ? 'bg-danger' : u.role === 'moderator' ? 'bg-warning text-dark' : 'bg-secondary'}">
-              ${u.role}
-            </span>
-          </td>
-          <td><span class="badge ${u.status === 'banned' ? 'status-banned' : 'bg-success'}">${u.status}</span></td>
-          <td>
-            ${isAdmin() && u.id !== currentUser.id ? `
-              ${u.role !== 'admin' ? `<button class="btn btn-outline-primary btn-sm me-1" onclick="setRole('${u.id}','moderator')">Make Mod</button>` : ''}
-              ${u.role === 'moderator' ? `<button class="btn btn-outline-secondary btn-sm me-1" onclick="setRole('${u.id}','user')">Demote</button>` : ''}
-              ${u.status === 'active'
-                ? `<button class="btn btn-outline-danger btn-sm" onclick="banUser('${u.id}')">Ban</button>`
-                : `<button class="btn btn-outline-success btn-sm" onclick="unbanUser('${u.id}')">Unban</button>`}
-            ` : u.id === currentUser.id ? '<span class="text-muted small">You</span>' : ''}
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    async function setRole(userId, role) {
-      const { error } = await sb.from('profiles').update({ role }).eq('id', userId);
-      if (error) alert(error.message);
-      else { await loadAdminData(); alert('Role updated'); }
-    }
-    async function unbanUser(userId) {
-      const { error } = await sb.from('profiles').update({ status: 'active' }).eq('id', userId);
-      if (error) alert(error.message);
-      else await loadAdminData();
-    }
-
-    // ============================================================
-    //  UI
-    // ============================================================
-    function updateUI() {
-      const logged = !!currentUser && !!profile;
-      document.getElementById('loginBtn').classList.toggle('d-none', logged);
-      document.getElementById('registerBtn').classList.toggle('d-none', logged);
-      document.getElementById('logoutBtn').classList.toggle('d-none', !logged);
-      document.getElementById('postBtn').classList.toggle('d-none', !logged);
-      document.getElementById('nav-dashboard-item')?.classList.toggle('d-none', !logged);
-      document.getElementById('nav-profile-item')?.classList.toggle('d-none', !logged);
-      document.getElementById('nav-admin-item')?.classList.toggle('d-none', !isStaff());
-
-      const guestCta = document.getElementById('guestCta');
-      if (guestCta) guestCta.classList.toggle('d-none', logged);
-      const itemsGrid = document.getElementById('itemsGrid');
-      const filters = document.querySelector('#section-marketplace .card');
-      if (!logged) {
-        if (itemsGrid) itemsGrid.innerHTML = '';
-        if (filters) filters.classList.add('d-none');
-      } else {
-        if (filters) filters.classList.remove('d-none');
-      }
-
-      const g = document.getElementById('userGreeting');
-      if (logged) {
-        g.textContent = `Hi, ${profile.name.split(' ')[0]}`;
-        g.classList.remove('d-none');
-      } else g.classList.add('d-none');
-    }
-
-    function populateUniversities() {
-      const unis = [...new Set(items.filter(i => i.status === 'approved').map(i => i.university).filter(Boolean))].sort();
-      const sel = document.getElementById('filterUniversity');
-      const cur = sel.value;
-      sel.innerHTML = '<option value="">All</option>' + unis.map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
-      sel.value = cur;
-    }
-
-    function resetFilters() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('filterUniversity').value = '';
-      document.getElementById('filterCategory').value = '';
-      document.getElementById('filterPrice').value = '';
-      renderItems();
-    }
-
-    // Allow guests to open legal pages
-    const originalShowSection = showSection;
-    // showSection already handles login for protected pages; legal pages are open to all
-  </script>
-
-  <!-- ========== TERMS ========== -->
-  <div id="section-terms" class="section">
-    <div class="container py-5" style="max-width: 800px;">
-      <button class="btn btn-sm btn-outline-secondary mb-3" onclick="goHome()"><i class="fas fa-arrow-left me-1"></i> Back</button>
-      <h1 class="h3 fw-bold mb-2">Terms and Conditions</h1>
-      <p class="text-muted small mb-4">Last updated: 17 September 2026 · Bei Poa Campus Marketplace</p>
-
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-4 legal-content">
-          <p>Welcome to <strong>Bei Poa</strong>. By creating an account, browsing, listing items, or using any part of this platform, you agree to these Terms and Conditions. Please read them carefully.</p>
-
-          <h5 class="fw-bold mt-4">1. What Bei Poa is</h5>
-          <p>Bei Poa is an online marketplace that helps university students and graduates buy and sell second-hand items such as books, electronics, furniture, and other campus-related goods. We provide the platform only. We do not own the items listed and we are not a party to the deals between buyers and sellers.</p>
-
-          <h5 class="fw-bold mt-4">2. Who can use Bei Poa</h5>
-          <ul>
-            <li>You must be at least 18 years old, or have permission from a parent or guardian if you are younger.</li>
-            <li>You must provide accurate information when you register.</li>
-            <li>You are responsible for keeping your login details safe.</li>
-            <li>One person should not create many fake accounts to abuse the system.</li>
-          </ul>
-
-          <h5 class="fw-bold mt-4">3. Your account</h5>
-          <p>You are responsible for everything that happens under your account. If you think someone else is using your account, tell us as soon as possible. We may suspend or close accounts that break these rules or that are used for fraud, spam, or harmful behaviour.</p>
-
-          <h5 class="fw-bold mt-4">4. Listing and selling</h5>
-          <ul>
-            <li>You may only list items you have the right to sell.</li>
-            <li>Descriptions and photos must be honest. Do not hide defects on purpose.</li>
-            <li>Prices must be clear. Do not use the platform for scams, fake products, or illegal goods.</li>
-            <li>New listings may be reviewed by our team before they appear publicly. We can approve, reject, or remove any listing at any time.</li>
-            <li>You are responsible for arranging payment and delivery with the buyer. Bei Poa does not hold money or guarantee payment.</li>
-          </ul>
-
-          <h5 class="fw-bold mt-4">5. Buying</h5>
-          <ul>
-            <li>Check the item description, condition, and seller details carefully before you contact a seller.</li>
-            <li>Meet in safe public places when possible. Prefer campus or well-known locations.</li>
-            <li>Bei Poa does not guarantee that an item is as described or that a seller will complete the deal.</li>
-            <li>Any dispute between buyer and seller should first be resolved between them. You may also report the listing or user through the app.</li>
-          </ul>
-
-          <h5 class="fw-bold mt-4">6. Prohibited behaviour</h5>
-          <p>You must not:</p>
-          <ul>
-            <li>Scam, defraud, or mislead other users</li>
-            <li>List stolen, counterfeit, or illegal items</li>
-            <li>Harass, threaten, or abuse other users</li>
-            <li>Post offensive, discriminatory, or sexual content involving minors</li>
-            <li>Use the platform for spam or advertising unrelated products without permission</li>
-            <li>Try to hack, overload, or disrupt the service</li>
-            <li>Collect other users’ personal data for purposes outside normal buying and selling</li>
-          </ul>
-          <p>Breaking these rules may lead to removal of content, account ban, and, where required, reporting to the authorities.</p>
-
-          <h5 class="fw-bold mt-4">7. Reports and moderation</h5>
-          <p>Users can report listings or behaviour they believe is harmful. Our moderators and admins may review reports, remove content, warn users, or ban accounts. We try to act fairly, but we are not obliged to take any particular action or to explain every decision in detail.</p>
-
-          <h5 class="fw-bold mt-4">8. No guarantee and limited liability</h5>
-          <p>Bei Poa is provided “as is”. We do our best to keep the platform working and safe, but we cannot promise that it will always be available, error-free, or free from bad actors.</p>
-          <p>To the fullest extent allowed by law:</p>
-          <ul>
-            <li>We are not responsible for the quality, safety, or legality of items listed by users.</li>
-            <li>We are not responsible for failed payments, non-delivery, or disputes between users.</li>
-            <li>We are not liable for any loss of money, data, or opportunity arising from your use of the platform, except where the law says we cannot limit that liability (for example, death or personal injury caused by our negligence, or fraud by us).</li>
-          </ul>
-
-          <h5 class="fw-bold mt-4">9. Intellectual property</h5>
-          <p>The Bei Poa name, logo, and design belong to us. You may not copy or use them without permission. Content you post (such as listing text and photos) remains yours, but you give us a licence to display it on the platform so that the service can work.</p>
-
-          <h5 class="fw-bold mt-4">10. Changes to the service or these terms</h5>
-          <p>We may update these Terms from time to time. When we do, we will change the “Last updated” date. Continued use of Bei Poa after changes means you accept the new terms. If you do not agree, you should stop using the platform and can request account deletion.</p>
-
-          <h5 class="fw-bold mt-4">11. Governing law</h5>
-          <p>These Terms are governed by the laws of Kenya. Any serious dispute that cannot be resolved amicably may be handled by the courts of Kenya.</p>
-
-          <h5 class="fw-bold mt-4">12. Contact</h5>
-          <p>For questions about these Terms, contact us through the support channels provided on the platform or via the email linked to the Bei Poa project administrators.</p>
-
-          <p class="mt-4 mb-0 small text-muted">By using Bei Poa you confirm that you have read and understood these Terms and Conditions.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== PRIVACY ========== -->
-  <div id="section-privacy" class="section">
-    <div class="container py-5" style="max-width: 800px;">
-      <button class="btn btn-sm btn-outline-secondary mb-3" onclick="goHome()"><i class="fas fa-arrow-left me-1"></i> Back</button>
-      <h1 class="h3 fw-bold mb-2">Privacy Policy</h1>
-      <p class="text-muted small mb-4">Last updated: 17 September 2026 · Bei Poa Campus Marketplace</p>
-
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-4 legal-content">
-          <p>This Privacy Policy explains what personal information Bei Poa collects, how we use it, and what choices you have. We aim to be clear and honest so you know where you stand.</p>
-
-          <h5 class="fw-bold mt-4">1. Who we are</h5>
-          <p>Bei Poa is a campus marketplace platform. For data protection purposes, we are the organisation responsible for deciding how your personal data is used on this service. Technical hosting and database services are provided with the help of third parties such as Supabase and our website host (for example Render).</p>
-
-          <h5 class="fw-bold mt-4">2. Information we collect</h5>
-          <p>We may collect:</p>
-          <ul>
-            <li><strong>Account information</strong> – name, email address, password (stored securely), university, phone/WhatsApp number, and optional bio.</li>
-            <li><strong>Listing information</strong> – titles, descriptions, prices, photos (via URLs you provide), condition, category, and contact details you choose to show.</li>
-            <li><strong>Usage information</strong> – actions such as posting, reporting, logging in, and basic technical data (for example browser type) needed to run and secure the service.</li>
-            <li><strong>Reports</strong> – when you or someone else submits a report about a listing or user, we store the reason and details you provide.</li>
-            <li><strong>Login providers</strong> – if you sign in with Google, we receive basic profile information (such as name and email) from Google according to your Google settings.</li>
-          </ul>
-          <p>We do not intentionally collect payment card numbers. Payments happen directly between users outside Bei Poa.</p>
-
-          <h5 class="fw-bold mt-4">3. How we use your information</h5>
-          <ul>
-            <li>To create and manage your account</li>
-            <li>To show your listings to other users and allow contact for buying/selling</li>
-            <li>To moderate content, review reports, and keep the community safer</li>
-            <li>To improve the platform and fix problems</li>
-            <li>To communicate important service messages (for example security or policy updates)</li>
-            <li>To comply with the law when we are required to</li>
-          </ul>
-          <p>We do not sell your personal information to advertisers.</p>
-
-          <h5 class="fw-bold mt-4">4. Legal bases (where applicable)</h5>
-          <p>We process your data because:</p>
-          <ul>
-            <li>You asked us to provide the service (contract / terms you accept)</li>
-            <li>We have a legitimate interest in running a safe marketplace and preventing fraud</li>
-            <li>We must meet legal obligations when they apply</li>
-            <li>You gave consent, where consent is needed (for example optional marketing, if we ever add it)</li>
-          </ul>
-
-          <h5 class="fw-bold mt-4">5. Who we share data with</h5>
-          <ul>
-            <li><strong>Other users</strong> – when you list an item, other logged-in users can see the listing details and the contact information you provide for that listing.</li>
-            <li><strong>Service providers</strong> – such as Supabase (database and authentication) and our website host. They process data only to provide their services to us.</li>
-            <li><strong>Authorities</strong> – if the law requires us to disclose information, or if we need to protect users from serious harm or crime.</li>
-          </ul>
-          <p>Moderators and admins on Bei Poa can access user and listing data needed to do their job (for example handling reports and bans).</p>
-
-          <h5 class="fw-bold mt-4">6. How long we keep data</h5>
-          <p>We keep your account and listing data while your account is active and as long as needed to operate the service. If your account is banned or deleted, we may keep limited records (for example to prevent repeat abuse or to meet legal requirements) for a reasonable period.</p>
-
-          <h5 class="fw-bold mt-4">7. Security</h5>
-          <p>We use industry-standard measures such as encrypted connections (HTTPS) and secure authentication. No system is 100% safe. Please use a strong password and do not share your login details. Meet buyers/sellers carefully and never send money to strangers without proper checks.</p>
-
-          <h5 class="fw-bold mt-4">8. Your rights and choices</h5>
-          <p>Depending on applicable law, you may be able to:</p>
-          <ul>
-            <li>Access the personal data we hold about you</li>
-            <li>Correct inaccurate information (you can edit much of it in your Profile)</li>
-            <li>Request deletion of your account</li>
-            <li>Object to or restrict certain processing</li>
-            <li>Withdraw consent where processing is based on consent</li>
-          </ul>
-          <p>To exercise these rights, contact us through the platform support channels. We may need to verify your identity before acting on a request.</p>
-
-          <h5 class="fw-bold mt-4">9. Children</h5>
-          <p>Bei Poa is aimed at university students and adults. It is not directed at children under 13. If you believe a child has given us personal data, contact us so we can take appropriate steps.</p>
-
-          <h5 class="fw-bold mt-4">10. International processing</h5>
-          <p>Our service providers may process data in data centres in different countries. Where data leaves your country, we rely on appropriate safeguards offered by those providers and applicable law.</p>
-
-          <h5 class="fw-bold mt-4">11. Changes to this policy</h5>
-          <p>We may update this Privacy Policy from time to time. The “Last updated” date will change when we do. Continued use of Bei Poa after an update means you accept the revised policy.</p>
-
-          <h5 class="fw-bold mt-4">12. Contact</h5>
-          <p>For privacy questions or requests, contact the Bei Poa administrators through the channels provided on the platform.</p>
-
-          <p class="mt-4 mb-0 small text-muted">By using Bei Poa you acknowledge that you have read this Privacy Policy.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer class="border-top bg-white py-4 mt-auto">
-    <div class="container">
-      <div class="row align-items-center gy-2">
-        <div class="col-md-6 small text-muted">
-          © 2026 Bei Poa · Campus marketplace for students
-        </div>
-        <div class="col-md-6 text-md-end small">
-          <a href="#" class="text-decoration-none me-3" onclick="showSection('terms'); return false;">Terms &amp; Conditions</a>
-          <a href="#" class="text-decoration-none" onclick="showSection('privacy'); return false;">Privacy Policy</a>
-        </div>
-      </div>
-    </div>
-  </footer>
+      </div></div>
+    </div></div></div>`).join('');
+}
+
+async function markSold(id){const {error}=await sb.from('items').update({sold:true}).eq('id',id);if(error)alert(error.message);else await loadItems()}
+async function deleteItem(id){if(!confirm('Delete?'))return;const {error}=await sb.from('items').delete().eq('id',id);if(error)alert(error.message);else await loadItems()}
+
+function openReport(id){if(!currentUser){showAuth('login');return}document.getElementById('reportItemId').value=id;reportModal.show()}
+async function submitReport(e){
+  e.preventDefault();
+  const itemId=document.getElementById('reportItemId').value;
+  const item=items.find(i=>i.id===itemId);if(!item)return;
+  showLoading(true);
+  const {error}=await sb.from('reports').insert({
+    item_id:itemId,item_title:item.title,seller_id:item.seller_id,seller_name:item.seller_name,seller_email:item.seller_email,
+    reason:document.getElementById('reportReason').value,details:document.getElementById('reportDetails').value.trim(),
+    reporter_id:currentUser.id,reporter_name:profile.name,status:'open'
+  });
+  showLoading(false);
+  if(error){alert(error.message);return}
+  reportModal.hide();alert('Report submitted. Thank you!');
+}
+
+function renderAdminOverview(){
+  document.getElementById('aUsers').textContent=users.length;
+  document.getElementById('aItems').textContent=items.length;
+  document.getElementById('aPend').textContent=items.filter(i=>i.status==='pending').length;
+  document.getElementById('aRep').textContent=reports.filter(r=>r.status==='open').length;
+}
+function renderAdminListings(){
+  const filter=document.getElementById('listingStatusFilter')?.value||'';
+  let list=[...items];if(filter)list=list.filter(i=>i.status===filter);
+  const body=document.getElementById('adminListingsBody');
+  if(!list.length){body.innerHTML='<tr><td colspan="5" class="text-center text-muted py-4">No listings</td></tr>';return}
+  body.innerHTML=list.map(item=>`<tr>
+    <td><div class="fw-semibold small">${esc(item.title)}</div><div class="text-muted" style="font-size:.72rem">${esc(item.category)} · ${esc(item.university)}</div></td>
+    <td class="small">${esc(item.seller_name)}</td>
+    <td class="small">KSh ${Number(item.price).toLocaleString()}</td>
+    <td><span class="badge status-${item.status}">${item.status}</span></td>
+    <td>${item.status==='pending'?`<button class="btn btn-success btn-sm me-1" onclick="moderate('${item.id}','approved')">Approve</button>
+      <button class="btn btn-outline-danger btn-sm me-1" onclick="moderate('${item.id}','rejected')">Reject</button>`:''}
+      <button class="btn btn-outline-secondary btn-sm" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button></td>
+  </tr>`).join('');
+}
+async function moderate(id,status){const {error}=await sb.from('items').update({status}).eq('id',id);if(error)alert(error.message);else await loadItems()}
+async function approveAll(){
+  const pending=items.filter(i=>i.status==='pending');
+  if(!pending.length){alert('None pending');return}
+  if(!confirm(`Approve ${pending.length}?`))return;
+  showLoading(true);for(const i of pending)await sb.from('items').update({status:'approved'}).eq('id',i.id);
+  showLoading(false);await loadItems();
+}
+function renderAdminReports(){
+  const open=reports.filter(r=>r.status==='open');
+  const list=document.getElementById('adminReportsList'),empty=document.getElementById('noReports');
+  if(!open.length){list.innerHTML='';empty.classList.remove('d-none');return}
+  empty.classList.add('d-none');
+  list.innerHTML=open.map(r=>`<div class="card border-0 shadow-sm mb-3 rounded-3" style="border-left:4px solid #ef4444!important">
+    <div class="card-body"><span class="badge bg-danger mb-1">${esc(r.reason)}</span>
+    <h6 class="fw-bold">${esc(r.item_title)}</h6>
+    <p class="small text-muted mb-1">Seller: ${esc(r.seller_name)}</p>
+    <p class="small">${esc(r.details)||'No details'}</p>
+    <div class="d-flex gap-1 flex-wrap">
+      <button class="btn btn-sm btn-outline-success" onclick="resolveReport('${r.id}','resolved')">Resolve</button>
+      <button class="btn btn-sm btn-outline-danger" onclick="banUser('${r.seller_id}')">Ban seller</button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="resolveReport('${r.id}','dismissed')">Dismiss</button>
+    </div></div></div>`).join('');
+}
+async function resolveReport(id,status){const {error}=await sb.from('reports').update({status}).eq('id',id);if(error)alert(error.message);else await loadAdminData()}
+async function banUser(userId){
+  if(!confirm('Ban user?'))return;
+  await sb.from('profiles').update({status:'banned'}).eq('id',userId);
+  await sb.from('items').update({status:'rejected'}).eq('seller_id',userId).eq('status','pending');
+  await loadAdminData();alert('Banned.');
+}
+function renderAdminUsers(){
+  document.getElementById('adminUsersBody').innerHTML=users.map(u=>`<tr>
+    <td><div class="fw-semibold small">${esc(u.name)}</div><div class="text-muted" style="font-size:.72rem">${esc(u.email)}</div></td>
+    <td class="small">${esc(u.university||'—')}</td>
+    <td><span class="badge ${u.role==='admin'?'bg-danger':u.role==='moderator'?'bg-warning text-dark':'bg-secondary'}">${u.role}</span></td>
+    <td><span class="badge ${u.status==='banned'?'status-banned':'bg-success'}">${u.status}</span></td>
+    <td>${isAdmin()&&u.id!==currentUser.id?`
+      ${u.role!=='admin'?`<button class="btn btn-outline-primary btn-sm me-1" onclick="setRole('${u.id}','moderator')">Make mod</button>`:''}
+      ${u.role==='moderator'?`<button class="btn btn-outline-secondary btn-sm me-1" onclick="setRole('${u.id}','user')">Demote</button>`:''}
+      ${u.status==='active'?`<button class="btn btn-outline-danger btn-sm" onclick="banUser('${u.id}')">Ban</button>`:`<button class="btn btn-outline-success btn-sm" onclick="unban('${u.id}')">Unban</button>`}
+    `:(u.id===currentUser.id?'<span class="text-muted small">You</span>':'')}</td>
+  </tr>`).join('');
+}
+async function setRole(id,role){const {error}=await sb.from('profiles').update({role}).eq('id',id);if(error)alert(error.message);else{await loadAdminData();alert('Updated')}}
+async function unban(id){await sb.from('profiles').update({status:'active'}).eq('id',id);await loadAdminData()}
+
+function updateUI(){
+  const logged=!!currentUser&&!!profile;
+  document.getElementById('btnLogin').classList.toggle('d-none',logged);
+  document.getElementById('btnReg').classList.toggle('d-none',logged);
+  document.getElementById('btnOut').classList.toggle('d-none',!logged);
+  document.getElementById('btnSell').classList.toggle('d-none',!logged);
+  ['n-market','n-cats','n-dash','n-msg'].forEach(id=>document.getElementById(id)?.classList.toggle('d-none',!logged));
+  document.getElementById('n-admin')?.classList.toggle('d-none',!isStaff());
+  const g=document.getElementById('greet');
+  if(logged){g.textContent=profile.name.split(' ')[0];g.classList.remove('d-none')}else g.classList.add('d-none');
+}
+function populateUniversities(){
+  const unis=[...new Set(items.filter(i=>i.status==='approved').map(i=>i.university).filter(Boolean))].sort();
+  const sel=document.getElementById('filterUniversity');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">All</option>'+unis.map(u=>`<option value="${esc(u)}">${esc(u)}</option>`).join('');
+  sel.value=cur;
+}
+function resetFilters(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('filterUniversity').value='';
+  document.getElementById('filterCategory').value='';
+  document.getElementById('filterPrice').value='';
+  renderItems();
+}
+</script>
 </body>
 </html>
