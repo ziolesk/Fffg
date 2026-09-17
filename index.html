@@ -59,10 +59,59 @@
     .stat-card {
       border: none; border-radius: 1rem;
       box-shadow: 0 4px 12px rgba(0,0,0,.05); background: #fff;
+      height: 100%;
     }
     .stat-card .icon {
       width: 44px; height: 44px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    /* CSS Grid dashboard layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1.25rem;
+    }
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      grid-column: 1 / -1;
+    }
+    .dashboard-main {
+      grid-column: 1 / -1;
+    }
+    .dashboard-side {
+      grid-column: 1 / -1;
+    }
+    @media (min-width: 992px) {
+      .dashboard-main {
+        grid-column: 1 / 9;
+      }
+      .dashboard-side {
+        grid-column: 9 / 13;
+      }
+    }
+    @media (max-width: 991px) {
+      .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 575px) {
+      .dashboard-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+    .quick-action-card {
+      border: none;
+      border-radius: 1rem;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,.05);
+      transition: transform .2s, box-shadow .2s;
+      cursor: pointer;
+    }
+    .quick-action-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(13,148,136,.12);
     }
     .profile-avatar {
       width: 80px; height: 80px; border-radius: 50%;
@@ -154,6 +203,11 @@
       <div class="container">
         <h1 class="display-6 fw-bold mb-2">Bei Poa</h1>
         <p class="mb-0 opacity-90">Graduates sell • New students buy — Fair prices, safe deals</p>
+        <div id="guestCta" class="mt-3 d-none">
+          <p class="mb-2">Please login or register to browse the marketplace</p>
+          <button class="btn btn-light btn-sm me-2" onclick="showAuthModal('login')">Login</button>
+          <button class="btn btn-outline-light btn-sm" onclick="showAuthModal('register')">Register</button>
+        </div>
       </div>
     </header>
 
@@ -204,7 +258,7 @@
     </main>
   </div>
 
-  <!-- USER DASHBOARD -->
+  <!-- USER DASHBOARD (CSS Grid layout) -->
   <div id="section-dashboard" class="section">
     <div class="container py-4">
       <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -216,32 +270,28 @@
           <i class="fas fa-plus me-1"></i> New Listing
         </button>
       </div>
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
+
+      <div class="dashboard-grid">
+        <!-- Stats row (CSS Grid) -->
+        <div class="dashboard-stats">
           <div class="card stat-card">
             <div class="card-body d-flex align-items-center gap-3">
               <div class="icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-list"></i></div>
               <div><div class="text-muted small">Total</div><div class="fs-4 fw-bold" id="statTotal">0</div></div>
             </div>
           </div>
-        </div>
-        <div class="col-6 col-md-3">
           <div class="card stat-card">
             <div class="card-body d-flex align-items-center gap-3">
               <div class="icon bg-success bg-opacity-10 text-success"><i class="fas fa-check-circle"></i></div>
               <div><div class="text-muted small">Active</div><div class="fs-4 fw-bold" id="statActive">0</div></div>
             </div>
           </div>
-        </div>
-        <div class="col-6 col-md-3">
           <div class="card stat-card">
             <div class="card-body d-flex align-items-center gap-3">
               <div class="icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-clock"></i></div>
               <div><div class="text-muted small">Pending</div><div class="fs-4 fw-bold" id="statPending">0</div></div>
             </div>
           </div>
-        </div>
-        <div class="col-6 col-md-3">
           <div class="card stat-card">
             <div class="card-body d-flex align-items-center gap-3">
               <div class="icon bg-secondary bg-opacity-10 text-secondary"><i class="fas fa-tag"></i></div>
@@ -249,15 +299,51 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-header bg-white border-0 pt-3 pb-0"><h5 class="mb-0 fw-semibold">My Listings</h5></div>
-        <div class="card-body">
-          <div id="myListings" class="row g-3"></div>
-          <div id="noMyListings" class="empty-state d-none">
-            <i class="fas fa-clipboard-list"></i>
-            <p class="mb-2">No listings yet</p>
-            <button class="btn btn-primary btn-sm" onclick="showPostModal()">Post first item</button>
+
+        <!-- Main listings -->
+        <div class="dashboard-main">
+          <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-3 pb-0">
+              <h5 class="mb-0 fw-semibold">My Listings</h5>
+            </div>
+            <div class="card-body">
+              <div id="myListings" class="row g-3"></div>
+              <div id="noMyListings" class="empty-state d-none">
+                <i class="fas fa-clipboard-list"></i>
+                <p class="mb-2">No listings yet</p>
+                <button class="btn btn-primary btn-sm" onclick="showPostModal()">Post first item</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side quick actions -->
+        <div class="dashboard-side">
+          <div class="card border-0 shadow-sm rounded-4 mb-3">
+            <div class="card-body">
+              <h6 class="fw-semibold mb-3">Quick Actions</h6>
+              <div class="d-grid gap-2">
+                <button class="btn btn-primary btn-sm text-start" onclick="showPostModal()">
+                  <i class="fas fa-plus me-2"></i> Post new item
+                </button>
+                <button class="btn btn-outline-secondary btn-sm text-start" onclick="showSection('marketplace')">
+                  <i class="fas fa-store me-2"></i> Browse marketplace
+                </button>
+                <button class="btn btn-outline-secondary btn-sm text-start" onclick="showSection('profile')">
+                  <i class="fas fa-user me-2"></i> Edit profile
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body">
+              <h6 class="fw-semibold mb-2">Tips</h6>
+              <ul class="small text-muted mb-0 ps-3">
+                <li class="mb-1">Clear photos sell faster</li>
+                <li class="mb-1">Use a real WhatsApp number</li>
+                <li>Pending items need admin approval</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -440,12 +526,7 @@
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="Google">
               Continue with Google
             </button>
-            <button type="button" class="btn btn-outline-success d-flex align-items-center justify-content-center gap-2" onclick="showPhoneLogin()">
-              <i class="fas fa-phone"></i>
-              Continue with Phone
-            </button>
           </div>
-
           <div class="text-center text-muted small mb-3">— or use email —</div>
 
           <form id="authForm" onsubmit="handleAuth(event)">
@@ -469,24 +550,13 @@
               <span id="authSubmitText">Login</span>
             </button>
           </form>
-
-          <!-- Phone Login Form (hidden by default) -->
-          <div id="phoneLoginSection" class="d-none">
-            <div class="mb-3">
-              <label class="form-label small fw-semibold">Phone Number</label>
-              <input id="phoneNumber" type="tel" class="form-control" placeholder="+2547XXXXXXXX">
-            </div>
-            <div class="mb-3 d-none" id="otpField">
-              <label class="form-label small fw-semibold">Enter OTP Code</label>
-              <input id="otpCode" type="text" class="form-control" placeholder="123456" maxlength="6">
-            </div>
-            <button type="button" id="phoneSubmitBtn" class="btn btn-success w-100 py-2" onclick="handlePhoneAuth()">
-              Send OTP
-            </button>
-            <button type="button" class="btn btn-link btn-sm w-100 mt-2" onclick="hidePhoneLogin()">← Back to Email</button>
-          </div>
-
-          <div class="text-center mt-3 small text-muted" id="authSwitchArea">
+          <p class="small text-muted text-center mt-3 mb-1">
+            By continuing you agree to our
+            <a href="#" onclick="authModal.hide(); showSection('terms'); return false;">Terms</a>
+            and
+            <a href="#" onclick="authModal.hide(); showSection('privacy'); return false;">Privacy Policy</a>.
+          </p>
+          <div class="text-center mt-2 small text-muted">
             <span id="authSwitchText">Don't have an account?</span>
             <a href="#" id="authSwitchLink" onclick="toggleAuthMode(event)" class="text-primary fw-semibold">Register</a>
           </div>
@@ -736,9 +806,27 @@
     // ============================================================
     //  NAVIGATION
     // ============================================================
+    function goHome() {
+      if (currentUser && profile) showSection('marketplace');
+      else showSection('marketplace'); // still marketplace with guest CTA
+    }
+
     function showSection(name) {
+      // Legal pages are always allowed
+      const publicPages = ['terms', 'privacy'];
+      if (!currentUser && !publicPages.includes(name)) {
+        if (name === 'dashboard' || name === 'profile' || name === 'admin' || name === 'marketplace') {
+          // marketplace shows guest CTA; other protected pages need login
+          if (name !== 'marketplace') {
+            showAuthModal('login');
+            return;
+          }
+        }
+      }
+
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById('section-' + name).classList.add('active');
+      const el = document.getElementById('section-' + name);
+      if (el) el.classList.add('active');
       document.querySelectorAll('.navbar-nav .nav-link').forEach(l => l.classList.remove('active'));
       const nl = document.getElementById('nav-' + name);
       if (nl) nl.classList.add('active');
@@ -750,6 +838,9 @@
         loadAdminData();
       }
       if (name === 'marketplace') renderItems();
+
+      // Scroll to top for legal pages
+      if (publicPages.includes(name)) window.scrollTo(0, 0);
 
       const col = document.getElementById('navMenu');
       if (col.classList.contains('show')) bootstrap.Collapse.getInstance(col)?.hide();
@@ -868,81 +959,6 @@
       } catch (err) {
         showLoading(false);
         alert(err.message || 'Google login failed. Make sure Google provider is enabled in Supabase.');
-      }
-    }
-
-    function showPhoneLogin() {
-      document.getElementById('authForm').classList.add('d-none');
-      document.getElementById('authSwitchArea').classList.add('d-none');
-      document.getElementById('phoneLoginSection').classList.remove('d-none');
-      document.querySelector('.d-grid.gap-2.mb-3')?.classList.add('d-none');
-      document.querySelector('.text-center.text-muted.small.mb-3')?.classList.add('d-none');
-    }
-
-    function hidePhoneLogin() {
-      document.getElementById('authForm').classList.remove('d-none');
-      document.getElementById('authSwitchArea').classList.remove('d-none');
-      document.getElementById('phoneLoginSection').classList.add('d-none');
-      document.getElementById('otpField').classList.add('d-none');
-      document.getElementById('phoneSubmitBtn').textContent = 'Send OTP';
-      document.getElementById('phoneSubmitBtn').onclick = handlePhoneAuth;
-      document.querySelector('.d-grid.gap-2.mb-3')?.classList.remove('d-none');
-      document.querySelector('.text-center.text-muted.small.mb-3')?.classList.remove('d-none');
-    }
-
-    let phoneStep = 'send'; // 'send' or 'verify'
-
-    async function handlePhoneAuth() {
-      const phone = document.getElementById('phoneNumber').value.trim();
-      if (!phone) {
-        alert('Please enter your phone number with country code (e.g. +2547...)');
-        return;
-      }
-
-      showLoading(true);
-      try {
-        if (phoneStep === 'send') {
-          const { error } = await sb.auth.signInWithOtp({ phone });
-          if (error) throw error;
-          document.getElementById('otpField').classList.remove('d-none');
-          document.getElementById('phoneSubmitBtn').textContent = 'Verify OTP';
-          phoneStep = 'verify';
-          alert('OTP sent! Check your SMS.');
-        } else {
-          const token = document.getElementById('otpCode').value.trim();
-          if (!token) {
-            alert('Please enter the OTP code');
-            return;
-          }
-          const { data, error } = await sb.auth.verifyOtp({
-            phone,
-            token,
-            type: 'sms'
-          });
-          if (error) throw error;
-          currentUser = data.user;
-          await loadProfile();
-          authModal.hide();
-          updateUI();
-          showSection('dashboard');
-          alert('Welcome to Bei Poa!');
-          phoneStep = 'send';
-        }
-      } catch (err) {
-        alert(err.message || 'Phone login failed. Make sure Phone provider is enabled and SMS is configured.');
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    // Handle redirect back from Google OAuth
-    async function handleAuthRedirect() {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        currentUser = session.user;
-        await loadProfile();
-        updateUI();
-        // If profile is incomplete, we could prompt for university etc.
       }
     }
 
@@ -1325,9 +1341,20 @@
       document.getElementById('registerBtn').classList.toggle('d-none', logged);
       document.getElementById('logoutBtn').classList.toggle('d-none', !logged);
       document.getElementById('postBtn').classList.toggle('d-none', !logged);
-      document.getElementById('nav-dashboard-item').classList.toggle('d-none', !logged);
-      document.getElementById('nav-profile-item').classList.toggle('d-none', !logged);
-      document.getElementById('nav-admin-item').classList.toggle('d-none', !isStaff());
+      document.getElementById('nav-dashboard-item')?.classList.toggle('d-none', !logged);
+      document.getElementById('nav-profile-item')?.classList.toggle('d-none', !logged);
+      document.getElementById('nav-admin-item')?.classList.toggle('d-none', !isStaff());
+
+      const guestCta = document.getElementById('guestCta');
+      if (guestCta) guestCta.classList.toggle('d-none', logged);
+      const itemsGrid = document.getElementById('itemsGrid');
+      const filters = document.querySelector('#section-marketplace .card');
+      if (!logged) {
+        if (itemsGrid) itemsGrid.innerHTML = '';
+        if (filters) filters.classList.add('d-none');
+      } else {
+        if (filters) filters.classList.remove('d-none');
+      }
 
       const g = document.getElementById('userGreeting');
       if (logged) {
@@ -1351,6 +1378,198 @@
       document.getElementById('filterPrice').value = '';
       renderItems();
     }
+
+    // Allow guests to open legal pages
+    const originalShowSection = showSection;
+    // showSection already handles login for protected pages; legal pages are open to all
   </script>
+
+  <!-- ========== TERMS ========== -->
+  <div id="section-terms" class="section">
+    <div class="container py-5" style="max-width: 800px;">
+      <button class="btn btn-sm btn-outline-secondary mb-3" onclick="goHome()"><i class="fas fa-arrow-left me-1"></i> Back</button>
+      <h1 class="h3 fw-bold mb-2">Terms and Conditions</h1>
+      <p class="text-muted small mb-4">Last updated: 17 September 2026 · Bei Poa Campus Marketplace</p>
+
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <p>Welcome to <strong>Bei Poa</strong>. By creating an account, browsing, listing items, or using any part of this platform, you agree to these Terms and Conditions. Please read them carefully.</p>
+
+          <h5 class="fw-bold mt-4">1. What Bei Poa is</h5>
+          <p>Bei Poa is an online marketplace that helps university students and graduates buy and sell second-hand items such as books, electronics, furniture, and other campus-related goods. We provide the platform only. We do not own the items listed and we are not a party to the deals between buyers and sellers.</p>
+
+          <h5 class="fw-bold mt-4">2. Who can use Bei Poa</h5>
+          <ul>
+            <li>You must be at least 18 years old, or have permission from a parent or guardian if you are younger.</li>
+            <li>You must provide accurate information when you register.</li>
+            <li>You are responsible for keeping your login details safe.</li>
+            <li>One person should not create many fake accounts to abuse the system.</li>
+          </ul>
+
+          <h5 class="fw-bold mt-4">3. Your account</h5>
+          <p>You are responsible for everything that happens under your account. If you think someone else is using your account, tell us as soon as possible. We may suspend or close accounts that break these rules or that are used for fraud, spam, or harmful behaviour.</p>
+
+          <h5 class="fw-bold mt-4">4. Listing and selling</h5>
+          <ul>
+            <li>You may only list items you have the right to sell.</li>
+            <li>Descriptions and photos must be honest. Do not hide defects on purpose.</li>
+            <li>Prices must be clear. Do not use the platform for scams, fake products, or illegal goods.</li>
+            <li>New listings may be reviewed by our team before they appear publicly. We can approve, reject, or remove any listing at any time.</li>
+            <li>You are responsible for arranging payment and delivery with the buyer. Bei Poa does not hold money or guarantee payment.</li>
+          </ul>
+
+          <h5 class="fw-bold mt-4">5. Buying</h5>
+          <ul>
+            <li>Check the item description, condition, and seller details carefully before you contact a seller.</li>
+            <li>Meet in safe public places when possible. Prefer campus or well-known locations.</li>
+            <li>Bei Poa does not guarantee that an item is as described or that a seller will complete the deal.</li>
+            <li>Any dispute between buyer and seller should first be resolved between them. You may also report the listing or user through the app.</li>
+          </ul>
+
+          <h5 class="fw-bold mt-4">6. Prohibited behaviour</h5>
+          <p>You must not:</p>
+          <ul>
+            <li>Scam, defraud, or mislead other users</li>
+            <li>List stolen, counterfeit, or illegal items</li>
+            <li>Harass, threaten, or abuse other users</li>
+            <li>Post offensive, discriminatory, or sexual content involving minors</li>
+            <li>Use the platform for spam or advertising unrelated products without permission</li>
+            <li>Try to hack, overload, or disrupt the service</li>
+            <li>Collect other users’ personal data for purposes outside normal buying and selling</li>
+          </ul>
+          <p>Breaking these rules may lead to removal of content, account ban, and, where required, reporting to the authorities.</p>
+
+          <h5 class="fw-bold mt-4">7. Reports and moderation</h5>
+          <p>Users can report listings or behaviour they believe is harmful. Our moderators and admins may review reports, remove content, warn users, or ban accounts. We try to act fairly, but we are not obliged to take any particular action or to explain every decision in detail.</p>
+
+          <h5 class="fw-bold mt-4">8. No guarantee and limited liability</h5>
+          <p>Bei Poa is provided “as is”. We do our best to keep the platform working and safe, but we cannot promise that it will always be available, error-free, or free from bad actors.</p>
+          <p>To the fullest extent allowed by law:</p>
+          <ul>
+            <li>We are not responsible for the quality, safety, or legality of items listed by users.</li>
+            <li>We are not responsible for failed payments, non-delivery, or disputes between users.</li>
+            <li>We are not liable for any loss of money, data, or opportunity arising from your use of the platform, except where the law says we cannot limit that liability (for example, death or personal injury caused by our negligence, or fraud by us).</li>
+          </ul>
+
+          <h5 class="fw-bold mt-4">9. Intellectual property</h5>
+          <p>The Bei Poa name, logo, and design belong to us. You may not copy or use them without permission. Content you post (such as listing text and photos) remains yours, but you give us a licence to display it on the platform so that the service can work.</p>
+
+          <h5 class="fw-bold mt-4">10. Changes to the service or these terms</h5>
+          <p>We may update these Terms from time to time. When we do, we will change the “Last updated” date. Continued use of Bei Poa after changes means you accept the new terms. If you do not agree, you should stop using the platform and can request account deletion.</p>
+
+          <h5 class="fw-bold mt-4">11. Governing law</h5>
+          <p>These Terms are governed by the laws of Kenya. Any serious dispute that cannot be resolved amicably may be handled by the courts of Kenya.</p>
+
+          <h5 class="fw-bold mt-4">12. Contact</h5>
+          <p>For questions about these Terms, contact us through the support channels provided on the platform or via the email linked to the Bei Poa project administrators.</p>
+
+          <p class="mt-4 mb-0 small text-muted">By using Bei Poa you confirm that you have read and understood these Terms and Conditions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PRIVACY ========== -->
+  <div id="section-privacy" class="section">
+    <div class="container py-5" style="max-width: 800px;">
+      <button class="btn btn-sm btn-outline-secondary mb-3" onclick="goHome()"><i class="fas fa-arrow-left me-1"></i> Back</button>
+      <h1 class="h3 fw-bold mb-2">Privacy Policy</h1>
+      <p class="text-muted small mb-4">Last updated: 17 September 2026 · Bei Poa Campus Marketplace</p>
+
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <p>This Privacy Policy explains what personal information Bei Poa collects, how we use it, and what choices you have. We aim to be clear and honest so you know where you stand.</p>
+
+          <h5 class="fw-bold mt-4">1. Who we are</h5>
+          <p>Bei Poa is a campus marketplace platform. For data protection purposes, we are the organisation responsible for deciding how your personal data is used on this service. Technical hosting and database services are provided with the help of third parties such as Supabase and our website host (for example Render).</p>
+
+          <h5 class="fw-bold mt-4">2. Information we collect</h5>
+          <p>We may collect:</p>
+          <ul>
+            <li><strong>Account information</strong> – name, email address, password (stored securely), university, phone/WhatsApp number, and optional bio.</li>
+            <li><strong>Listing information</strong> – titles, descriptions, prices, photos (via URLs you provide), condition, category, and contact details you choose to show.</li>
+            <li><strong>Usage information</strong> – actions such as posting, reporting, logging in, and basic technical data (for example browser type) needed to run and secure the service.</li>
+            <li><strong>Reports</strong> – when you or someone else submits a report about a listing or user, we store the reason and details you provide.</li>
+            <li><strong>Login providers</strong> – if you sign in with Google, we receive basic profile information (such as name and email) from Google according to your Google settings.</li>
+          </ul>
+          <p>We do not intentionally collect payment card numbers. Payments happen directly between users outside Bei Poa.</p>
+
+          <h5 class="fw-bold mt-4">3. How we use your information</h5>
+          <ul>
+            <li>To create and manage your account</li>
+            <li>To show your listings to other users and allow contact for buying/selling</li>
+            <li>To moderate content, review reports, and keep the community safer</li>
+            <li>To improve the platform and fix problems</li>
+            <li>To communicate important service messages (for example security or policy updates)</li>
+            <li>To comply with the law when we are required to</li>
+          </ul>
+          <p>We do not sell your personal information to advertisers.</p>
+
+          <h5 class="fw-bold mt-4">4. Legal bases (where applicable)</h5>
+          <p>We process your data because:</p>
+          <ul>
+            <li>You asked us to provide the service (contract / terms you accept)</li>
+            <li>We have a legitimate interest in running a safe marketplace and preventing fraud</li>
+            <li>We must meet legal obligations when they apply</li>
+            <li>You gave consent, where consent is needed (for example optional marketing, if we ever add it)</li>
+          </ul>
+
+          <h5 class="fw-bold mt-4">5. Who we share data with</h5>
+          <ul>
+            <li><strong>Other users</strong> – when you list an item, other logged-in users can see the listing details and the contact information you provide for that listing.</li>
+            <li><strong>Service providers</strong> – such as Supabase (database and authentication) and our website host. They process data only to provide their services to us.</li>
+            <li><strong>Authorities</strong> – if the law requires us to disclose information, or if we need to protect users from serious harm or crime.</li>
+          </ul>
+          <p>Moderators and admins on Bei Poa can access user and listing data needed to do their job (for example handling reports and bans).</p>
+
+          <h5 class="fw-bold mt-4">6. How long we keep data</h5>
+          <p>We keep your account and listing data while your account is active and as long as needed to operate the service. If your account is banned or deleted, we may keep limited records (for example to prevent repeat abuse or to meet legal requirements) for a reasonable period.</p>
+
+          <h5 class="fw-bold mt-4">7. Security</h5>
+          <p>We use industry-standard measures such as encrypted connections (HTTPS) and secure authentication. No system is 100% safe. Please use a strong password and do not share your login details. Meet buyers/sellers carefully and never send money to strangers without proper checks.</p>
+
+          <h5 class="fw-bold mt-4">8. Your rights and choices</h5>
+          <p>Depending on applicable law, you may be able to:</p>
+          <ul>
+            <li>Access the personal data we hold about you</li>
+            <li>Correct inaccurate information (you can edit much of it in your Profile)</li>
+            <li>Request deletion of your account</li>
+            <li>Object to or restrict certain processing</li>
+            <li>Withdraw consent where processing is based on consent</li>
+          </ul>
+          <p>To exercise these rights, contact us through the platform support channels. We may need to verify your identity before acting on a request.</p>
+
+          <h5 class="fw-bold mt-4">9. Children</h5>
+          <p>Bei Poa is aimed at university students and adults. It is not directed at children under 13. If you believe a child has given us personal data, contact us so we can take appropriate steps.</p>
+
+          <h5 class="fw-bold mt-4">10. International processing</h5>
+          <p>Our service providers may process data in data centres in different countries. Where data leaves your country, we rely on appropriate safeguards offered by those providers and applicable law.</p>
+
+          <h5 class="fw-bold mt-4">11. Changes to this policy</h5>
+          <p>We may update this Privacy Policy from time to time. The “Last updated” date will change when we do. Continued use of Bei Poa after an update means you accept the revised policy.</p>
+
+          <h5 class="fw-bold mt-4">12. Contact</h5>
+          <p>For privacy questions or requests, contact the Bei Poa administrators through the channels provided on the platform.</p>
+
+          <p class="mt-4 mb-0 small text-muted">By using Bei Poa you acknowledge that you have read this Privacy Policy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-top bg-white py-4 mt-auto">
+    <div class="container">
+      <div class="row align-items-center gy-2">
+        <div class="col-md-6 small text-muted">
+          © 2026 Bei Poa · Campus marketplace for students
+        </div>
+        <div class="col-md-6 text-md-end small">
+          <a href="#" class="text-decoration-none me-3" onclick="showSection('terms'); return false;">Terms &amp; Conditions</a>
+          <a href="#" class="text-decoration-none" onclick="showSection('privacy'); return false;">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
