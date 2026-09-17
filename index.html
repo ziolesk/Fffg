@@ -117,6 +117,49 @@ footer a{color:#cbd5e1}footer a:hover{color:var(--orange)}
 .promo{background:linear-gradient(90deg,#0a1628,#1e3a5f);border-radius:16px;color:#fff;padding:1.6rem 1.8rem}
 .chk-step{width:28px;height:28px;border-radius:50%;background:#e2e8f0;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700}
 .chk-step.on{background:var(--orange);color:#fff}
+
+/* ===== MOBILE FIXES ===== */
+@media (max-width: 767px) {
+  .mainnav { padding: .5rem 0; }
+  .brand { font-size: 1.05rem; }
+  .brand-ico { width: 30px; height: 30px; font-size: .75rem; }
+  .searchbar { max-width: 100%; margin: .5rem 0; order: 3; width: 100%; }
+  .mainnav .container { flex-wrap: wrap; }
+  .hero { padding: 2rem 0 1.75rem; }
+  .hero h1 { font-size: 1.65rem; }
+  .stat-row { gap: 1rem; }
+  .stat-row strong { font-size: 1.1rem; }
+  .cat-grid { grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .cat { padding: .7rem .3rem; }
+  .cat i { width: 38px; height: 38px; font-size: 1rem; }
+  .cat .t { font-size: .7rem; }
+  .pcard img { height: 130px; }
+  .shell, .admin-shell { grid-template-columns: 1fr; }
+  .side, .aside { display: none !important; }
+  .msg-layout { grid-template-columns: 1fr; height: auto; min-height: 50vh; }
+  .auth-grid { grid-template-columns: 1fr; }
+  .promo { padding: 1.2rem; }
+  footer .row > div { margin-bottom: .5rem; }
+  .mobile-nav {
+    display: flex !important;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #fff; border-top: 1px solid #e2e8f0;
+    z-index: 1040; padding: .4rem 0; justify-content: space-around;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.06);
+  }
+  .mobile-nav a {
+    display: flex; flex-direction: column; align-items: center;
+    font-size: .65rem; color: #64748b; font-weight: 500; padding: .25rem .5rem;
+    text-decoration: none;
+  }
+  .mobile-nav a i { font-size: 1.15rem; margin-bottom: .15rem; }
+  .mobile-nav a.active { color: #f97316; }
+  body { padding-bottom: 64px; }
+}
+@media (min-width: 768px) {
+  .mobile-nav { display: none !important; }
+}
+
 </style>
 </head>
 <body>
@@ -171,8 +214,8 @@ footer a{color:#cbd5e1}footer a:hover{color:var(--orange)}
 <div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-book fa-lg mb-2 text-warning"></i><div class="small">Books</div></div></div>
 <div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-couch fa-lg mb-2 text-success"></i><div class="small">Furniture</div></div></div>
 <div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-mobile-alt fa-lg mb-2 text-danger"></i><div class="small">Phones</div></div></div>
-<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-shirt fa-lg mb-2"></i><div class="small">Fashion</div></div></div>
-<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-bicycle fa-lg mb-2 text-primary"></i><div class="small">Sports</div></div></div>
+<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-file-alt fa-lg mb-2"></i><div class="small">Notes</div></div></div>
+<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-flask fa-lg mb-2 text-primary"></i><div class="small">Lab gear</div></div></div>
 </div>
 </div>
 </div>
@@ -181,14 +224,14 @@ footer a{color:#cbd5e1}footer a:hover{color:var(--orange)}
 <div class="container py-5">
 <h2 class="fw-bold mb-3" style="letter-spacing:-.02em">Shop by Category</h2>
 <div class="cat-grid mb-5">
-<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-mobile-alt"></i><div class="t">Phones &amp; Tablets</div></div>
+<div class="cat" onclick="filterCat('Textbooks')"><i class="fas fa-book"></i><div class="t">Textbooks</div></div>
+<div class="cat" onclick="filterCat('Notes / PDFs')"><i class="fas fa-file-alt"></i><div class="t">Notes / PDFs</div></div>
 <div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-laptop"></i><div class="t">Laptops</div></div>
-<div class="cat" onclick="filterCat('Clothing')"><i class="fas fa-shirt"></i><div class="t">Fashion</div></div>
+<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-mobile-alt"></i><div class="t">Phones</div></div>
 <div class="cat" onclick="filterCat('Furniture')"><i class="fas fa-couch"></i><div class="t">Furniture</div></div>
-<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-plug"></i><div class="t">Electronics</div></div>
-<div class="cat" onclick="filterCat('Other')"><i class="fas fa-motorcycle"></i><div class="t">Vehicles</div></div>
-<div class="cat" onclick="filterCat('Textbooks')"><i class="fas fa-book"></i><div class="t">Books</div></div>
-<div class="cat" onclick="filterCat('Other')"><i class="fas fa-football-ball"></i><div class="t">Sports</div></div>
+<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-headphones"></i><div class="t">Gadgets</div></div>
+<div class="cat" onclick="filterCat('Other')"><i class="fas fa-flask"></i><div class="t">Lab gear</div></div>
+<div class="cat" onclick="filterCat('Other')"><i class="fas fa-box"></i><div class="t">Other</div></div>
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -199,11 +242,20 @@ footer a{color:#cbd5e1}footer a:hover{color:var(--orange)}
 
 <div class="promo d-flex align-items-center justify-content-between flex-wrap gap-3">
 <div>
-<div class="fw-bold h5 mb-1">Second-Hand Deals You'll Love</div>
-<div class="small opacity-75">Quality products. Lower prices. Bigger smiles on campus.</div>
+<div class="fw-bold h5 mb-1">Campus deals you'll love</div>
+<div class="small opacity-75">Fair student prices. Moderated listings. Safer deals.</div>
 </div>
 <button class="btn-or" onclick="goMarket()">Explore Deals</button>
 </div>
+</div>
+
+<div class="container pb-5">
+  <h2 class="fw-bold mb-4 text-center" style="letter-spacing:-.02em">How Bei Poa works</h2>
+  <div class="row g-3 text-center">
+    <div class="col-md-4"><div class="tile h-100"><div class="mb-2" style="font-size:1.75rem;color:var(--orange)"><i class="fas fa-user-plus"></i></div><div class="fw-bold mb-1">1. Create account</div><p class="small text-muted mb-0">Sign up with email or Google. Add your university.</p></div></div>
+    <div class="col-md-4"><div class="tile h-100"><div class="mb-2" style="font-size:1.75rem;color:var(--orange)"><i class="fas fa-tags"></i></div><div class="fw-bold mb-1">2. List or browse</div><p class="small text-muted mb-0">Post items for review, or buy approved listings from students.</p></div></div>
+    <div class="col-md-4"><div class="tile h-100"><div class="mb-2" style="font-size:1.75rem;color:var(--orange)"><i class="fas fa-handshake"></i></div><div class="fw-bold mb-1">3. Meet &amp; deal</div><p class="small text-muted mb-0">Chat on WhatsApp, meet on campus, pay safely.</p></div></div>
+  </div>
 </div>
 </div>
 
@@ -220,7 +272,7 @@ footer a{color:#cbd5e1}footer a:hover{color:var(--orange)}
 <div class="col-6 col-md-2"><label class="form-label small text-muted mb-1">University</label><select id="filterUniversity" class="form-select form-select-sm" onchange="renderItems()"><option value="">All</option></select></div>
 <div class="col-6 col-md-2"><label class="form-label small text-muted mb-1">Category</label>
 <select id="filterCategory" class="form-select form-select-sm" onchange="renderItems()">
-<option value="">All</option><option>Textbooks</option><option>Electronics</option><option>Furniture</option><option>Notes / PDFs</option><option>Clothing</option><option>Other</option>
+<option value="">All</option><option>Textbooks</option><option>Electronics</option><option>Furniture</option><option>Notes / PDFs</option><option>Other</option>
 </select></div>
 <div class="col-6 col-md-2"><label class="form-label small text-muted mb-1">Max price</label><input id="filterPrice" type="number" class="form-control form-control-sm" placeholder="Any" oninput="debounceRender()"></div>
 <div class="col-6 col-md-2"><button class="btn-out btn-sm w-100" onclick="resetFilters()">Reset</button></div>
@@ -235,17 +287,17 @@ footer a{color:#cbd5e1}footer a:hover{color:var(--orange)}
 <h2 class="fw-bold mb-1">Shop by Category</h2>
 <p class="text-muted mb-4">Find exactly what you need from our wide range of second-hand campus products.</p>
 <div class="row g-3 mb-4">
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-mobile-alt"></i><div class="t">Phones &amp; Tablets</div><div class="c">Electronics</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Textbooks')"><i class="fas fa-book"></i><div class="t">Textbooks</div><div class="c">Course books</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Notes / PDFs')"><i class="fas fa-file-alt"></i><div class="t">Notes / PDFs</div><div class="c">Study materials</div></div></div>
 <div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-laptop"></i><div class="t">Laptops &amp; Computers</div><div class="c">Electronics</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Clothing')"><i class="fas fa-shirt"></i><div class="t">Fashion &amp; Clothing</div><div class="c">Clothing</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Furniture')"><i class="fas fa-couch"></i><div class="t">Furniture &amp; Home</div><div class="c">Furniture</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-tv"></i><div class="t">Electronics &amp; Appliances</div><div class="c">Electronics</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Other')"><i class="fas fa-motorcycle"></i><div class="t">Vehicles &amp; Motorbikes</div><div class="c">Other</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Textbooks')"><i class="fas fa-book"></i><div class="t">Books &amp; Stationery</div><div class="c">Textbooks</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Other')"><i class="fas fa-running"></i><div class="t">Sports &amp; Outdoors</div><div class="c">Other</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-mobile-alt"></i><div class="t">Phones &amp; Tablets</div><div class="c">Electronics</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Furniture')"><i class="fas fa-couch"></i><div class="t">Room Furniture</div><div class="c">Hostels</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-headphones"></i><div class="t">Gadgets &amp; Accessories</div><div class="c">Electronics</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Other')"><i class="fas fa-flask"></i><div class="t">Lab &amp; Course Gear</div><div class="c">Other</div></div></div>
+<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Other')"><i class="fas fa-box"></i><div class="t">Other Campus Items</div><div class="c">Misc</div></div></div>
 </div>
 <div class="promo d-flex justify-content-between align-items-center flex-wrap gap-3">
-<div><div class="fw-bold h5 mb-1">Up to 70% off campus deals</div><div class="small opacity-75">Quality products. Lower prices.</div></div>
+<div><div class="fw-bold h5 mb-1">Fair prices on campus</div><div class="small opacity-75">Graduates sell. New students buy.</div></div>
 <button class="btn-or" onclick="goMarket()">Explore Deals</button>
 </div>
 </div></div>
@@ -443,7 +495,7 @@ footer a{color:#cbd5e1}footer a:hover{color:var(--orange)}
 <div class="row g-3 mb-3">
 <div class="col-md-4"><label class="form-label small fw-semibold">Price (KES) *</label><input id="itemPrice" type="number" class="form-control" required min="0"></div>
 <div class="col-md-4"><label class="form-label small fw-semibold">Category *</label>
-<select id="itemCategory" class="form-select" required><option value="">Select</option><option>Textbooks</option><option>Electronics</option><option>Furniture</option><option>Notes / PDFs</option><option>Clothing</option><option>Other</option></select></div>
+<select id="itemCategory" class="form-select" required><option value="">Select</option><option>Textbooks</option><option>Electronics</option><option>Furniture</option><option>Notes / PDFs</option><option>Other</option></select></div>
 <div class="col-md-4"><label class="form-label small fw-semibold">Condition</label>
 <select id="itemCondition" class="form-select"><option>Like New</option><option>Good</option><option>Fair</option><option>Used</option></select></div>
 </div>
@@ -555,6 +607,9 @@ function showSec(name){
   document.querySelectorAll('.nav-a').forEach(a=>a.classList.remove('active'));
   const map={home:'n-home',marketplace:'n-market',categories:'n-cats',dashboard:'n-dash',messages:'n-msg',admin:'n-admin'};
   document.getElementById(map[name])?.classList.add('active');
+  document.querySelectorAll('.mobile-nav a').forEach(a=>a.classList.remove('active'));
+  const mmap={home:'m-home',marketplace:'m-market',dashboard:'m-dash',profile:'m-more'};
+  document.getElementById(mmap[name])?.classList.add('active');
   if(name==='dashboard'&&profile)renderDashboard();
   if(name==='profile'&&profile)loadProfileForm();
   if(name==='admin'&&isStaff()){adminTab('overview');loadAdminData()}
