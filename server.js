@@ -23,7 +23,7 @@ let items = [
   },
   {
     id: 'bp-2',
-    title: 'Casio fx-991EX Scientific Calculator',
+    title: 'Casio fx-991EX Scientific Calculator ClassWiz',
     price: 2400,
     category: 'Electronics',
     condition: 'Good',
@@ -37,7 +37,7 @@ let items = [
   },
   {
     id: 'bp-3',
-    title: 'Hostel Study Desk & Chair',
+    title: 'Hostel Study Desk & Ergonomic Chair',
     price: 4500,
     category: 'Furniture',
     condition: 'Good',
@@ -48,6 +48,20 @@ let items = [
     sold: false,
     image_url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600',
     description: 'Solid wooden desk with side bookshelf. Gate B Juja.'
+  },
+  {
+    id: 'bp-4',
+    title: 'HP Pavilion 15 Core i5 8GB 256GB SSD',
+    price: 28000,
+    category: 'Electronics',
+    condition: 'Fair',
+    university: 'Strathmore',
+    contact: '+254745678901',
+    seller_name: 'Angela Cherono',
+    status: 'approved',
+    sold: false,
+    image_url: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600',
+    description: 'Excellent battery health, charger included. Strathmore Student Centre.'
   }
 ];
 
@@ -58,7 +72,7 @@ const server = http.createServer((req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -116,14 +130,32 @@ const server = http.createServer((req, res) => {
     return res.end(JSON.stringify({ message: 'Deleted', id }));
   }
 
-  // Serve index.html as fallback for any frontend route
-  const indexPath = path.join(__dirname, 'index.html');
-  fs.readFile(indexPath, (err, data) => {
+  // Serve static files / index.html
+  const filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
+  fs.readFile(filePath, (err, data) => {
     if (err) {
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      return res.end('Error loading index.html');
+      // Fallback to index.html for single page client side routing
+      const indexPath = path.join(__dirname, 'index.html');
+      fs.readFile(indexPath, (fallbackErr, indexData) => {
+        if (fallbackErr) {
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          return res.end('Error loading index.html');
+        }
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(indexData);
+      });
+      return;
     }
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+
+    const ext = path.extname(filePath);
+    let contentType = 'text/html';
+    if (ext === '.js') contentType = 'application/javascript';
+    else if (ext === '.css') contentType = 'text/css';
+    else if (ext === '.json') contentType = 'application/json';
+    else if (ext === '.svg') contentType = 'image/svg+xml';
+    else if (ext === '.png') contentType = 'image/png';
+
+    res.writeHead(200, { 'Content-Type': contentType });
     res.end(data);
   });
 });

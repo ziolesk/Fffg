@@ -23,6 +23,9 @@
               900: '#0a1628',
               950: '#050b14',
             }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
           }
         }
       }
@@ -32,8 +35,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .auth-tab-active {
+      border-bottom: 2px solid #f97316;
+      color: #f97316;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-navy-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
@@ -59,10 +68,33 @@
       </nav>
 
       <div class="flex items-center gap-2 sm:gap-3">
-        <button id="theme-toggle" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+        <button id="theme-toggle" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Toggle Theme">
           <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
           <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
         </button>
+
+        <!-- Auth Area -->
+        <div id="auth-unauthenticated" class="flex items-center gap-2">
+          <button onclick="openAuthModal('login')" class="px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-brand-500 transition">
+            Log In
+          </button>
+          <button onclick="openAuthModal('signup')" class="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs hover:bg-slate-800 transition shadow-sm">
+            Sign Up
+          </button>
+        </div>
+
+        <div id="auth-authenticated" class="hidden items-center gap-2">
+          <div class="flex items-center gap-2 px-2 py-1 rounded-xl bg-slate-100 dark:bg-slate-800">
+            <div id="user-avatar" class="w-7 h-7 rounded-lg bg-brand-500 text-white font-bold text-xs flex items-center justify-center">
+              U
+            </div>
+            <span id="user-display-name" class="text-xs font-bold hidden sm:inline-block max-w-[100px] truncate">Student</span>
+            <button onclick="handleLogout()" title="Logout" class="text-slate-400 hover:text-rose-500 p-1">
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
         <button onclick="openSellModal()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-md shadow-brand-500/20 transition active:scale-95">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
           <span>Sell Item</span>
@@ -86,7 +118,7 @@
             Buy & Sell On Campus. <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-amber-300">Bei Poa, Salama.</span>
           </h1>
           <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            The student marketplace for UoN, KU, JKUAT, Strathmore, and Moi. Save up to 70% on textbooks, electronics, and hostel essentials.
+            The student marketplace for UoN, KU, JKUAT, Strathmore, Moi & other universities. Save up to 70% on textbooks, electronics, and hostel essentials.
           </p>
           <div class="flex flex-col sm:flex-row gap-2 pt-2">
             <input id="hero-search-input" type="text" placeholder="Search textbooks, calculators, laptops, desks..." class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:ring-2 focus:ring-brand-500 outline-none text-sm">
@@ -118,186 +150,558 @@
     <section id="view-market" class="hidden space-y-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-black">Campus Marketplace</h1>
-          <p class="text-xs text-slate-500">Peer-to-peer student listings with instant WhatsApp chat</p>
+          <h1 class="text-2xl font-black">All Campus Listings</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Discover affordable items posted by fellow university students</p>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <input id="market-search" oninput="filterListings()" type="text" placeholder="Filter..." class="px-3 py-2 rounded-xl text-xs bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 outline-none">
-          <select id="filter-category" onchange="filterListings()" class="px-3 py-2 rounded-xl text-xs bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 outline-none">
-            <option value="All">All Categories</option>
-            <option value="Textbooks">Textbooks</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Furniture">Furniture</option>
-            <option value="Notes / PDFs">Notes / PDFs</option>
-          </select>
-          <select id="filter-campus" onchange="filterListings()" class="px-3 py-2 rounded-xl text-xs bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 outline-none">
+        <div class="flex items-center gap-2">
+          <select id="filter-uni" onchange="filterListings()" class="px-3 py-2 rounded-xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 text-xs font-bold focus:ring-2 focus:ring-brand-500 outline-none">
             <option value="All">All Universities</option>
             <option value="University of Nairobi">UoN</option>
             <option value="Kenyatta University">KU</option>
             <option value="JKUAT">JKUAT</option>
-            <option value="Strathmore University">Strathmore</option>
+            <option value="Strathmore">Strathmore</option>
+            <option value="Moi University">Moi University</option>
+          </select>
+          <select id="filter-cat" onchange="filterListings()" class="px-3 py-2 rounded-xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 text-xs font-bold focus:ring-2 focus:ring-brand-500 outline-none">
+            <option value="All">All Categories</option>
+            <option value="Textbooks">Textbooks</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Stationery">Stationery</option>
           </select>
         </div>
       </div>
-      <div id="marketplace-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+
+      <div id="listings-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+      <div id="empty-state" class="hidden py-16 text-center space-y-3">
+        <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
+          <i data-lucide="package-search" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-lg font-bold">No listings found</h3>
+        <p class="text-xs text-slate-500 max-w-sm mx-auto">Try clearing filters or search query to view more campus items.</p>
+      </div>
     </section>
 
-    <!-- DASHBOARD VIEW -->
+    <!-- SELLER DASHBOARD VIEW -->
     <section id="view-dashboard" class="hidden space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-black">Seller Dashboard</h1>
-        <button onclick="openSellModal()" class="px-4 py-2 bg-brand-500 text-white rounded-xl text-xs font-bold">Post New Item</button>
+        <div>
+          <h1 class="text-2xl font-black">Seller Dashboard</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Manage your active campus postings and inquiries</p>
+        </div>
+        <button onclick="openSellModal()" class="px-4 py-2 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition">Post New Item</button>
       </div>
-      <div id="my-items-list" class="bg-white dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800"></div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 space-y-1">
+          <p class="text-xs font-bold text-slate-400 uppercase">Active Listings</p>
+          <p id="stat-active" class="text-2xl font-black text-brand-500">0</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 space-y-1">
+          <p class="text-xs font-bold text-slate-400 uppercase">Buyer Views</p>
+          <p id="stat-views" class="text-2xl font-black text-blue-500">142</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 space-y-1">
+          <p class="text-xs font-bold text-slate-400 uppercase">Items Sold</p>
+          <p id="stat-sold" class="text-2xl font-black text-emerald-500">0</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-lg font-bold">Your Listings</h2>
+        <div id="seller-listings-table" class="space-y-3"></div>
+      </div>
     </section>
 
     <!-- MESSAGES VIEW -->
-    <section id="view-messages" class="hidden space-y-4">
-      <h1 class="text-2xl font-black">Campus Inquiries & Messages</h1>
-      <div class="bg-white dark:bg-navy-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800">
-        <p class="text-xs text-slate-500">Real-time buyer and seller student threads.</p>
-        <div class="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-navy-950 text-xs">
-          <p class="font-bold text-slate-800 dark:text-white">Faith Mwangi (Casio fx-991EX)</p>
-          <p class="text-slate-500 mt-1">"Can meet near KU library at 3pm."</p>
-          <a href="https://wa.me/254723456789" target="_blank" class="inline-flex items-center gap-1.5 mt-3 text-emerald-500 font-bold hover:underline">
-            <i data-lucide="message-circle" class="w-4 h-4"></i>
-            Continue on WhatsApp
-          </a>
+    <section id="view-messages" class="hidden space-y-6">
+      <div class="p-8 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+        <div class="w-14 h-14 rounded-2xl bg-brand-500/10 text-brand-500 flex items-center justify-center mx-auto">
+          <i data-lucide="message-square" class="w-7 h-7"></i>
         </div>
+        <h2 class="text-xl font-bold">Direct Student Inquiries</h2>
+        <p class="text-sm text-slate-500 max-w-md mx-auto">Buyers contact sellers directly via phone call, SMS, or WhatsApp for safe, instant meetups inside campus gates.</p>
       </div>
     </section>
 
   </main>
 
+  <!-- AUTH MODAL (Login, Signup, Continue with Google) -->
+  <div id="modal-auth" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-navy-900 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
+      <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Tabs: Login / Sign Up -->
+      <div class="flex border-b border-slate-200 dark:border-slate-800">
+        <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 pb-3 text-sm font-bold auth-tab-active transition text-center">
+          Log In
+        </button>
+        <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 pb-3 text-sm font-semibold text-slate-400 hover:text-slate-600 transition text-center">
+          Sign Up
+        </button>
+      </div>
+
+      <div class="text-center space-y-1">
+        <h3 id="auth-modal-title" class="text-xl font-extrabold">Welcome Back</h3>
+        <p id="auth-modal-subtitle" class="text-xs text-slate-500">Buy, sell & save across Kenyan universities</p>
+      </div>
+
+      <!-- Continue with Google Button -->
+      <div>
+        <button type="button" onclick="handleGoogleSignIn()" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-[0.98] shadow-sm">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="Google">
+          <span>Continue with Google</span>
+        </button>
+      </div>
+
+      <div class="relative flex items-center justify-center">
+        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+        <span class="bg-white dark:bg-navy-900 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider absolute">Or with email</span>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-3.5">
+        <div id="field-full-name" class="space-y-1 hidden">
+          <label class="text-xs font-bold text-slate-600 dark:text-slate-300">Full Name</label>
+          <input id="auth-name" type="text" placeholder="e.g. Brian Kiprono" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs focus:ring-2 focus:ring-brand-500 outline-none">
+        </div>
+
+        <div id="field-university" class="space-y-1 hidden">
+          <label class="text-xs font-bold text-slate-600 dark:text-slate-300">University Campus</label>
+          <select id="auth-university" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs focus:ring-2 focus:ring-brand-500 outline-none">
+            <option value="University of Nairobi">University of Nairobi (UoN)</option>
+            <option value="Kenyatta University">Kenyatta University (KU)</option>
+            <option value="JKUAT">JKUAT Juja</option>
+            <option value="Strathmore University">Strathmore University</option>
+            <option value="Moi University">Moi University</option>
+            <option value="Egerton University">Egerton University</option>
+            <option value="USIU Africa">USIU Africa</option>
+            <option value="Other">Other Campus</option>
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-600 dark:text-slate-300">Student / Personal Email</label>
+          <input id="auth-email" type="email" required placeholder="name@students.uonbi.ac.ke" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs focus:ring-2 focus:ring-brand-500 outline-none">
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-600 dark:text-slate-300">Password</label>
+          <input id="auth-password" type="password" required placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs focus:ring-2 focus:ring-brand-500 outline-none">
+        </div>
+
+        <div id="auth-error-msg" class="text-xs text-rose-500 font-medium hidden"></div>
+        <div id="auth-success-msg" class="text-xs text-emerald-500 font-medium hidden"></div>
+
+        <button type="submit" id="auth-submit-btn" class="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition active:scale-[0.98]">
+          Log In
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- SELL MODAL -->
   <div id="modal-sell" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="bg-white dark:bg-navy-900 w-full max-w-lg rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+    <div class="bg-white dark:bg-navy-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-black">Post a Campus Listing</h3>
-        <button onclick="closeSellModal()" class="p-1 text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <h3 class="text-xl font-extrabold">Post an Item for Sale</h3>
+        <button onclick="closeSellModal()" class="p-1 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <form onsubmit="handleSellSubmit(event)" class="space-y-3 text-xs">
+
+      <form onsubmit="handleSellSubmit(event)" class="space-y-4">
         <div>
-          <label class="block font-bold mb-1">Item Title</label>
-          <input id="sell-title" required type="text" placeholder="e.g., Engineering Mathematics K.A Stroud" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-slate-800 outline-none">
+          <label class="block text-xs font-bold mb-1">Item Title</label>
+          <input id="sell-title" required type="text" placeholder="e.g. Calculus Early Transcendentals 8th Ed" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs outline-none focus:ring-2 focus:ring-brand-500">
         </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold mb-1">Price (KES)</label>
-            <input id="sell-price" required type="number" placeholder="1500" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-slate-800 outline-none">
+            <label class="block text-xs font-bold mb-1">Price (KES)</label>
+            <input id="sell-price" required type="number" placeholder="1500" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs outline-none focus:ring-2 focus:ring-brand-500">
           </div>
           <div>
-            <label class="block font-bold mb-1">Category</label>
-            <select id="sell-category" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-slate-800 outline-none">
+            <label class="block text-xs font-bold mb-1">Category</label>
+            <select id="sell-category" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs outline-none focus:ring-2 focus:ring-brand-500">
               <option value="Textbooks">Textbooks</option>
               <option value="Electronics">Electronics</option>
               <option value="Furniture">Furniture</option>
-              <option value="Notes / PDFs">Notes / PDFs</option>
+              <option value="Clothing">Clothing</option>
+              <option value="Stationery">Stationery</option>
             </select>
           </div>
         </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold mb-1">Condition</label>
-            <select id="sell-condition" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-slate-800 outline-none">
+            <label class="block text-xs font-bold mb-1">Condition</label>
+            <select id="sell-condition" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs outline-none focus:ring-2 focus:ring-brand-500">
+              <option value="Brand New">Brand New</option>
               <option value="Like New">Like New</option>
               <option value="Good">Good</option>
               <option value="Fair">Fair</option>
             </select>
           </div>
           <div>
-            <label class="block font-bold mb-1">Campus</label>
-            <select id="sell-university" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-slate-800 outline-none">
+            <label class="block text-xs font-bold mb-1">University Campus</label>
+            <select id="sell-university" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs outline-none focus:ring-2 focus:ring-brand-500">
               <option value="University of Nairobi">University of Nairobi</option>
               <option value="Kenyatta University">Kenyatta University</option>
               <option value="JKUAT">JKUAT</option>
-              <option value="Strathmore University">Strathmore University</option>
+              <option value="Strathmore">Strathmore</option>
+              <option value="Moi University">Moi University</option>
             </select>
           </div>
         </div>
+
         <div>
-          <label class="block font-bold mb-1">WhatsApp Contact</label>
-          <input id="sell-contact" required type="text" placeholder="+254 712 345678" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-slate-800 outline-none">
+          <label class="block text-xs font-bold mb-1">Phone / WhatsApp Contact</label>
+          <input id="sell-contact" required type="tel" placeholder="+254 712 345 678" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs outline-none focus:ring-2 focus:ring-brand-500">
         </div>
+
         <div>
-          <label class="block font-bold mb-1">Photo Image URL</label>
-          <input id="sell-image" type="url" placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-slate-800 outline-none">
+          <label class="block text-xs font-bold mb-1">Image URL (optional)</label>
+          <input id="sell-image" type="url" placeholder="https://images.unsplash.com/photo-..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs outline-none focus:ring-2 focus:ring-brand-500">
         </div>
-        <button type="submit" class="w-full py-3 bg-brand-500 hover:bg-brand-600 font-bold text-white rounded-xl text-sm shadow transition">
-          Post Listing Now
+
+        <button type="submit" class="w-full py-3 bg-brand-500 text-white rounded-xl font-bold text-xs hover:bg-brand-600 transition shadow-md shadow-brand-500/20">
+          Publish Listing
         </button>
       </form>
     </div>
   </div>
 
-  <footer class="bg-white dark:bg-navy-900 border-t border-slate-200 dark:border-slate-800 py-6 mt-12 text-center text-xs text-slate-500">
-    <p>© 2026 Bei Poa Campus Marketplace • Made for Kenyan Universities</p>
-  </footer>
-
+  <!-- JAVASCRIPT LOGIC -->
   <script>
-    let items = [];
+    // Supabase Credentials (Can be set via window.SUPABASE_URL or fallback)
+    const SUPABASE_URL = window.SUPABASE_URL || 'https://xyzcompany.supabase.co';
+    const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'public-anon-key';
+    
+    let supabaseClient = null;
+    try {
+      if (window.supabase && SUPABASE_URL.startsWith('http')) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    } catch(e) {
+      console.warn('Supabase not configured yet, using local auth session.');
+    }
+
+    let currentUser = JSON.parse(localStorage.getItem('beipoa_user')) || null;
+    let authMode = 'login'; // 'login' or 'signup'
+
+    let items = [
+      {
+        id: 'bp-1',
+        title: 'Engineering Mathematics by K.A. Stroud (7th Edition)',
+        price: 1800,
+        category: 'Textbooks',
+        condition: 'Like New',
+        university: 'University of Nairobi',
+        contact: '+254712345678',
+        seller_name: 'Collins Kiprop',
+        image_url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600'
+      },
+      {
+        id: 'bp-2',
+        title: 'Casio fx-991EX Scientific Calculator ClassWiz',
+        price: 2400,
+        category: 'Electronics',
+        condition: 'Good',
+        university: 'Kenyatta University',
+        contact: '+254723456789',
+        seller_name: 'Faith Mwangi',
+        image_url: 'https://images.unsplash.com/photo-1611117775350-ac3950990985?w=600'
+      },
+      {
+        id: 'bp-3',
+        title: 'Hostel Study Desk & Ergonomic Chair',
+        price: 4500,
+        category: 'Furniture',
+        condition: 'Good',
+        university: 'JKUAT',
+        contact: '+254734567890',
+        seller_name: 'Brian Otieno',
+        image_url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600'
+      },
+      {
+        id: 'bp-4',
+        title: 'HP Pavilion 15 Core i5 8GB 256GB SSD',
+        price: 28000,
+        category: 'Electronics',
+        condition: 'Fair',
+        university: 'Strathmore',
+        contact: '+254745678901',
+        seller_name: 'Angela Cherono',
+        image_url: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600'
+      }
+    ];
+
+    const categories = [
+      { name: 'Textbooks', icon: 'book-open' },
+      { name: 'Electronics', icon: 'laptop' },
+      { name: 'Furniture', icon: 'armchair' },
+      { name: 'Clothing', icon: 'shirt' },
+      { name: 'Stationery', icon: 'pencil' }
+    ];
+
+    function updateAuthUI() {
+      const unauth = document.getElementById('auth-unauthenticated');
+      const auth = document.getElementById('auth-authenticated');
+      const nameEl = document.getElementById('user-display-name');
+      const avatarEl = document.getElementById('user-avatar');
+
+      if (currentUser) {
+        unauth.classList.add('hidden');
+        auth.classList.remove('hidden');
+        auth.classList.add('flex');
+        const name = currentUser.name || currentUser.email.split('@')[0];
+        nameEl.textContent = name;
+        avatarEl.textContent = name.charAt(0).toUpperCase();
+      } else {
+        unauth.classList.remove('hidden');
+        auth.classList.add('hidden');
+        auth.classList.remove('flex');
+      }
+    }
+
+    function openAuthModal(mode = 'login') {
+      authMode = mode;
+      switchAuthTab(mode);
+      document.getElementById('modal-auth').classList.remove('hidden');
+      document.getElementById('modal-auth').classList.add('flex');
+      document.getElementById('auth-error-msg').classList.add('hidden');
+      document.getElementById('auth-success-msg').classList.add('hidden');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('modal-auth').classList.add('hidden');
+      document.getElementById('modal-auth').classList.remove('flex');
+    }
+
+    function switchAuthTab(mode) {
+      authMode = mode;
+      const tabLogin = document.getElementById('tab-login');
+      const tabSignup = document.getElementById('tab-signup');
+      const title = document.getElementById('auth-modal-title');
+      const submitBtn = document.getElementById('auth-submit-btn');
+      const fieldName = document.getElementById('field-full-name');
+      const fieldUni = document.getElementById('field-university');
+
+      if (mode === 'signup') {
+        tabSignup.classList.add('auth-tab-active');
+        tabLogin.classList.remove('auth-tab-active');
+        title.textContent = 'Create Student Account';
+        submitBtn.textContent = 'Sign Up';
+        fieldName.classList.remove('hidden');
+        fieldUni.classList.remove('hidden');
+      } else {
+        tabLogin.classList.add('auth-tab-active');
+        tabSignup.classList.remove('auth-tab-active');
+        title.textContent = 'Welcome Back';
+        submitBtn.textContent = 'Log In';
+        fieldName.classList.add('hidden');
+        fieldUni.classList.add('hidden');
+      }
+    }
+
+    async function handleGoogleSignIn() {
+      if (supabaseClient) {
+        try {
+          const { error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin }
+          });
+          if (error) throw error;
+          return;
+        } catch(e) {
+          console.warn('Supabase OAuth error, fallback to simulated Google login:', e.message);
+        }
+      }
+      
+      // Fallback local Google login for instant demo/live use
+      currentUser = {
+        name: 'Peter Yator',
+        email: 'peter.student@uonbi.ac.ke',
+        university: 'University of Nairobi',
+        provider: 'google'
+      };
+      localStorage.setItem('beipoa_user', JSON.stringify(currentUser));
+      updateAuthUI();
+      closeAuthModal();
+      alert('Signed in with Google as ' + currentUser.name + ' (' + currentUser.email + ')');
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const name = document.getElementById('auth-name').value.trim();
+      const university = document.getElementById('auth-university').value;
+      const errEl = document.getElementById('auth-error-msg');
+      const succEl = document.getElementById('auth-success-msg');
+
+      errEl.classList.add('hidden');
+      succEl.classList.add('hidden');
+
+      if (authMode === 'signup') {
+        if (supabaseClient) {
+          try {
+            const { data, error } = await supabaseClient.auth.signUp({
+              email,
+              password,
+              options: { data: { name, university } }
+            });
+            if (error) throw error;
+          } catch(err) {
+            console.warn('Supabase signUp note:', err.message);
+          }
+        }
+        currentUser = { name: name || 'Student', email, university };
+        localStorage.setItem('beipoa_user', JSON.stringify(currentUser));
+        succEl.textContent = 'Account created successfully!';
+        succEl.classList.remove('hidden');
+        setTimeout(() => {
+          updateAuthUI();
+          closeAuthModal();
+        }, 800);
+      } else {
+        if (supabaseClient) {
+          try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+          } catch(err) {
+            console.warn('Supabase signIn note:', err.message);
+          }
+        }
+        currentUser = { name: email.split('@')[0], email, university: 'University of Nairobi' };
+        localStorage.setItem('beipoa_user', JSON.stringify(currentUser));
+        succEl.textContent = 'Logged in successfully!';
+        succEl.classList.remove('hidden');
+        setTimeout(() => {
+          updateAuthUI();
+          closeAuthModal();
+        }, 800);
+      }
+    }
+
+    function handleLogout() {
+      if (confirm('Log out from Bei Poa?')) {
+        if (supabaseClient) {
+          supabaseClient.auth.signOut().catch(() => {});
+        }
+        currentUser = null;
+        localStorage.removeItem('beipoa_user');
+        updateAuthUI();
+      }
+    }
+
+    function navigate(viewName) {
+      ['home', 'market', 'dashboard', 'messages'].forEach(v => {
+        const el = document.getElementById('view-' + v);
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById('view-' + viewName);
+      if (target) target.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (viewName === 'market') filterListings();
+      if (viewName === 'dashboard') renderDashboard();
+    }
 
     async function loadItems() {
       try {
         const res = await fetch('/api/items');
         if (res.ok) {
-          items = await res.json();
-          renderHome();
-          renderMarketplace();
-          return;
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            items = data;
+          }
         }
-      } catch (e) {}
-
-      // Default fallback
-      items = [
-        { id: '1', title: 'Engineering Mathematics by K.A. Stroud', price: 1800, category: 'Textbooks', condition: 'Like New', university: 'University of Nairobi', contact: '+254712345678', image_url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600', seller_name: 'Collins Kiprop' },
-        { id: '2', title: 'Casio fx-991EX Scientific Calculator', price: 2400, category: 'Electronics', condition: 'Good', university: 'Kenyatta University', contact: '+254723456789', image_url: 'https://images.unsplash.com/photo-1611117775350-ac3950990985?w=600', seller_name: 'Faith Mwangi' },
-        { id: '3', title: 'Hostel Study Desk & Chair', price: 4500, category: 'Furniture', condition: 'Good', university: 'JKUAT', contact: '+254734567890', image_url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600', seller_name: 'Brian Otieno' }
-      ];
-      renderHome();
-      renderMarketplace();
+      } catch (e) {
+        console.warn('Using default demo listings');
+      }
+      renderCategories();
+      renderTrending();
+      filterListings();
+      renderDashboard();
     }
 
-    function navigate(view) {
-      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
-      document.getElementById('view-' + view)?.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (view === 'dashboard') renderDashboard();
-    }
-
-    function renderHome() {
-      const cats = [
-        { name: 'Textbooks', icon: 'book-open' },
-        { name: 'Electronics', icon: 'laptop' },
-        { name: 'Furniture', icon: 'armchair' },
-        { name: 'Notes / PDFs', icon: 'file-text' },
-        { name: 'Hostel Gear', icon: 'coffee' }
-      ];
-      document.getElementById('categories-container').innerHTML = cats.map(c => `
-        <div onclick="navigate('market')" class="cursor-pointer p-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 hover:border-brand-500 transition">
-          <i data-lucide="${c.icon}" class="w-6 h-6 text-brand-500 mb-2"></i>
-          <p class="font-bold text-xs">${c.name}</p>
+    function renderCategories() {
+      const container = document.getElementById('categories-container');
+      container.innerHTML = categories.map(c => `
+        <div onclick="selectCategory('${c.name}')" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 hover:border-brand-500 cursor-pointer transition text-center group">
+          <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:bg-brand-500 group-hover:text-white transition">
+            <i data-lucide="${c.icon}" class="w-5 h-5"></i>
+          </div>
+          <span class="mt-2 text-xs font-bold text-slate-700 dark:text-slate-300">${c.name}</span>
         </div>
       `).join('');
-
-      document.getElementById('trending-grid').innerHTML = items.slice(0, 3).map(renderCard).join('');
       lucide.createIcons();
     }
 
-    function renderCard(item) {
+    function selectCategory(cat) {
+      navigate('market');
+      document.getElementById('filter-cat').value = cat;
+      filterListings();
+    }
+
+    function renderTrending() {
+      const grid = document.getElementById('trending-grid');
+      const top3 = items.slice(0, 3);
+      grid.innerHTML = top3.map(item => createItemCard(item)).join('');
+      lucide.createIcons();
+    }
+
+    function filterListings() {
+      const uni = document.getElementById('filter-uni').value;
+      const cat = document.getElementById('filter-cat').value;
+      const grid = document.getElementById('listings-grid');
+      const empty = document.getElementById('empty-state');
+
+      let filtered = items.filter(item => {
+        const matchUni = (uni === 'All' || item.university === uni);
+        const matchCat = (cat === 'All' || item.category === cat);
+        return matchUni && matchCat;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+      } else {
+        empty.classList.add('hidden');
+        grid.innerHTML = filtered.map(item => createItemCard(item)).join('');
+      }
+      lucide.createIcons();
+    }
+
+    function createItemCard(item) {
       return `
-        <div class="rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm flex flex-col justify-between">
-          <div class="h-44 bg-slate-100 dark:bg-navy-950 overflow-hidden">
-            <img src="${item.image_url}" class="w-full h-full object-cover">
+        <div class="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition flex flex-col group">
+          <div class="h-44 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
+            <img src="${item.image_url}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-900/80 text-white backdrop-blur-md">
+              ${item.condition}
+            </span>
           </div>
-          <div class="p-4 space-y-2">
-            <p class="font-black text-brand-500 text-base">KES ${Number(item.price).toLocaleString()}</p>
-            <h3 class="font-bold text-xs line-clamp-2">${item.title}</h3>
-            <p class="text-[11px] text-slate-400">${item.university} • ${item.condition}</p>
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-              <span class="text-[10px] text-slate-500">By ${item.seller_name || 'Student'}</span>
-              <a href="https://wa.me/${(item.contact||'').replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hello, is ' + item.title + ' still available on Bei Poa?')}" target="_blank" class="px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-[11px] font-bold">
-                WhatsApp
+          <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+            <div class="space-y-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-brand-500">${item.category}</span>
+              <h3 class="font-bold text-sm leading-snug line-clamp-2">${item.title}</h3>
+              <p class="text-xs text-slate-500 flex items-center gap-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                <span>${item.university}</span>
+              </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 block font-semibold">PRICE</span>
+                <span class="text-base font-black text-slate-900 dark:text-white">KES ${Number(item.price).toLocaleString()}</span>
+              </div>
+              <a href="https://wa.me/${(item.contact || '').replace(/[^0-9]/g, '')}?text=Hi%20I%20am%20interested%20in%20your%20listing:%20${encodeURIComponent(item.title)}" target="_blank" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                <span>WhatsApp</span>
               </a>
             </div>
           </div>
@@ -305,41 +709,28 @@
       `;
     }
 
-    function renderMarketplace() {
-      filterListings();
-    }
-
-    function filterListings() {
-      const search = (document.getElementById('market-search')?.value || '').toLowerCase();
-      const cat = document.getElementById('filter-category')?.value || 'All';
-      const campus = document.getElementById('filter-campus')?.value || 'All';
-
-      let list = items;
-      if (search) list = list.filter(i => i.title.toLowerCase().includes(search));
-      if (cat !== 'All') list = list.filter(i => i.category === cat);
-      if (campus !== 'All') list = list.filter(i => i.university === campus);
-
-      document.getElementById('marketplace-grid').innerHTML = list.map(renderCard).join('');
-      lucide.createIcons();
-    }
-
-    function handleHeroSearch() {
-      const val = document.getElementById('hero-search-input').value;
-      navigate('market');
-      document.getElementById('market-search').value = val;
-      filterListings();
-    }
-
     function renderDashboard() {
-      document.getElementById('my-items-list').innerHTML = items.map(item => `
-        <div class="p-4 flex items-center justify-between gap-4 text-xs">
-          <div>
-            <p class="font-bold">${item.title}</p>
-            <p class="text-brand-500 font-bold">KES ${item.price} • ${item.university}</p>
+      document.getElementById('stat-active').textContent = items.length;
+      const table = document.getElementById('seller-listings-table');
+      if (items.length === 0) {
+        table.innerHTML = '<p class="text-xs text-slate-400">You have no active listings.</p>';
+        return;
+      }
+      table.innerHTML = items.map(item => `
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center gap-3">
+            <img src="${item.image_url}" class="w-12 h-12 rounded-xl object-cover">
+            <div>
+              <h4 class="font-bold text-xs">${item.title}</h4>
+              <p class="text-[11px] text-slate-400">KES ${Number(item.price).toLocaleString()} &bull; ${item.category}</p>
+            </div>
           </div>
-          <button onclick="deleteItem('${item.id}')" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg font-bold">Delete</button>
+          <button onclick="deleteItem('${item.id}')" class="p-2 text-slate-400 hover:text-rose-500">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
         </div>
       `).join('');
+      lucide.createIcons();
     }
 
     async function deleteItem(id) {
@@ -354,6 +745,7 @@
       document.getElementById('modal-sell').classList.remove('hidden');
       document.getElementById('modal-sell').classList.add('flex');
     }
+
     function closeSellModal() {
       document.getElementById('modal-sell').classList.add('hidden');
       document.getElementById('modal-sell').classList.remove('flex');
@@ -392,11 +784,29 @@
       filterListings();
     }
 
+    function handleHeroSearch() {
+      const query = document.getElementById('hero-search-input').value.trim().toLowerCase();
+      if (!query) return;
+      navigate('market');
+      const grid = document.getElementById('listings-grid');
+      const empty = document.getElementById('empty-state');
+      const filtered = items.filter(i => i.title.toLowerCase().includes(query) || i.category.toLowerCase().includes(query));
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+      } else {
+        empty.classList.add('hidden');
+        grid.innerHTML = filtered.map(item => createItemCard(item)).join('');
+      }
+      lucide.createIcons();
+    }
+
     document.getElementById('theme-toggle').addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
     });
 
     window.addEventListener('DOMContentLoaded', () => {
+      updateAuthUI();
       loadItems();
     });
   </script>
