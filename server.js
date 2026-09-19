@@ -4,66 +4,26 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
-const PORT = process.env.PORT || 10000;
+const PORT = (process.env.PORT && process.env.PORT !== '8080') ? process.env.PORT : 3000;
+const DATA_FILE = path.join(__dirname, 'items.json');
 
-let items = [
-  {
-    id: 'bp-1',
-    title: 'Engineering Mathematics by K.A. Stroud (7th Edition)',
-    price: 1800,
-    category: 'Textbooks',
-    condition: 'Like New',
-    university: 'University of Nairobi',
-    contact: '+254712345678',
-    seller_name: 'Collins Kiprop',
-    status: 'approved',
-    sold: false,
-    image_url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600',
-    description: 'Hardcover, minimal pencil highlights. Clean binding.'
-  },
-  {
-    id: 'bp-2',
-    title: 'Casio fx-991EX Scientific Calculator ClassWiz',
-    price: 2400,
-    category: 'Electronics',
-    condition: 'Good',
-    university: 'Kenyatta University',
-    contact: '+254723456789',
-    seller_name: 'Faith Mwangi',
-    status: 'approved',
-    sold: false,
-    image_url: 'https://images.unsplash.com/photo-1611117775350-ac3950990985?w=600',
-    description: 'Solar powered ClassWiz with slide-on case. KU Main Gate.'
-  },
-  {
-    id: 'bp-3',
-    title: 'Hostel Study Desk & Ergonomic Chair',
-    price: 4500,
-    category: 'Furniture',
-    condition: 'Good',
-    university: 'JKUAT',
-    contact: '+254734567890',
-    seller_name: 'Brian Otieno',
-    status: 'approved',
-    sold: false,
-    image_url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600',
-    description: 'Solid wooden desk with side bookshelf. Gate B Juja.'
-  },
-  {
-    id: 'bp-4',
-    title: 'HP Pavilion 15 Core i5 8GB 256GB SSD',
-    price: 28000,
-    category: 'Electronics',
-    condition: 'Fair',
-    university: 'Strathmore',
-    contact: '+254745678901',
-    seller_name: 'Angela Cherono',
-    status: 'approved',
-    sold: false,
-    image_url: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600',
-    description: 'Excellent battery health, charger included. Strathmore Student Centre.'
+// Persistent items storage (starts empty - no fake listings)
+let items = [];
+try {
+  if (fs.existsSync(DATA_FILE)) {
+    items = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
   }
-];
+} catch (e) {
+  items = [];
+}
+
+function saveItems() {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(items, null, 2));
+  } catch (e) {
+    console.error('Failed to save items to disk:', e);
+  }
+}
 
 const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
@@ -82,7 +42,7 @@ const server = http.createServer((req, res) => {
   // API Health
   if (pathname === '/api/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ status: 'ok', app: 'Bei Poa Campus Marketplace', time: new Date().toISOString() }));
+    return res.end(JSON.stringify({ status: 'ok', app: 'Bei Poa Campus Marketplace', port: PORT, time: new Date().toISOString() }));
   }
 
   // API Items GET
@@ -108,10 +68,13 @@ const server = http.createServer((req, res) => {
           contact: parsed.contact,
           image_url: parsed.image_url || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600',
           seller_name: parsed.seller_name || 'Campus Student',
+          seller_email: parsed.seller_email || '',
           status: 'approved',
-          sold: false
+          sold: false,
+          created_at: new Date().toISOString()
         };
         items.unshift(newItem);
+        saveItems();
         res.writeHead(201, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(newItem));
       } catch (e) {
@@ -126,6 +89,7 @@ const server = http.createServer((req, res) => {
   if (pathname.startsWith('/api/items/') && req.method === 'DELETE') {
     const id = pathname.replace('/api/items/', '');
     items = items.filter(i => i.id !== id);
+    saveItems();
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ message: 'Deleted', id }));
   }
