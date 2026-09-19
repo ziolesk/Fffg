@@ -1,6 +1,0 @@
-{
-  "name": "Bei Poa",
-  "description": "Campus marketplace for university students to buy and sell textbooks, electronics, notes, and items safely.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
