@@ -1,0 +1,17 @@
+# Bei Poa – Render Blueprint
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: bei-poa
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
