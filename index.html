@@ -3,654 +3,502 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
-<title>Bei Poa – Premium Campus Marketplace</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>Bei Poa</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/app.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
-  --navy:#0a1628;--navy2:#0f1c2e;--navy3:#1a2740;
-  --orange:#f97316;--orange2:#ea580c;
-  --bg:#f4f6f9;--card:#fff;--muted:#64748b;--border:#e2e8f0;
-  --radius:14px;--shadow:0 4px 20px rgba(10,22,40,.06);
+:root {
+  --bg:#0b0f1a; --bg2:#121826; --bg3:#1a2236;
+  --card:#151c2e; --card2:#1c253c;
+  --text:#f1f5f9; --muted:#94a3b8; --dim:#64748b;
+  --orange:#f97316; --orange2:#fb923c;
+  --blue:#3b82f6; --green:#22c55e; --red:#ef4444;
+  --border:rgba(255,255,255,.08);
+  --radius:18px; --nav-h:72px;
+  --font:Inter,system-ui,sans-serif;
+  --shadow:0 8px 32px rgba(0,0,0,.4);
 }
-*{box-sizing:border-box}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:#0f172a;margin:0;min-height:100vh}
-a{text-decoration:none}
-.section{display:none}.section.active{display:block}
-/* TOP NAV */
-.topnav{background:var(--navy);color:#fff;padding:.4rem 0;font-size:.78rem}
-.topnav a{color:#94a3b8}.topnav a:hover{color:#fff}
-.mainnav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1000;padding:.65rem 0}
-.brand{display:flex;align-items:center;gap:.5rem;font-weight:800;font-size:1.2rem;color:var(--navy)}
-.brand-ico{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#f97316,#fb923c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem}
-.searchbar{background:#f8fafc;border:1px solid var(--border);border-radius:999px;padding:.4rem 1rem;display:flex;align-items:center;gap:.5rem;flex:1;max-width:400px}
-.searchbar input{border:0;background:transparent;outline:0;width:100%;font-size:.88rem}
-.nav-a{color:#475569;font-weight:500;font-size:.88rem;padding:.35rem .65rem;border-radius:8px}
-.nav-a:hover,.nav-a.active{color:var(--navy);background:#f1f5f9}
-.btn-or{background:var(--orange);color:#fff;border:0;font-weight:600;border-radius:10px;padding:.45rem 1rem}
-.btn-or:hover{background:var(--orange2);color:#fff}
-.btn-nv{background:var(--navy);color:#fff;border:0;font-weight:600;border-radius:10px;padding:.45rem 1rem}
-.btn-nv:hover{background:var(--navy3);color:#fff}
-.btn-out{border:1.5px solid var(--border);background:#fff;color:#334155;font-weight:500;border-radius:10px;padding:.4rem .9rem}
-.btn-out:hover{border-color:#94a3b8}
-.btn-wa{background:#25d366;color:#fff;border:0;border-radius:10px;font-weight:600}
-.btn-wa:hover{background:#1da851;color:#fff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font);min-height:100%;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button,input,select,textarea{font-family:inherit}
+.sec{display:none;min-height:100vh;padding-bottom:calc(var(--nav-h) + 16px);animation:fadeIn .35s ease}
+.sec.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOP APP BAR */
+.appbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(11,15,26,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.15rem}
+.logo-i{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--orange2));display:grid;place-items:center;font-size:.85rem}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);display:grid;place-items:center}
+
 /* HERO */
-.hero{background:linear-gradient(125deg,#0a1628 0%,#12263f 40%,#0c4a6e 100%);color:#fff;padding:3.2rem 0 2.8rem;position:relative;overflow:hidden}
-.hero h1{font-weight:800;letter-spacing:-.03em;font-size:clamp(1.85rem,4vw,2.7rem);line-height:1.15}
-.hero h1 em{color:var(--orange);font-style:normal}
-.hero-art{background:rgba(255,255,255,.08);border-radius:20px;padding:1.5rem;backdrop-filter:blur(8px)}
-.stat-row{display:flex;flex-wrap:wrap;gap:1.75rem;margin-top:1.75rem}
-.stat-row strong{display:block;font-size:1.3rem;font-weight:800}
-.stat-row span{font-size:.75rem;opacity:.7}
-/* CATEGORIES */
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.75rem}
-.cat{background:#fff;border:1px solid var(--border);border-radius:14px;padding:.9rem .4rem;text-align:center;cursor:pointer;transition:.2s}
-.cat:hover{border-color:var(--orange);box-shadow:var(--shadow);transform:translateY(-3px)}
-.cat i{width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:#fff7ed;color:var(--orange);font-size:1.15rem;margin-bottom:.4rem}
-.cat .t{font-weight:600;font-size:.78rem}
-.cat .c{font-size:.65rem;color:var(--muted)}
-/* PRODUCT CARD */
-.pcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:100%;transition:.2s;box-shadow:var(--shadow);cursor:pointer}
-.pcard:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(10,22,40,.12)}
-.pcard img{width:100%;height:160px;object-fit:cover;background:#f1f5f9}
-.pcard .bd{padding:.9rem}
-.price{font-weight:800;color:var(--navy);font-size:1.05rem}
-.badge-g{background:#d1fae5;color:#065f46;font-size:.68rem;font-weight:600;border-radius:6px;padding:.2em .5em}
-.badge-f{background:#fef3c7;color:#92400e;font-size:.68rem;font-weight:600;border-radius:6px;padding:.2em .5em}
-/* DASHBOARD SIDEBAR */
-.shell{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 64px)}
-@media(max-width:991px){.shell{grid-template-columns:1fr}.side{display:none!important}}
-.side{background:var(--navy);color:#94a3b8;padding:1.25rem 1rem}
-.side .u{display:flex;align-items:center;gap:.7rem;padding:.7rem;border-radius:12px;background:rgba(255,255,255,.06);margin-bottom:1rem}
-.side .av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#f97316,#fb923c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
-.side .nl{display:block;color:#94a3b8;padding:.6rem .8rem;border-radius:10px;font-size:.88rem;font-weight:500;margin-bottom:.15rem}
-.side .nl:hover,.side .nl.on{background:rgba(249,115,22,.18);color:#fff}
-.side .nl i{width:22px}
-.main{padding:1.5rem;background:var(--bg)}
-.tile{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.1rem;box-shadow:var(--shadow)}
-.tile .n{font-size:1.5rem;font-weight:800}
-/* ADMIN */
-.admin-shell{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px)}
-@media(max-width:991px){.admin-shell{grid-template-columns:1fr}.aside{display:none!important}}
-.aside{background:var(--navy);padding:1.2rem 1rem;color:#94a3b8}
-.aside .nl{display:block;color:#94a3b8;padding:.55rem .75rem;border-radius:10px;font-size:.85rem;margin-bottom:.12rem}
-.aside .nl:hover,.aside .nl.on{background:var(--orange);color:#fff}
-.amain{padding:1.5rem;background:#f8fafc}
-/* AUTH */
-.auth-grid{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 80px)}
-@media(max-width:991px){.auth-grid{grid-template-columns:1fr}.auth-l{display:none!important}}
-.auth-l{background:linear-gradient(160deg,#0a1628,#1e3a5f);color:#fff;padding:3rem;display:flex;flex-direction:column;justify-content:center}
-.auth-r{display:flex;align-items:center;justify-content:center;padding:2rem;background:#fff}
-.auth-box{width:100%;max-width:390px}
+.hero{padding:20px 16px 8px;position:relative;overflow:hidden}
+.hero h1{font-size:1.85rem;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin:0 0 8px}
+.hero h1 span{background:linear-gradient(90deg,#fb923c,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:.9rem;margin:0 0 16px;line-height:1.5}
+.search-pill{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:999px;padding:12px 16px;margin-bottom:16px}
+.search-pill input{flex:1;border:0;background:transparent;color:var(--text);outline:0;font-size:.9rem}
+.hero-visual{position:relative;height:160px;border-radius:20px;background:linear-gradient(135deg,#1e3a5f,#0c4a6e 50%,#1e1b4b);overflow:hidden;margin-bottom:16px}
+.hero-visual .float{position:absolute;font-size:2rem;animation:float 4s ease-in-out infinite}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:1.1rem;font-weight:800}
+.stat span{font-size:.65rem;color:var(--muted)}
+
+/* CATEGORIES horizontal */
+.sec-pad{padding:0 16px}
+.row-title{display:flex;justify-content:space-between;align-items:center;margin:20px 0 12px}
+.row-title h2{margin:0;font-size:1.1rem;font-weight:700}
+.row-title a{color:var(--orange);font-size:.8rem;font-weight:600}
+.h-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.h-scroll::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;width:72px}
+.chip .ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:1.2rem;color:#fff}
+.chip span{font-size:.7rem;color:var(--muted);font-weight:500}
+.chip.active span{color:var(--orange)}
+
+/* PRODUCT GRID */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;position:relative}
+.pcard .img{aspect-ratio:1;background:var(--bg3);position:relative}
+.pcard .img img{width:100%;height:100%;object-fit:cover}
+.pcard .fav{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.45);border:0;color:#fff;display:grid;place-items:center}
+.pcard .body{padding:10px}
+.pcard .price{font-weight:800;font-size:1rem;color:var(--orange)}
+.pcard .title{font-size:.8rem;font-weight:600;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .meta{font-size:.65rem;color:var(--dim)}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:.6rem;font-weight:600;padding:2px 6px;border-radius:6px;background:rgba(34,197,94,.15);color:var(--green)}
+.badge.warn{background:rgba(249,115,22,.15);color:var(--orange)}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;left:12px;right:12px;bottom:12px;height:64px;z-index:100;
+  display:flex;align-items:center;justify-content:space-around;
+  background:rgba(18,24,38,.82);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow);padding:0 6px}
+.bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--dim);font-size:.6rem;font-weight:500;padding:6px 10px;border-radius:14px;transition:.2s}
+.bnav a i{font-size:1.2rem}
+.bnav a.on{color:var(--orange)}
+.bnav .sell{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ea580c);color:#fff;display:grid;place-items:center;margin-top:-22px;box-shadow:0 6px 20px rgba(249,115,22,.45);border:3px solid var(--bg);font-size:1.2rem}
+.bnav .sell i{font-size:1.25rem;color:#fff}
+
+/* SCREENS */
+.page-head{padding:16px;display:flex;align-items:center;gap:12px}
+.page-head h1{margin:0;font-size:1.35rem;font-weight:800;flex:1}
+.filters{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.fchip{flex-shrink:0;padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:.8rem;font-weight:500}
+.fchip.on{background:var(--orange);border-color:var(--orange);color:#fff}
+
 /* PRODUCT DETAIL */
-.pd-img{border-radius:16px;overflow:hidden;background:#f1f5f9}
-.pd-img img{width:100%;max-height:420px;object-fit:cover}
-.safety li{margin-bottom:.4rem;font-size:.88rem;color:#475569}
-/* MESSAGES */
-.msg-layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 120px);background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--border)}
-@media(max-width:767px){.msg-layout{grid-template-columns:1fr}}
-.msg-list{border-right:1px solid var(--border);overflow-y:auto}
-.msg-item{padding:.85rem 1rem;border-bottom:1px solid var(--border);cursor:pointer}
-.msg-item:hover,.msg-item.on{background:#f8fafc}
-.msg-chat{display:flex;flex-direction:column;height:100%}
-.msg-body{flex:1;overflow-y:auto;padding:1rem;background:#f8fafc}
-.bubble{max-width:75%;padding:.65rem .9rem;border-radius:14px;font-size:.9rem;margin-bottom:.5rem}
-.bubble.me{background:#0a1628;color:#fff;margin-left:auto;border-bottom-right-radius:4px}
-.bubble.them{background:#fff;border:1px solid var(--border);border-bottom-left-radius:4px}
-.msg-input{padding:.75rem;border-top:1px solid var(--border);display:flex;gap:.5rem}
-/* MISC */
-.form-control,.form-select{border-radius:10px;border-color:var(--border);padding:.6rem .85rem}
-.form-control:focus,.form-select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(249,115,22,.15)}
-.modal-content{border:0;border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.15)}
-.empty{text-align:center;padding:3rem 1rem;color:#94a3b8}
-.empty i{font-size:2.4rem;opacity:.4;margin-bottom:.5rem}
-.status-pending{background:#fef3c7;color:#92400e}
-.status-approved{background:#d1fae5;color:#065f46}
-.status-rejected{background:#fee2e2;color:#991b1b}
-.status-banned{background:#1f2937;color:#fff}
-.loading-overlay{position:fixed;inset:0;background:rgba(244,246,249,.92);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
-footer{background:var(--navy);color:#94a3b8;padding:2.2rem 0 1.5rem;margin-top:auto}
-footer a{color:#cbd5e1}footer a:hover{color:var(--orange)}
-.promo{background:linear-gradient(90deg,#0a1628,#1e3a5f);border-radius:16px;color:#fff;padding:1.6rem 1.8rem}
-.chk-step{width:28px;height:28px;border-radius:50%;background:#e2e8f0;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700}
-.chk-step.on{background:var(--orange);color:#fff}
+.pd-img{width:100%;aspect-ratio:1;object-fit:cover;background:var(--bg3)}
+.pd-body{padding:16px}
+.pd-price{font-size:1.5rem;font-weight:800;color:var(--orange)}
+.pd-actions{display:flex;gap:10px;padding:12px 16px;position:sticky;bottom:calc(var(--nav-h) + 8px);background:rgba(11,15,26,.9);backdrop-filter:blur(12px)}
+.btn{flex:1;padding:14px;border-radius:14px;border:0;font-weight:700;font-size:.95rem;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-o{background:linear-gradient(135deg,var(--orange),#ea580c);color:#fff}
+.btn-g{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.btn-wa{background:#25d366;color:#fff}
 
-/* ===== MOBILE FIXES ===== */
-html, body {
-  overflow-x: hidden !important;
-  max-width: 100vw !important;
-  width: 100% !important;
-}
-img, video, iframe, .pcard, .hero-art, .promo, .msg-layout, .shell, .admin-shell {
-  max-width: 100%;
-}
-.container {
-  max-width: 100%;
-  padding-left: 12px !important;
-  padding-right: 12px !important;
-}
-/* Top nav: actions scroll horizontally on mobile */
-.nav-scroll {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  max-width: 100%;
-  flex: 1;
-  min-width: 0;
-}
-.nav-scroll::-webkit-scrollbar { display: none; }
-.nav-scroll > * { flex-shrink: 0; }
+/* CHAT */
+.chat-list .item{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);align-items:center}
+.chat-list .av{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ea580c);display:grid;place-items:center;font-weight:700;flex-shrink:0}
+.chat-list .info{flex:1;min-width:0}
+.chat-list .info b{display:block;font-size:.9rem}
+.chat-list .info span{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.chat-thread{display:flex;flex-direction:column;height:calc(100vh - var(--nav-h) - 56px)}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px}
+.bubble{max-width:78%;padding:10px 14px;border-radius:16px;margin-bottom:8px;font-size:.9rem;line-height:1.4}
+.bubble.me{background:var(--orange);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.bubble.them{background:var(--card2);border-bottom-left-radius:4px}
+.chat-input{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg2)}
+.chat-input input{flex:1;border:0;background:var(--card);color:var(--text);border-radius:999px;padding:12px 16px;outline:0}
+.chat-input button{width:44px;height:44px;border-radius:50%;border:0;background:var(--orange);color:#fff}
 
-@media (max-width: 767px) {
-  .mainnav { padding: 0.45rem 0; }
-  .mainnav .container {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .brand { font-size: 1rem; flex-shrink: 0; }
-  .brand-ico { width: 28px; height: 28px; font-size: 0.7rem; }
-  .searchbar { display: none !important; }
-  .nav-a.d-none.d-md-inline,
-  .nav-a.d-md-inline { display: none !important; }
-  #greet { display: none !important; }
-  .hero { padding: 1.75rem 0 1.5rem; }
-  .hero h1 { font-size: 1.5rem !important; line-height: 1.25; }
-  .hero .btn-lg { padding: 0.45rem 0.9rem; font-size: 0.9rem; }
-  .stat-row { gap: 0.75rem 1rem; }
-  .stat-row strong { font-size: 1rem; }
-  .cat-grid { grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
-  .cat { padding: 0.55rem 0.2rem; }
-  .cat i { width: 34px; height: 34px; font-size: 0.9rem; margin-bottom: 0.25rem; }
-  .cat .t { font-size: 0.62rem; line-height: 1.2; }
-  .pcard img { height: 120px; }
-  .price { font-size: 0.95rem; }
-  .shell, .admin-shell { grid-template-columns: 1fr !important; }
-  .side, .aside { display: none !important; }
-  .msg-layout { grid-template-columns: 1fr !important; height: auto; min-height: 40vh; }
-  .auth-grid { grid-template-columns: 1fr !important; }
-  .promo { padding: 1rem; font-size: 0.9rem; }
-  .row { margin-left: 0 !important; margin-right: 0 !important; }
-  [class*="col-"] { padding-left: 6px; padding-right: 6px; }
-  .table-responsive { max-width: 100%; overflow-x: auto; }
-  body { padding-bottom: 70px; }
-  .mobile-nav {
-    display: flex !important;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: #fff;
-    border-top: 1px solid #e2e8f0;
-    z-index: 1040;
-    padding: 0.35rem 0 calc(0.35rem + env(safe-area-inset-bottom));
-    justify-content: space-around;
-    box-shadow: 0 -4px 20px rgba(0,0,0,.08);
-  }
-  .mobile-nav a {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 0.62rem;
-    color: #64748b;
-    font-weight: 500;
-    padding: 0.2rem 0.4rem;
-    text-decoration: none;
-    min-width: 52px;
-  }
-  .mobile-nav a i { font-size: 1.1rem; margin-bottom: 0.1rem; }
-  .mobile-nav a.active { color: #f97316; }
-  .btn-or, .btn-nv, .btn-out { white-space: nowrap; }
-  .modal-dialog { margin: 0.5rem; max-width: calc(100% - 1rem); }
-}
-@media (min-width: 768px) {
-  .mobile-nav { display: none !important; }
-  .nav-scroll { overflow: visible; flex: initial; }
-}
+/* PROFILE / DASH */
+.cover{height:120px;background:linear-gradient(135deg,#1e3a5f,#7c2d12);position:relative}
+.avatar-lg{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ea580c);border:3px solid var(--bg);display:grid;place-items:center;font-size:1.8rem;font-weight:800;margin:-40px auto 0;position:relative;z-index:2}
+.profile-info{text-align:center;padding:8px 16px 16px}
+.profile-info h2{margin:0;font-size:1.2rem}
+.profile-info .handle{color:var(--muted);font-size:.85rem}
+.profile-stats{display:flex;justify-content:center;gap:24px;margin:12px 0}
+.profile-stats div{text-align:center}
+.profile-stats b{display:block;font-size:1.1rem}
+.profile-stats span{font-size:.7rem;color:var(--muted)}
+.tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.tile{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+.tile .lbl{font-size:.7rem;color:var(--muted)}
+.tile .val{font-size:1.25rem;font-weight:800;margin-top:4px}
+.tile .chg{font-size:.7rem;color:var(--green)}
+
+/* AUTH SHEET */
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.sheet.on{display:flex}
+.sheet-box{width:100%;max-width:480px;background:var(--bg2);border-radius:24px 24px 0 0;padding:20px 20px 32px;animation:fadeIn .3s ease}
+.sheet-box h3{margin:0 0 16px;font-size:1.2rem}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);outline:0;font-size:.9rem}
+.field input:focus{border-color:var(--orange)}
+.full{width:100%;padding:14px;border-radius:14px;border:0;background:linear-gradient(135deg,var(--orange),#ea580c);color:#fff;font-weight:700;font-size:1rem;margin-top:8px}
+.ghost{width:100%;padding:14px;border-radius:14px;border:1px solid var(--border);background:transparent;color:var(--text);font-weight:600;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.muted-link{text-align:center;margin-top:12px;font-size:.85rem;color:var(--muted)}
+.muted-link a{color:var(--orange);font-weight:600}
+
+/* ADMIN */
+.admin-nav{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto}
+.admin-nav button{flex-shrink:0;padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:.8rem}
+.admin-nav button.on{background:var(--orange);color:#fff;border-color:var(--orange)}
+.table-card{margin:0 16px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px}
+.table-card .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.table-card .row:last-child{border-bottom:0}
+.sm-btn{padding:6px 10px;border-radius:8px;border:0;font-size:.7rem;font-weight:600}
+.sm-btn.ok{background:rgba(34,197,94,.2);color:var(--green)}
+.sm-btn.no{background:rgba(239,68,68,.2);color:var(--red)}
+
+.empty{text-align:center;padding:48px 20px;color:var(--dim)}
+.empty i{font-size:2.5rem;opacity:.4;margin-bottom:8px}
+.loading{position:fixed;inset:0;background:rgba(11,15,26,.9);display:none;align-items:center;justify-content:center;z-index:300}
+.loading.on{display:flex}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border);padding:12px 18px;border-radius:12px;z-index:400;font-size:.85rem;box-shadow:var(--shadow);display:none}
+.toast.on{display:block;animation:fadeIn .25s ease}
+.menu-list{padding:8px 16px}
+.menu-list a,.menu-list button{width:100%;display:flex;align-items:center;gap:14px;padding:14px 12px;border-radius:12px;border:0;background:transparent;color:var(--text);font-size:.95rem;text-align:left}
+.menu-list a i,.menu-list button i{width:24px;color:var(--muted)}
+.menu-list .danger{color:var(--red)}
 </style>
 </head>
-<body data-theme="light">
-<div id="toast-wrap"></div>
-<div id="notifPanel" class="d-none" style="position:fixed;top:70px;right:12px;width:min(360px,calc(100vw - 24px));max-height:70vh;overflow:auto;background:var(--bg-elevated,#fff);border:1px solid var(--border,#e2e8f0);border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.15);z-index:2000;padding:0.75rem">
-<div class="d-flex justify-content-between align-items-center mb-2 px-1"><strong class="small">Notifications</strong><button class="btn-ghost btn-sm" onclick="markAllNotifsRead()">Mark all read</button></div>
-<div id="notifList"><div class="empty p-3 small">No notifications</div></div>
-</div>
-<div id="loading" class="loading-overlay d-none"><div class="text-center"><div class="spinner-border" style="color:var(--orange);width:2.8rem;height:2.8rem"></div><p class="mt-3 text-muted mb-0">Loading Bei Poa...</p></div></div>
+<body>
 
-<!-- TOP BAR -->
-<div class="topnav d-none d-md-block"><div class="container d-flex justify-content-between">
-<span>Buy, sell &amp; trade campus items · Safe · Moderated</span>
-<div class="d-flex gap-3"><a href="#" onclick="showSec('terms');return false">Terms</a><a href="#" onclick="showSec('privacy');return false">Privacy</a></div>
-</div></div>
+<div class="loading" id="loading"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
 
-<!-- MAIN NAV -->
-<nav class="mainnav"><div class="container d-flex align-items-center justify-content-between gap-2 flex-wrap">
-<a class="brand" href="#" onclick="showSec('home');return false"><span class="brand-ico">BP</span> Bei Poa</a>
-<div class="searchbar d-none d-lg-flex" id="searchWrap"><i class="fas fa-search text-muted"></i><input id="navSearch" placeholder="Search products, brands, or categories..." oninput="onSearch(this.value)"></div>
-<div class="nav-scroll">
-<a class="nav-a d-none d-md-inline active" id="n-home" href="#" onclick="showSec('home');return false">Home</a>
-<a class="nav-a d-none" id="n-market" href="#" onclick="showSec('marketplace');return false">Marketplace</a>
-<a class="nav-a d-none" id="n-cats" href="#" onclick="showSec('categories');return false">Categories</a>
-<a class="nav-a d-none" id="n-dash" href="#" onclick="showSec('dashboard');return false">Dashboard</a>
-<a class="nav-a d-none" id="n-msg" href="#" onclick="showSec('messages');return false">Messages</a>
-<a class="nav-a d-none" id="n-admin" href="#" onclick="showSec('admin');return false">Admin</a>
-<span id="greet" class="small text-muted d-none d-xl-inline me-1"></span>
-<button id="notifBtn" class="theme-toggle d-none" onclick="toggleNotifPanel()" title="Notifications"><i class="fas fa-bell"></i><span id="notifDot" class="d-none" style="position:absolute;top:6px;right:6px;width:8px;height:8px;background:#f97316;border-radius:50%"></span></button>
-<button type="button" id="themeBtn" class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"><i class="fas fa-moon" id="themeIcon"></i></button>
-<button id="btnLogin" class="btn-out btn-sm" onclick="showAuth('login')">Login</button>
-<button id="btnReg" class="btn-or btn-sm" onclick="showAuth('register')">Sign Up</button>
-<button id="btnSell" class="btn-nv btn-sm d-none" onclick="openPost()"><i class="fas fa-plus me-1"></i>Sell</button>
-<button id="btnOut" class="btn-out btn-sm d-none" onclick="logout()">Logout</button>
-</div></div></nav>
-
-<!-- ========== 1. HOME ========== -->
-<div id="sec-home" class="section active">
-<section class="hero"><div class="container"><div class="row align-items-center g-4">
-<div class="col-lg-6">
-<p class="text-uppercase small fw-semibold mb-2 opacity-75" style="letter-spacing:.08em">Campus Marketplace</p>
-<h1>Give Good Products a<br><em>Second Life</em></h1>
-<p class="mt-3 mb-4 opacity-90" style="max-width:460px">Buy and sell quality second-hand campus items at the best prices. Safe. Easy. Trusted by students.</p>
-<div class="d-flex flex-wrap gap-2">
-<button class="btn-or btn-lg" onclick="goMarket()">Browse Now</button>
-<button class="btn btn-outline-light btn-lg" onclick="goSell()">Start Selling</button>
-</div>
-<div class="stat-row">
-<div><strong id="hUsers">—</strong><span>Active Users</span></div>
-<div><strong id="hItems">—</strong><span>Items Listed</span></div>
-<div><strong>Safe</strong><span>Moderated</span></div>
-<div><strong>4.8★</strong><span>Community</span></div>
-</div>
-</div>
-<div class="col-lg-6 d-none d-lg-block">
-<div class="hero-art">
-<div class="row g-2">
-<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-laptop fa-lg mb-2 text-info"></i><div class="small">Laptops</div></div></div>
-<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-book fa-lg mb-2 text-warning"></i><div class="small">Books</div></div></div>
-<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-couch fa-lg mb-2 text-success"></i><div class="small">Furniture</div></div></div>
-<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-mobile-alt fa-lg mb-2 text-danger"></i><div class="small">Phones</div></div></div>
-<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-file-alt fa-lg mb-2"></i><div class="small">Notes</div></div></div>
-<div class="col-4"><div class="bg-white bg-opacity-10 rounded-3 p-3 text-center"><i class="fas fa-flask fa-lg mb-2 text-primary"></i><div class="small">Lab gear</div></div></div>
-</div>
-</div>
-</div>
-</div></div></section>
-
-<div class="container py-5">
-<h2 class="fw-bold mb-3" style="letter-spacing:-.02em">Shop by Category</h2>
-<div class="cat-grid mb-5">
-<div class="cat" onclick="filterCat('Textbooks')"><i class="fas fa-book"></i><div class="t">Textbooks</div></div>
-<div class="cat" onclick="filterCat('Notes / PDFs')"><i class="fas fa-file-alt"></i><div class="t">Notes / PDFs</div></div>
-<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-laptop"></i><div class="t">Laptops</div></div>
-<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-mobile-alt"></i><div class="t">Phones</div></div>
-<div class="cat" onclick="filterCat('Furniture')"><i class="fas fa-couch"></i><div class="t">Furniture</div></div>
-<div class="cat" onclick="filterCat('Electronics')"><i class="fas fa-headphones"></i><div class="t">Gadgets</div></div>
-<div class="cat" onclick="filterCat('Other')"><i class="fas fa-flask"></i><div class="t">Lab gear</div></div>
-<div class="cat" onclick="filterCat('Other')"><i class="fas fa-box"></i><div class="t">Other</div></div>
+<!-- HOME -->
+<div class="sec on" id="sec-home">
+  <div class="appbar">
+    <div class="logo"><div class="logo-i">BP</div> Bei Poa</div>
+    <button class="icon-btn" onclick="showSec('notifications')"><i class="fas fa-bell"></i></button>
+  </div>
+  <div class="hero">
+    <h1>Find Amazing<br><span>Campus Deals</span></h1>
+    <p>Buy and sell quality items at the best prices. Safe. Easy. Trusted.</p>
+    <div class="search-pill" onclick="showSec('explore')">
+      <i class="fas fa-search" style="color:var(--dim)"></i>
+      <input placeholder="Search products, books, electronics..." readonly>
+    </div>
+    <div class="hero-visual">
+      <span class="float" style="left:12%;top:20%;animation-delay:0s">💻</span>
+      <span class="float" style="left:45%;top:35%;animation-delay:.5s">📱</span>
+      <span class="float" style="left:70%;top:15%;animation-delay:1s">📚</span>
+      <span class="float" style="left:30%;top:55%;animation-delay:1.5s">🎧</span>
+      <span class="float" style="left:60%;top:60%;animation-delay:.8s">🎒</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><b id="hUsers">—</b><span>Active Users</span></div>
+      <div class="stat"><b id="hItems">0</b><span>Listings</span></div>
+      <div class="stat"><b>4.8★</b><span>Rating</span></div>
+    </div>
+  </div>
+  <div class="sec-pad">
+    <div class="row-title"><h2>Popular Categories</h2><a href="#" onclick="showSec('explore');return false">See All</a></div>
+  </div>
+  <div class="h-scroll sec-pad" style="padding-bottom:8px">
+    <div class="chip" onclick="filterCat('Electronics')"><div class="ic" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)"><i class="fas fa-laptop"></i></div><span>Electronics</span></div>
+    <div class="chip" onclick="filterCat('Textbooks')"><div class="ic" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)"><i class="fas fa-book"></i></div><span>Books</span></div>
+    <div class="chip" onclick="filterCat('Notes / PDFs')"><div class="ic" style="background:linear-gradient(135deg,#06b6d4,#0891b2)"><i class="fas fa-file-alt"></i></div><span>Notes</span></div>
+    <div class="chip" onclick="filterCat('Furniture')"><div class="ic" style="background:linear-gradient(135deg,#f97316,#c2410c)"><i class="fas fa-couch"></i></div><span>Furniture</span></div>
+    <div class="chip" onclick="filterCat('Other')"><div class="ic" style="background:linear-gradient(135deg,#22c55e,#15803d)"><i class="fas fa-flask"></i></div><span>Lab gear</span></div>
+    <div class="chip" onclick="filterCat('Other')"><div class="ic" style="background:linear-gradient(135deg,#64748b,#334155)"><i class="fas fa-box"></i></div><span>Other</span></div>
+  </div>
+  <div class="sec-pad"><div class="row-title"><h2>Featured</h2><a href="#" onclick="showSec('explore');return false">See All</a></div></div>
+  <div class="pgrid" id="featuredGrid"></div>
 </div>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-<h2 class="fw-bold mb-0" style="letter-spacing:-.02em">Featured Products</h2>
-<button class="btn-out btn-sm" onclick="goMarket()">View All</button>
+<!-- EXPLORE -->
+<div class="sec" id="sec-explore">
+  <div class="appbar">
+    <div class="logo"><div class="logo-i">BP</div> Explore</div>
+  </div>
+  <div style="padding:12px 16px">
+    <div class="search-pill">
+      <i class="fas fa-search" style="color:var(--dim)"></i>
+      <input id="searchInput" placeholder="Search products..." oninput="debounceRender()">
+    </div>
+  </div>
+  <div class="filters">
+    <button class="fchip on" data-cat="" onclick="setFilter(this,'')">All</button>
+    <button class="fchip" data-cat="Electronics" onclick="setFilter(this,'Electronics')">Electronics</button>
+    <button class="fchip" data-cat="Textbooks" onclick="setFilter(this,'Textbooks')">Books</button>
+    <button class="fchip" data-cat="Furniture" onclick="setFilter(this,'Furniture')">Furniture</button>
+    <button class="fchip" data-cat="Notes / PDFs" onclick="setFilter(this,'Notes / PDFs')">Notes</button>
+    <button class="fchip" data-cat="Other" onclick="setFilter(this,'Other')">Other</button>
+  </div>
+  <div class="pgrid" id="itemsGrid"></div>
+  <div class="empty d-none" id="noItems" style="display:none"><i class="fas fa-box-open"></i><p>No items found</p></div>
 </div>
-<div id="featured" class="row g-3 mb-5"></div>
 
-<div class="promo d-flex align-items-center justify-content-between flex-wrap gap-3">
-<div>
-<div class="fw-bold h5 mb-1">Campus deals you'll love</div>
-<div class="small opacity-75">Fair student prices. Moderated listings. Safer deals.</div>
-</div>
-<button class="btn-or" onclick="goMarket()">Explore Deals</button>
-</div>
+<!-- PRODUCT -->
+<div class="sec" id="sec-product">
+  <div class="appbar">
+    <button class="icon-btn" onclick="showSec('explore')"><i class="fas fa-arrow-left"></i></button>
+    <div class="logo" style="font-size:1rem">Details</div>
+    <button class="icon-btn" id="pdFav" onclick="toggleFavorite(selectedItem&&selectedItem.id)"><i class="far fa-heart"></i></button>
+  </div>
+  <div id="productDetail"></div>
 </div>
 
-<div class="container pb-5">
-  <h2 class="fw-bold mb-4 text-center" style="letter-spacing:-.02em">How Bei Poa works</h2>
-  <div class="row g-3 text-center">
-    <div class="col-md-4"><div class="tile h-100"><div class="mb-2" style="font-size:1.75rem;color:var(--orange)"><i class="fas fa-user-plus"></i></div><div class="fw-bold mb-1">1. Create account</div><p class="small text-muted mb-0">Sign up with email or Google. Add your university.</p></div></div>
-    <div class="col-md-4"><div class="tile h-100"><div class="mb-2" style="font-size:1.75rem;color:var(--orange)"><i class="fas fa-tags"></i></div><div class="fw-bold mb-1">2. List or browse</div><p class="small text-muted mb-0">Post items for review, or buy approved listings from students.</p></div></div>
-    <div class="col-md-4"><div class="tile h-100"><div class="mb-2" style="font-size:1.75rem;color:var(--orange)"><i class="fas fa-handshake"></i></div><div class="fw-bold mb-1">3. Meet &amp; deal</div><p class="small text-muted mb-0">Chat on WhatsApp, meet on campus, pay safely.</p></div></div>
+<!-- MESSAGES -->
+<div class="sec" id="sec-messages">
+  <div class="appbar"><div class="logo"><div class="logo-i">BP</div> Messages</div></div>
+  <div class="chat-list" id="msgList"><div class="empty"><i class="fas fa-comments"></i><p>No chats yet. Message a seller from a listing.</p></div></div>
+</div>
+
+<!-- CHAT THREAD -->
+<div class="sec" id="sec-chat">
+  <div class="appbar">
+    <button class="icon-btn" onclick="showSec('messages')"><i class="fas fa-arrow-left"></i></button>
+    <div class="logo" style="font-size:.95rem" id="msgTitle">Chat</div>
+    <div style="width:40px"></div>
+  </div>
+  <div class="chat-thread">
+    <div class="chat-msgs" id="msgBody"></div>
+    <div class="chat-input">
+      <input id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatMessage()">
+      <button type="button" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+    </div>
   </div>
 </div>
+
+<!-- PROFILE -->
+<div class="sec" id="sec-profile">
+  <div class="appbar"><div class="logo"><div class="logo-i">BP</div> Profile</div>
+    <button class="icon-btn" onclick="showSec('settings')"><i class="fas fa-cog"></i></button>
+  </div>
+  <div id="profileGuest" style="display:none">
+    <div class="empty" style="padding-top:80px">
+      <i class="fas fa-user-circle"></i>
+      <p style="margin:12px 0;color:var(--muted)">Sign in to manage your listings and chats</p>
+      <button class="btn btn-o" style="max-width:200px;margin:0 auto" onclick="openAuth('login')">Login</button>
+      <button class="btn btn-g" style="max-width:200px;margin:12px auto 0" onclick="openAuth('register')">Sign Up</button>
+    </div>
+  </div>
+  <div id="profileUser" style="display:none">
+    <div class="cover"></div>
+    <div class="avatar-lg" id="pAv">U</div>
+    <div class="profile-info">
+      <h2 id="pName">User</h2>
+      <div class="handle" id="pEmail">email</div>
+      <div class="profile-stats">
+        <div><b id="statListings">0</b><span>Listings</span></div>
+        <div><b id="statActive">0</b><span>Active</span></div>
+        <div><b id="statSold">0</b><span>Sold</span></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+        <button class="btn btn-o" style="flex:0 1 140px;padding:10px" onclick="openPost()">Sell item</button>
+        <button class="btn btn-g" style="flex:0 1 140px;padding:10px" onclick="showSec('dashboard')">Dashboard</button>
+      </div>
+    </div>
+    <div class="menu-list">
+      <a href="#" onclick="showSec('dashboard');return false"><i class="fas fa-chart-line"></i> My Dashboard</a>
+      <a href="#" onclick="showSec('settings');return false"><i class="fas fa-user-edit"></i> Edit profile</a>
+      <a href="#" id="adminLink" style="display:none" onclick="showSec('admin');return false"><i class="fas fa-shield-alt"></i> Admin panel</a>
+      <button class="danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Log out</button>
+    </div>
+  </div>
 </div>
 
-<!-- ========== MARKETPLACE ========== -->
-<div id="sec-marketplace" class="section">
-<div class="container py-4">
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-<div><h2 class="fw-bold mb-0">Marketplace</h2><p class="text-muted small mb-0">Approved campus listings</p></div>
-<button class="btn-or btn-sm" onclick="openPost()"><i class="fas fa-plus me-1"></i>Sell</button>
+<!-- DASHBOARD -->
+<div class="sec" id="sec-dashboard">
+  <div class="page-head">
+    <button class="icon-btn" onclick="showSec('profile')"><i class="fas fa-arrow-left"></i></button>
+    <h1>Dashboard</h1>
+  </div>
+  <div class="tile-grid" style="margin-bottom:16px">
+    <div class="tile"><div class="lbl">My Listings</div><div class="val" id="dTotal">0</div></div>
+    <div class="tile"><div class="lbl">Active</div><div class="val" id="dActive">0</div></div>
+    <div class="tile"><div class="lbl">Pending</div><div class="val" id="dPending">0</div></div>
+    <div class="tile"><div class="lbl">Sold</div><div class="val" id="dSold">0</div></div>
+  </div>
+  <div class="sec-pad"><h2 style="font-size:1rem;margin:0 0 12px">My listings</h2></div>
+  <div id="myListings" class="pgrid"></div>
+  <div class="empty" id="noMy" style="display:none"><i class="fas fa-clipboard-list"></i><p>No listings yet</p>
+    <button class="btn btn-o" style="max-width:180px;margin:12px auto 0" onclick="openPost()">Post item</button>
+  </div>
 </div>
-<div class="card border-0 shadow-sm rounded-4 mb-4"><div class="card-body p-3">
-<div class="row g-2 align-items-end">
-<div class="col-md-4"><label class="form-label small text-muted mb-1">Search</label><input id="searchInput" class="form-control form-control-sm" placeholder="Search..." oninput="debounceRender()"></div>
-<div class="col-6 col-md-2"><label class="form-label small text-muted mb-1">University</label><select id="filterUniversity" class="form-select form-select-sm" onchange="renderItems()"><option value="">All</option></select></div>
-<div class="col-6 col-md-2"><label class="form-label small text-muted mb-1">Category</label>
-<select id="filterCategory" class="form-select form-select-sm" onchange="renderItems()">
-<option value="">All</option><option>Textbooks</option><option>Electronics</option><option>Furniture</option><option>Notes / PDFs</option><option>Other</option>
-</select></div>
-<div class="col-6 col-md-2"><label class="form-label small text-muted mb-1">Max price</label><input id="filterPrice" type="number" class="form-control form-control-sm" placeholder="Any" oninput="debounceRender()"></div>
-<div class="col-6 col-md-2"><button class="btn-out btn-sm w-100" onclick="resetFilters()">Reset</button></div>
-</div></div></div>
-<div id="itemsGrid" class="row g-3"></div>
-<div id="noItems" class="empty d-none"><i class="fas fa-box-open"></i><p>No items found.</p></div>
-</div></div>
 
-<!-- ========== 3. CATEGORIES ========== -->
-<div id="sec-categories" class="section">
-<div class="container py-4">
-<h2 class="fw-bold mb-1">Shop by Category</h2>
-<p class="text-muted mb-4">Find exactly what you need from our wide range of second-hand campus products.</p>
-<div class="row g-3 mb-4">
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Textbooks')"><i class="fas fa-book"></i><div class="t">Textbooks</div><div class="c">Course books</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Notes / PDFs')"><i class="fas fa-file-alt"></i><div class="t">Notes / PDFs</div><div class="c">Study materials</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-laptop"></i><div class="t">Laptops &amp; Computers</div><div class="c">Electronics</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-mobile-alt"></i><div class="t">Phones &amp; Tablets</div><div class="c">Electronics</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Furniture')"><i class="fas fa-couch"></i><div class="t">Room Furniture</div><div class="c">Hostels</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Electronics')"><i class="fas fa-headphones"></i><div class="t">Gadgets &amp; Accessories</div><div class="c">Electronics</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Other')"><i class="fas fa-flask"></i><div class="t">Lab &amp; Course Gear</div><div class="c">Other</div></div></div>
-<div class="col-6 col-md-3"><div class="cat h-100" onclick="filterCat('Other')"><i class="fas fa-box"></i><div class="t">Other Campus Items</div><div class="c">Misc</div></div></div>
+<!-- SETTINGS / EDIT PROFILE -->
+<div class="sec" id="sec-settings">
+  <div class="page-head">
+    <button class="icon-btn" onclick="showSec('profile')"><i class="fas fa-arrow-left"></i></button>
+    <h1>Settings</h1>
+  </div>
+  <div style="padding:0 16px">
+    <div class="field"><label>Full name</label><input id="profileName"></div>
+    <div class="field"><label>Email</label><input id="profileEmail" readonly></div>
+    <div class="field"><label>University</label><input id="profileUniversity"></div>
+    <div class="field"><label>Phone / WhatsApp</label><input id="profilePhone" placeholder="+2547..."></div>
+    <div class="field"><label>Bio</label><textarea id="profileBio" rows="2"></textarea></div>
+    <button class="full" onclick="saveProfile()">Save changes</button>
+  </div>
 </div>
-<div class="promo d-flex justify-content-between align-items-center flex-wrap gap-3">
-<div><div class="fw-bold h5 mb-1">Fair prices on campus</div><div class="small opacity-75">Graduates sell. New students buy.</div></div>
-<button class="btn-or" onclick="goMarket()">Explore Deals</button>
-</div>
-</div></div>
 
-<!-- ========== 2. PRODUCT DETAIL ========== -->
-<div id="sec-product" class="section">
-<div class="container py-4">
-<button class="btn-out btn-sm mb-3" onclick="showSec('marketplace')"><i class="fas fa-arrow-left me-1"></i>Back to listings</button>
-<div class="row g-4" id="productDetail"></div>
-</div></div>
+<!-- NOTIFICATIONS -->
+<div class="sec" id="sec-notifications">
+  <div class="page-head">
+    <button class="icon-btn" onclick="showSec('home')"><i class="fas fa-arrow-left"></i></button>
+    <h1>Notifications</h1>
+  </div>
+  <div id="notifList"><div class="empty"><i class="fas fa-bell"></i><p>No notifications</p></div></div>
+</div>
 
-<!-- ========== 4. DASHBOARD ========== -->
-<div id="sec-dashboard" class="section">
-<div class="shell">
-<aside class="side">
-<div class="u"><div class="av" id="dAv">U</div><div><div class="text-white fw-semibold small" id="dName">User</div><div style="font-size:.68rem" id="dRole">Buyer &amp; Seller</div></div></div>
-<a class="nl on" href="#" onclick="showSec('dashboard');return false"><i class="fas fa-home me-2"></i>Dashboard</a>
-<a class="nl" href="#" onclick="showSec('marketplace');return false"><i class="fas fa-store me-2"></i>My Listings</a>
-<a class="nl" href="#" onclick="showSec('messages');return false"><i class="fas fa-comments me-2"></i>Messages</a>
-<a class="nl" href="#" onclick="showSec('profile');return false"><i class="fas fa-user me-2"></i>Profile</a>
-<a class="nl" href="#" onclick="openPost();return false"><i class="fas fa-plus me-2"></i>Sell Item</a>
-<a class="nl" href="#" onclick="logout();return false"><i class="fas fa-sign-out-alt me-2"></i>Log Out</a>
-</aside>
-<div class="main">
-<h2 class="fw-bold mb-1">Good day, <span id="dHello">there</span> 👋</h2>
-<p class="text-muted small mb-4">Here's what's happening on your account.</p>
-<div class="row g-3 mb-4">
-<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">My Listings</div><div class="n" id="statTotal">0</div></div></div>
-<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Active</div><div class="n text-success" id="statActive">0</div></div></div>
-<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Pending</div><div class="n text-warning" id="statPending">0</div></div></div>
-<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Sold</div><div class="n" id="statSold">0</div></div></div>
+<!-- ADMIN -->
+<div class="sec" id="sec-admin">
+  <div class="page-head">
+    <button class="icon-btn" onclick="showSec('profile')"><i class="fas fa-arrow-left"></i></button>
+    <h1>Admin Panel</h1>
+  </div>
+  <div class="tile-grid" style="margin-bottom:12px">
+    <div class="tile"><div class="lbl">Users</div><div class="val" id="aUsers">0</div></div>
+    <div class="tile"><div class="lbl">Listings</div><div class="val" id="aItems">0</div></div>
+    <div class="tile"><div class="lbl">Pending</div><div class="val" id="aPend">0</div></div>
+    <div class="tile"><div class="lbl">Reports</div><div class="val" id="aRep">0</div></div>
+  </div>
+  <div class="admin-nav">
+    <button class="on" onclick="adminTab('listings',this)">Listings</button>
+    <button onclick="adminTab('reports',this)">Reports</button>
+    <button onclick="adminTab('users',this)">Users</button>
+  </div>
+  <div id="admin-listings" class="table-card"><div id="adminListingsBody"></div></div>
+  <div id="admin-reports" class="table-card" style="display:none"><div id="adminReportsList"></div></div>
+  <div id="admin-users" class="table-card" style="display:none"><div id="adminUsersBody"></div></div>
 </div>
-<div class="card border-0 shadow-sm rounded-4"><div class="card-header bg-white border-0 pt-3"><h5 class="fw-bold mb-0">Recent Listings</h5></div>
-<div class="card-body"><div id="myListings" class="row g-3"></div>
-<div id="noMyListings" class="empty d-none"><i class="fas fa-clipboard-list"></i><p class="mb-2">No listings yet</p><button class="btn-or btn-sm" onclick="openPost()">Post first item</button></div>
-</div></div>
-</div></div></div>
 
-<!-- ========== 5. MESSAGES ========== -->
-<div id="sec-messages" class="section">
-<div class="container-bp py-4">
-<div class="d-flex justify-content-between align-items-center mb-3">
-<h2 class="fw-bold mb-0">Messages</h2>
-<span class="badge bg-secondary" id="unreadBadge">0 unread</span>
-</div>
-<div class="msg-layout">
-<div class="msg-list" id="msgList"><div class="empty p-4"><i class="fas fa-comments"></i><p class="small mb-0">No conversations yet. Message a seller from a product page.</p></div></div>
-<div class="msg-chat">
-<div class="p-3 border-bottom d-flex align-items-center gap-2">
-<div class="fw-semibold flex-grow-1" id="msgTitle">Select a conversation</div>
-</div>
-<div class="msg-body" id="msgBody"></div>
-<div class="msg-input">
-<input class="form-control" id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatMessage()">
-<button class="btn-accent" type="button" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- ========== PROFILE ========== -->
-<div id="sec-profile" class="section">
-<div class="container py-4" style="max-width:700px">
-<h2 class="fw-bold mb-4">Profile</h2>
-<div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
-<div class="d-flex align-items-center gap-3 mb-4">
-<div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center" style="width:72px;height:72px;background:linear-gradient(135deg,#f97316,#fb923c);font-size:1.5rem" id="pAv">U</div>
-<div><h3 class="h5 fw-bold mb-0" id="pName">User</h3><p class="text-muted small mb-1" id="pEmail">email</p>
-<span class="badge bg-dark" id="pRole">USER</span> <span class="badge bg-secondary" id="pUni">—</span></div>
-</div>
-<form onsubmit="saveProfile(event)">
-<div class="row g-3">
-<div class="col-md-6"><label class="form-label small fw-semibold">Full name</label><input id="profileName" class="form-control" required></div>
-<div class="col-md-6"><label class="form-label small fw-semibold">Email</label><input id="profileEmail" class="form-control" readonly></div>
-<div class="col-md-6"><label class="form-label small fw-semibold">University</label><input id="profileUniversity" class="form-control"></div>
-<div class="col-md-6"><label class="form-label small fw-semibold">Phone / WhatsApp</label><input id="profilePhone" class="form-control" placeholder="+2547..."></div>
-<div class="col-12"><label class="form-label small fw-semibold">Bio</label><textarea id="profileBio" class="form-control" rows="2"></textarea></div>
-</div>
-<button class="btn-or mt-3">Save changes</button>
-</form>
-</div></div></div></div>
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <a href="#" class="on" id="nav-home" onclick="showSec('home');return false"><i class="fas fa-home"></i>Home</a>
+  <a href="#" id="nav-explore" onclick="showSec('explore');return false"><i class="fas fa-search"></i>Explore</a>
+  <a href="#" class="sell" onclick="goSell();return false"><i class="fas fa-plus"></i></a>
+  <a href="#" id="nav-messages" onclick="goMessages();return false"><i class="fas fa-comment"></i>Messages</a>
+  <a href="#" id="nav-profile" onclick="showSec('profile');return false"><i class="fas fa-user"></i>Profile</a>
+</nav>
 
-<!-- ========== 6. ADMIN ========== -->
-<div id="sec-admin" class="section">
-<div class="admin-shell">
-<aside class="aside">
-<div class="text-white fw-bold mb-3 px-2">Admin Panel</div>
-<a class="nl on" href="#" id="at-overview" onclick="adminTab('overview');return false"><i class="fas fa-chart-pie me-2"></i>Dashboard</a>
-<a class="nl" href="#" id="at-listings" onclick="adminTab('listings');return false"><i class="fas fa-box me-2"></i>Products</a>
-<a class="nl" href="#" id="at-reports" onclick="adminTab('reports');return false"><i class="fas fa-flag me-2"></i>Reports</a>
-<a class="nl" href="#" id="at-users" onclick="adminTab('users');return false"><i class="fas fa-users me-2"></i>Users</a>
-</aside>
-<div class="amain">
-<div class="d-md-none mb-3"><select class="form-select" onchange="adminTab(this.value)"><option value="overview">Dashboard</option><option value="listings">Products</option><option value="reports">Reports</option><option value="users">Users</option></select></div>
-<div id="admin-overview">
-<h2 class="fw-bold mb-4">Admin Dashboard</h2>
-<div class="row g-3 mb-4">
-<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Total Users</div><div class="n" id="aUsers">0</div></div></div>
-<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Products</div><div class="n" id="aItems">0</div></div></div>
-<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Pending Approvals</div><div class="n text-warning" id="aPend">0</div></div></div>
-<div class="col-6 col-lg-3"><div class="tile"><div class="text-muted small">Open Reports</div><div class="n text-danger" id="aRep">0</div></div></div>
+<!-- AUTH SHEET -->
+<div class="sheet" id="authSheet">
+  <div class="sheet-box">
+    <h3 id="authTitle">Login</h3>
+    <button class="ghost" type="button" onclick="loginGoogle()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Continue with Google</button>
+    <div style="text-align:center;color:var(--dim);font-size:.8rem;margin:12px 0">or email</div>
+    <form onsubmit="handleAuth(event)">
+      <div class="field" id="nameField" style="display:none"><label>Full name</label><input id="authName"></div>
+      <div class="field"><label>Email</label><input id="authEmail" type="email" required></div>
+      <div class="field"><label>Password</label><input id="authPassword" type="password" required minlength="6"></div>
+      <div class="field" id="universityField" style="display:none"><label>University</label><input id="authUniversity" placeholder="e.g. University of Nairobi"></div>
+      <button class="full" type="submit" id="authSubmitText">Login</button>
+    </form>
+    <div class="muted-link"><span id="authSwitchText">Don't have an account?</span> <a href="#" id="authSwitchLink" onclick="toggleAuth(event)">Register</a></div>
+    <button class="ghost" type="button" onclick="closeAuth()" style="margin-top:8px">Close</button>
+  </div>
 </div>
-<div class="alert alert-light border">Promote trusted users to <strong>moderator</strong> to help approve listings and handle reports.</div>
-</div>
-<div id="admin-listings" class="d-none">
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-<h2 class="fw-bold mb-0">Products</h2>
-<div class="d-flex gap-2">
-<button class="btn btn-success btn-sm" onclick="approveAll()">Approve all pending</button>
-<select id="listingStatusFilter" class="form-select form-select-sm w-auto" onchange="renderAdminListings()">
-<option value="">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
-</select></div></div>
-<div class="table-responsive bg-white rounded-4 shadow-sm"><table class="table table-hover align-middle mb-0">
-<thead class="table-light"><tr><th>Item</th><th>Seller</th><th>Price</th><th>Status</th><th></th></tr></thead>
-<tbody id="adminListingsBody"></tbody></table></div>
-</div>
-<div id="admin-reports" class="d-none">
-<h2 class="fw-bold mb-3">Reports</h2>
-<div id="adminReportsList"></div>
-<div id="noReports" class="empty d-none"><i class="fas fa-flag"></i><p>No open reports.</p></div>
-</div>
-<div id="admin-users" class="d-none">
-<h2 class="fw-bold mb-3">Users</h2>
-<div class="table-responsive bg-white rounded-4 shadow-sm"><table class="table table-hover align-middle mb-0">
-<thead class="table-light"><tr><th>User</th><th>University</th><th>Role</th><th>Status</th><th></th></tr></thead>
-<tbody id="adminUsersBody"></tbody></table></div>
-</div>
-</div></div></div>
 
-<!-- ========== 8. CHECKOUT (contact flow) ========== -->
-<div id="sec-checkout" class="section">
-<div class="container py-4" style="max-width:800px">
-<h2 class="fw-bold mb-4">Complete your deal</h2>
-<div class="d-flex align-items-center gap-2 mb-4">
-<span class="chk-step on">1</span><span class="small fw-semibold me-2">Contact</span>
-<span class="text-muted">—</span>
-<span class="chk-step">2</span><span class="small text-muted me-2">Meet</span>
-<span class="text-muted">—</span>
-<span class="chk-step">3</span><span class="small text-muted">Pay &amp; collect</span>
+<!-- POST SHEET -->
+<div class="sheet" id="postSheet">
+  <div class="sheet-box" style="max-height:90vh;overflow-y:auto">
+    <h3>Add New Listing</h3>
+    <form onsubmit="handlePost(event)">
+      <div class="field"><label>Product Title</label><input id="itemTitle" required placeholder="e.g. MacBook Air M1"></div>
+      <div class="field"><label>Category</label>
+        <select id="itemCategory" required>
+          <option value="">Select</option>
+          <option>Textbooks</option><option>Electronics</option><option>Furniture</option>
+          <option>Notes / PDFs</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Price (KSh)</label><input id="itemPrice" type="number" required min="0" placeholder="e.g. 75000"></div>
+      <div class="field"><label>Condition</label>
+        <select id="itemCondition"><option>Like New</option><option>Good</option><option>Fair</option><option>Used</option></select>
+      </div>
+      <div class="field"><label>University</label><input id="itemUniversity" required></div>
+      <div class="field"><label>WhatsApp</label><input id="itemContact" required placeholder="+2547..."></div>
+      <div class="field"><label>Description</label><textarea id="itemDesc" rows="2" placeholder="Tell buyers more..."></textarea></div>
+      <div class="field"><label>Image URL</label><input id="itemImage" type="url" placeholder="https://..."></div>
+      <button class="full" type="submit">Publish Listing</button>
+    </form>
+    <button class="ghost" type="button" onclick="closePost()">Cancel</button>
+  </div>
 </div>
-<div class="row g-4" id="checkoutBox"></div>
-</div></div>
 
-<!-- TERMS -->
-<div id="sec-terms" class="section"><div class="container py-5" style="max-width:760px">
-<button class="btn-out btn-sm mb-3" onclick="showSec('home')"><i class="fas fa-arrow-left me-1"></i>Back</button>
-<h1 class="h3 fw-bold">Terms and Conditions</h1>
-<p class="text-muted small">Last updated: 17 September 2026 · Bei Poa</p>
-<div class="card border-0 shadow-sm rounded-4 mt-3"><div class="card-body p-4">
-<p>By using Bei Poa you agree to these Terms. Bei Poa is a campus marketplace. We provide the platform only; we are not the seller and we do not hold payments.</p>
-<h5 class="fw-bold mt-3">Accounts</h5><p>Provide accurate info. Keep passwords safe. We may suspend accounts used for fraud or abuse.</p>
-<h5 class="fw-bold mt-3">Listings</h5><p>Only list items you may sell. Be honest. Listings may be reviewed. We can remove content.</p>
-<h5 class="fw-bold mt-3">Deals</h5><p>Buyers and sellers arrange payment and delivery. Meet safely. Bei Poa does not guarantee quality or payment.</p>
-<h5 class="fw-bold mt-3">Prohibited</h5><p>No scams, illegal goods, or harassment. Violations may lead to bans.</p>
-<h5 class="fw-bold mt-3">Liability</h5><p>Service is provided “as is”. We limit liability to the fullest extent allowed by Kenyan law.</p>
-<p class="small text-muted mb-0 mt-3">Continued use means you accept these Terms.</p>
-</div></div></div></div>
-
-<!-- PRIVACY -->
-<div id="sec-privacy" class="section"><div class="container py-5" style="max-width:760px">
-<button class="btn-out btn-sm mb-3" onclick="showSec('home')"><i class="fas fa-arrow-left me-1"></i>Back</button>
-<h1 class="h3 fw-bold">Privacy Policy</h1>
-<p class="text-muted small">Last updated: 17 September 2026 · Bei Poa</p>
-<div class="card border-0 shadow-sm rounded-4 mt-3"><div class="card-body p-4">
-<p>We collect account data (name, email, university, phone), listing content, and reports to run the marketplace. We use Supabase and hosting providers to operate the service.</p>
-<p>We do not sell your personal data. Other users see listing details you publish. You can update your profile in the app.</p>
-<p class="small text-muted mb-0 mt-3">Using Bei Poa means you acknowledge this policy.</p>
-</div></div></div></div>
-
-<!-- AUTH MODAL -->
-<div class="modal fade" id="authModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-<div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold" id="authTitle">Login</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-<div class="modal-body">
-<button type="button" class="btn btn-outline-dark w-100 mb-3 d-flex align-items-center justify-content-center gap-2" onclick="loginGoogle()">
-<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt=""> Continue with Google
-</button>
-<div class="text-center text-muted small mb-3">or use email</div>
-<form id="authForm" onsubmit="handleAuth(event)">
-<div class="mb-3" id="nameField"><label class="form-label small fw-semibold">Full name</label><input id="authName" class="form-control"></div>
-<div class="mb-3"><label class="form-label small fw-semibold">Email</label><input id="authEmail" type="email" class="form-control" required></div>
-<div class="mb-3"><label class="form-label small fw-semibold">Password</label><input id="authPassword" type="password" class="form-control" required minlength="6"></div>
-<div class="mb-3 d-none" id="universityField"><label class="form-label small fw-semibold">University</label><input id="authUniversity" class="form-control" placeholder="e.g. University of Nairobi"></div>
-<button class="btn-or w-100 py-2" type="submit"><span id="authSubmitText">Login</span></button>
-</form>
-<p class="small text-muted text-center mt-3 mb-1">By continuing you agree to our <a href="#" onclick="authModal.hide();showSec('terms');return false">Terms</a> and <a href="#" onclick="authModal.hide();showSec('privacy');return false">Privacy Policy</a>.</p>
-<div class="text-center small text-muted"><span id="authSwitchText">Don't have an account?</span> <a href="#" id="authSwitchLink" onclick="toggleAuth(event)" style="color:var(--orange);font-weight:600">Register</a></div>
-</div></div></div></div>
-
-<!-- POST MODAL -->
-<div class="modal fade" id="postModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
-<div class="modal-header border-0"><h5 class="modal-title fw-bold">Sell an item</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-<div class="modal-body">
-<div class="alert alert-warning small py-2">New listings go to <strong>Pending</strong> until approved.</div>
-<form id="postForm" onsubmit="handlePost(event)">
-<div class="mb-3"><label class="form-label small fw-semibold">Title *</label><input id="itemTitle" class="form-control" required></div>
-<div class="mb-3"><label class="form-label small fw-semibold">Description</label><textarea id="itemDesc" class="form-control" rows="2"></textarea></div>
-<div class="row g-3 mb-3">
-<div class="col-md-4"><label class="form-label small fw-semibold">Price (KES) *</label><input id="itemPrice" type="number" class="form-control" required min="0"></div>
-<div class="col-md-4"><label class="form-label small fw-semibold">Category *</label>
-<select id="itemCategory" class="form-select" required><option value="">Select</option><option>Textbooks</option><option>Electronics</option><option>Furniture</option><option>Notes / PDFs</option><option>Other</option></select></div>
-<div class="col-md-4"><label class="form-label small fw-semibold">Condition</label>
-<select id="itemCondition" class="form-select"><option>Like New</option><option>Good</option><option>Fair</option><option>Used</option></select></div>
-</div>
-<div class="row g-3 mb-3">
-<div class="col-md-6"><label class="form-label small fw-semibold">University *</label><input id="itemUniversity" class="form-control" required></div>
-<div class="col-md-6"><label class="form-label small fw-semibold">WhatsApp *</label><input id="itemContact" class="form-control" required placeholder="+2547..."></div>
-</div>
-<div class="mb-3"><label class="form-label small fw-semibold">Image URL</label><input id="itemImage" type="url" class="form-control" placeholder="https://..."></div>
-<button class="btn-or w-100 py-2" type="submit">Submit for review</button>
-</form>
-</div></div></div></div>
-
-<!-- REPORT -->
-<div class="modal fade" id="reportModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-<div class="modal-header border-0"><h5 class="modal-title fw-bold text-danger"><i class="fas fa-flag me-2"></i>Report</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-<div class="modal-body">
-<form onsubmit="submitReport(event)">
-<input type="hidden" id="reportItemId">
-<div class="mb-3"><label class="form-label small fw-semibold">Reason *</label>
-<select id="reportReason" class="form-select" required>
-<option value="">Select</option><option value="scam">Scam / Fraud</option><option value="fake">Fake / Misleading</option>
-<option value="inappropriate">Inappropriate</option><option value="wrong_info">Wrong contact</option><option value="other">Other</option>
-</select></div>
-<div class="mb-3"><label class="form-label small fw-semibold">Details</label><textarea id="reportDetails" class="form-control" rows="3"></textarea></div>
-<button class="btn btn-danger w-100" type="submit">Submit report</button>
-</form>
-</div></div></div></div>
-
-<footer>
-<div class="container">
-<div class="row gy-3">
-<div class="col-md-5"><div class="d-flex align-items-center gap-2 text-white fw-bold mb-2"><span class="brand-ico" style="width:28px;height:28px;font-size:.75rem">BP</span> Bei Poa</div>
-<p class="small mb-0">Campus marketplace for Kenyan students. Graduates sell, newcomers buy — fairly and safely.</p></div>
-<div class="col-md-3"><div class="text-white fw-semibold small mb-2">Explore</div>
-<a href="#" class="d-block small mb-1" onclick="showSec('home');return false">Home</a>
-<a href="#" class="d-block small mb-1" onclick="goMarket();return false">Marketplace</a>
-<a href="#" class="d-block small mb-1" onclick="showSec('categories');return false">Categories</a></div>
-<div class="col-md-4"><div class="text-white fw-semibold small mb-2">Legal</div>
-<a href="#" class="d-block small mb-1" onclick="showSec('terms');return false">Terms &amp; Conditions</a>
-<a href="#" class="d-block small mb-1" onclick="showSec('privacy');return false">Privacy Policy</a></div>
-</div>
-<hr class="border-secondary my-3 opacity-25">
-<div class="small">© 2026 Bei Poa. All rights reserved.</div>
-</div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 const SUPABASE_URL='https://mnlfiiuqlacjlaiszygr.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_CmrQp0cnfQfiFFcaOYeEng_E2H4bMJ8';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-let currentUser=null,profile=null,items=[],users=[],reports=[],authMode='login',debounceTimer=null,selectedItem=null;
-let authModal,postModal,reportModal;
+
+let currentUser=null,profile=null,items=[],users=[],reports=[];
+let authMode='login',selectedItem=null,activeFilter='';
+let favorites=new Set(),conversations=[],activeConvo=null,chatChannel=null,debounceTimer=null;
 
 document.addEventListener('DOMContentLoaded',async()=>{
-  authModal=new bootstrap.Modal(document.getElementById('authModal'));
-  postModal=new bootstrap.Modal(document.getElementById('postModal'));
-  reportModal=new bootstrap.Modal(document.getElementById('reportModal'));
-  showLoading(true);
+  load(true);
   try{
     const {data:{session}}=await sb.auth.getSession();
     if(session){currentUser=session.user;await loadProfile()}
-    await loadItems();updateUI();
+    await loadItems();
+    updateUI();
     if(profile&&isStaff())await loadAdminData();
-    showSec('home');
-  }catch(e){console.error(e);alert('Backend connection failed')}
-  finally{showLoading(false)}
+  }catch(e){console.error(e);toast('Connection issue')}
+  finally{load(false)}
   sb.channel('items').on('postgres_changes',{event:'*',schema:'public',table:'items'},()=>loadItems()).subscribe();
 });
 
-function showLoading(s){document.getElementById('loading').classList.toggle('d-none',!s)}
+function load(on){document.getElementById('loading').classList.toggle('on',!!on)}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2800)}
 function isStaff(){return profile&&(profile.role==='admin'||profile.role==='moderator')}
 function isAdmin(){return profile&&profile.role==='admin'}
 function esc(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML}
-function debounceRender(){clearTimeout(debounceTimer);debounceTimer=setTimeout(renderItems,280)}
-function onSearch(v){const s=document.getElementById('searchInput');if(s){s.value=v;debounceRender()}if(currentUser)showSec('marketplace')}
-function goMarket(){if(!currentUser){showAuth('login');return}showSec('marketplace')}
-function goSell(){if(!currentUser){showAuth('register');return}openPost()}
-function filterCat(c){if(!currentUser){showAuth('login');return}showSec('marketplace');document.getElementById('filterCategory').value=c;renderItems()}
+
+function showSec(name){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  const el=document.getElementById('sec-'+name);
+  if(el)el.classList.add('on');
+  document.querySelectorAll('.bnav a').forEach(a=>a.classList.remove('on'));
+  const map={home:'nav-home',explore:'nav-explore',messages:'nav-messages',profile:'nav-profile'};
+  if(map[name])document.getElementById(map[name])?.classList.add('on');
+  if(name==='explore')renderItems();
+  if(name==='home')renderFeatured();
+  if(name==='profile')renderProfile();
+  if(name==='dashboard'&&profile)renderDashboard();
+  if(name==='settings'&&profile)loadProfileForm();
+  if(name==='messages')loadConversations();
+  if(name==='admin'&&isStaff()){loadAdminData();adminTab('listings')}
+  window.scrollTo(0,0);
+}
+
+function goSell(){if(!currentUser){openAuth('register');return}openPost()}
+function goMessages(){if(!currentUser){openAuth('login');return}showSec('messages')}
+function filterCat(c){if(!currentUser){openAuth('login');return}activeFilter=c;showSec('explore');
+  document.querySelectorAll('.fchip').forEach(x=>x.classList.toggle('on',x.dataset.cat===c));
+  renderItems()}
+function setFilter(btn,c){activeFilter=c;document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('on'));btn.classList.add('on');renderItems()}
+function debounceRender(){clearTimeout(debounceTimer);debounceTimer=setTimeout(renderItems,250)}
 
 async function loadProfile(){
   if(!currentUser)return;
   const {data,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
   if(error)return;profile=data;
-  if(profile.status==='banned'){alert('Account banned.');await logout()}
+  if(profile.status==='banned'){toast('Account banned');await logout()}
 }
 async function loadItems(){
   const {data}=await sb.from('items').select('*').order('created_at',{ascending:false});
-  items=data||[];populateUniversities();renderItems();renderFeatured();
-  if(profile)renderDashboard();if(isStaff())renderAdminListings();
-  document.getElementById('hItems').textContent=items.filter(i=>i.status==='approved').length||'0';
-  document.getElementById('hUsers').textContent=users.length||'—';
+  items=data||[];
+  renderItems();renderFeatured();
+  document.getElementById('hItems').textContent=items.filter(i=>i.status==='approved').length;
+  if(profile)renderDashboard();
+  if(isStaff())renderAdminListings();
 }
 async function loadAdminData(){
   const [{data:u},{data:r}]=await Promise.all([
@@ -658,53 +506,95 @@ async function loadAdminData(){
     sb.from('reports').select('*').order('created_at',{ascending:false})
   ]);
   users=u||[];reports=r||[];
-  renderAdminOverview();renderAdminListings();renderAdminReports();renderAdminUsers();
+  document.getElementById('aUsers').textContent=users.length;
+  document.getElementById('aItems').textContent=items.length;
+  document.getElementById('aPend').textContent=items.filter(i=>i.status==='pending').length;
+  document.getElementById('aRep').textContent=reports.filter(r=>r.status==='open').length;
   document.getElementById('hUsers').textContent=users.length||'—';
+  renderAdminListings();renderAdminReports();renderAdminUsers();
 }
 
-function showSec(name){
-  const pub=['home','terms','privacy','categories'];
-  if(!currentUser&&!pub.includes(name)){showAuth('login');return}
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-'+name)?.classList.add('active');
-  document.querySelectorAll('.nav-a').forEach(a=>a.classList.remove('active'));
-  const map={home:'n-home',marketplace:'n-market',categories:'n-cats',dashboard:'n-dash',messages:'n-msg',admin:'n-admin'};
-  document.getElementById(map[name])?.classList.add('active');
-  document.querySelectorAll('.mobile-nav a').forEach(a=>a.classList.remove('active'));
-  const mmap={home:'m-home',marketplace:'m-market',dashboard:'m-dash',profile:'m-more'};
-  document.getElementById(mmap[name])?.classList.add('active');
-  if(name==='dashboard'&&profile)renderDashboard();
-  if(name==='profile'&&profile)loadProfileForm();
-  if(name==='admin'&&isStaff()){adminTab('overview');loadAdminData()}
-  if(name==='marketplace')renderItems();
-  if(name==='messages')loadConversations();
-  if(name==='home')renderFeatured();
-  window.scrollTo(0,0);
+function cardHtml(item){
+  const img=item.image_url||'https://via.placeholder.com/400x400?text=Bei+Poa';
+  return `<div class="pcard" onclick="openProduct('${item.id}')">
+    <div class="img"><img src="${img}" onerror="this.src='https://via.placeholder.com/400x400?text=Bei+Poa'">
+      <button class="fav" onclick="event.stopPropagation();toggleFavorite('${item.id}')"><i class="fa${favorites.has(item.id)?'s':'r'} fa-heart"></i></button>
+    </div>
+    <div class="body">
+      <div class="price">KSh ${Number(item.price).toLocaleString()}</div>
+      <div class="title">${esc(item.title)}</div>
+      <div class="meta">${esc(item.university||'')} · ${esc(item.condition||'')}</div>
+    </div>
+  </div>`;
 }
 
-function adminTab(t){
-  ['overview','listings','reports','users'].forEach(x=>{
-    const el=document.getElementById('admin-'+x);
-    if(el)el.classList.toggle('d-none',x!==t);
-    document.getElementById('at-'+x)?.classList.toggle('on',x===t);
-  });
-  if(t==='listings')renderAdminListings();
-  if(t==='reports')renderAdminReports();
-  if(t==='users')renderAdminUsers();
-  if(t==='overview')renderAdminOverview();
+function renderFeatured(){
+  const g=document.getElementById('featuredGrid');
+  const list=items.filter(i=>i.status==='approved'&&!i.sold).slice(0,6);
+  if(!currentUser){
+    g.innerHTML=`<div style="grid-column:1/-1" class="empty"><p style="color:var(--muted)">Login to browse campus deals</p>
+      <button class="btn btn-o" style="max-width:160px;margin:8px auto" onclick="openAuth('login')">Login</button></div>`;
+    return;
+  }
+  if(!list.length){g.innerHTML='<div style="grid-column:1/-1" class="empty"><p>No featured items yet</p></div>';return}
+  g.innerHTML=list.map(cardHtml).join('');
 }
 
-function showAuth(m){authMode=m;updateAuthUI();authModal.show()}
+function renderItems(){
+  const search=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  let list=items.filter(i=>i.status==='approved'&&!i.sold);
+  if(activeFilter)list=list.filter(i=>i.category===activeFilter);
+  if(search)list=list.filter(i=>i.title.toLowerCase().includes(search)||(i.description||'').toLowerCase().includes(search));
+  const g=document.getElementById('itemsGrid');
+  const no=document.getElementById('noItems');
+  if(!currentUser){
+    g.innerHTML=`<div style="grid-column:1/-1" class="empty"><p>Login to explore listings</p>
+      <button class="btn btn-o" style="max-width:160px;margin:8px auto" onclick="openAuth('login')">Login</button></div>`;
+    return;
+  }
+  if(!list.length){g.innerHTML='';if(no)no.style.display='block';return}
+  if(no)no.style.display='none';
+  g.innerHTML=list.map(cardHtml).join('');
+}
+
+function openProduct(id){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  selectedItem=item;
+  const phone=(item.contact||'').replace(/\D/g,'');
+  document.getElementById('productDetail').innerHTML=`
+    <img class="pd-img" src="${item.image_url||'https://via.placeholder.com/600'}" onerror="this.src='https://via.placeholder.com/600x600?text=Bei+Poa'">
+    <div class="pd-body">
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <span class="badge">${esc(item.condition||'Good')}</span>
+        <span class="badge warn">${esc(item.category||'')}</span>
+      </div>
+      <h1 style="margin:0 0 4px;font-size:1.35rem">${esc(item.title)}</h1>
+      <div class="pd-price">KSh ${Number(item.price).toLocaleString()}</div>
+      <div class="meta" style="margin:8px 0;color:var(--muted);font-size:.85rem">
+        <i class="fas fa-map-marker-alt"></i> ${esc(item.university||'Kenya')} · Seller: ${esc(item.seller_name||'')}
+      </div>
+      <p style="color:var(--muted);font-size:.9rem;line-height:1.5">${esc(item.description||'No description.')}</p>
+    </div>
+    <div class="pd-actions">
+      <a class="btn btn-wa" href="https://wa.me/${phone}" target="_blank"><i class="fab fa-whatsapp"></i></a>
+      <button class="btn btn-g" onclick="startConversation('${item.id}')"><i class="fas fa-comment"></i> Chat</button>
+      <button class="btn btn-o" onclick="startConversation('${item.id}')">Buy Now</button>
+    </div>`;
+  showSec('product');
+  bumpViews(item.id);
+}
+
+function openAuth(mode){authMode=mode;updateAuthUI();document.getElementById('authSheet').classList.add('on')}
+function closeAuth(){document.getElementById('authSheet').classList.remove('on')}
 function toggleAuth(e){e.preventDefault();authMode=authMode==='login'?'register':'login';updateAuthUI()}
 function updateAuthUI(){
   const L=authMode==='login';
   document.getElementById('authTitle').textContent=L?'Login':'Create account';
   document.getElementById('authSubmitText').textContent=L?'Login':'Sign up';
-  document.getElementById('nameField').classList.toggle('d-none',L);
-  document.getElementById('universityField').classList.toggle('d-none',L);
+  document.getElementById('nameField').style.display=L?'none':'block';
+  document.getElementById('universityField').style.display=L?'none':'block';
   document.getElementById('authSwitchText').textContent=L?"Don't have an account?":'Already have an account?';
   document.getElementById('authSwitchLink').textContent=L?'Register':'Login';
-  document.getElementById('authName').required=!L;
 }
 
 async function handleAuth(e){
@@ -713,61 +603,39 @@ async function handleAuth(e){
   const password=document.getElementById('authPassword').value;
   const name=document.getElementById('authName').value.trim();
   const university=document.getElementById('authUniversity').value.trim();
-  showLoading(true);
+  load(true);
   try{
     if(authMode==='register'){
-      if(!name){alert('Enter your name');return}
+      if(!name){toast('Enter your name');return}
       const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,university}}});
       if(error)throw error;
-      if(data.session){currentUser=data.user;await loadProfile();authModal.hide();document.getElementById('authForm').reset();updateUI();showSec('home');alert('Welcome to Bei Poa!')}
-      else{alert('Account created! You can login.');authMode='login';updateAuthUI();document.getElementById('authEmail').value=email}
+      if(data.session){currentUser=data.user;await loadProfile();closeAuth();updateUI();toast('Welcome to Bei Poa!')}
+      else{toast('Account created — you can login');authMode='login';updateAuthUI()}
     }else{
       const {data,error}=await sb.auth.signInWithPassword({email,password});
       if(error)throw error;
-      currentUser=data.user;await loadProfile();authModal.hide();document.getElementById('authForm').reset();updateUI();showSec(isStaff()?'admin':'home');
+      currentUser=data.user;await loadProfile();closeAuth();updateUI();toast('Welcome back');
     }
-  }catch(err){alert(err.message||'Auth failed')}
-  finally{showLoading(false)}
+  }catch(err){toast(err.message||'Auth failed')}
+  finally{load(false)}
 }
 async function loginGoogle(){
-  showLoading(true);
+  load(true);
   try{const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin}});if(error)throw error}
-  catch(err){showLoading(false);alert(err.message||'Google login failed')}
+  catch(e){load(false);toast(e.message)}
 }
 async function logout(){
-  if(!confirm('Logout?'))return;
-  await sb.auth.signOut();currentUser=null;profile=null;updateUI();showSec('home');
-}
-
-function loadProfileForm(){
-  if(!profile)return;
-  document.getElementById('profileName').value=profile.name||'';
-  document.getElementById('profileEmail').value=profile.email||'';
-  document.getElementById('profileUniversity').value=profile.university||'';
-  document.getElementById('profilePhone').value=profile.phone||'';
-  document.getElementById('profileBio').value=profile.bio||'';
-  document.getElementById('pName').textContent=profile.name;
-  document.getElementById('pEmail').textContent=profile.email;
-  document.getElementById('pRole').textContent=(profile.role||'user').toUpperCase();
-  document.getElementById('pUni').textContent=profile.university||'—';
-  document.getElementById('pAv').textContent=(profile.name||'U').charAt(0).toUpperCase();
-}
-async function saveProfile(e){
-  e.preventDefault();if(!profile)return;
-  const updates={name:document.getElementById('profileName').value.trim(),university:document.getElementById('profileUniversity').value.trim(),phone:document.getElementById('profilePhone').value.trim(),bio:document.getElementById('profileBio').value.trim()};
-  showLoading(true);
-  const {error}=await sb.from('profiles').update(updates).eq('id',profile.id);
-  showLoading(false);
-  if(error){alert(error.message);return}
-  profile={...profile,...updates};updateUI();loadProfileForm();alert('Saved!');
+  await sb.auth.signOut();currentUser=null;profile=null;updateUI();showSec('home');toast('Logged out');
 }
 
 function openPost(){
-  if(!currentUser){showAuth('login');return}
+  if(!currentUser){openAuth('login');return}
   document.getElementById('itemUniversity').value=profile?.university||'';
   document.getElementById('itemContact').value=profile?.phone||'';
-  postModal.show();
+  document.getElementById('postSheet').classList.add('on');
 }
+function closePost(){document.getElementById('postSheet').classList.remove('on')}
+
 async function handlePost(e){
   e.preventDefault();
   const newItem={
@@ -782,311 +650,84 @@ async function handlePost(e){
     seller_id:currentUser.id,seller_name:profile.name,seller_email:profile.email,
     status:isStaff()?'approved':'pending',sold:false
   };
-  showLoading(true);
+  load(true);
   const {error}=await sb.from('items').insert(newItem);
-  showLoading(false);
-  if(error){alert(error.message);return}
-  postModal.hide();document.getElementById('postForm').reset();await loadItems();
-  alert(newItem.status==='pending'?'Submitted for review!':'Posted!');
+  load(false);
+  if(error){toast(error.message);return}
+  closePost();document.querySelector('#postSheet form').reset();
+  await loadItems();
+  toast(newItem.status==='pending'?'Submitted for review':'Posted!');
+  showSec('dashboard');
 }
 
-function cardHtml(item){
-  const cond=item.condition==='Like New'||item.condition==='Good'?'badge-g':'badge-f';
-  return `<div class="col-6 col-md-4 col-lg-3">
-    <div class="pcard" onclick="openProduct('${item.id}')">
-      <img src="${item.image_url||'https://via.placeholder.com/400x300?text=Bei+Poa'}" alt="" onerror="this.src='https://via.placeholder.com/400x300?text=Bei+Poa'">
-      <div class="bd">
-        <div class="d-flex justify-content-between align-items-start mb-1">
-          <span class="price">KSh ${Number(item.price).toLocaleString()}</span>
-          <span class="${cond}">${esc(item.condition)}</span>
-        </div>
-        <div class="fw-semibold small text-truncate">${esc(item.title)}</div>
-        <div class="text-muted" style="font-size:.72rem">${esc(item.university||'')}</div>
-      </div>
-    </div></div>`;
-}
-
-function renderFeatured(){
-  const list=items.filter(i=>i.status==='approved'&&!i.sold).slice(0,4);
-  const g=document.getElementById('featured');
-  if(!currentUser){
-    g.innerHTML=`<div class="col-12"><div class="card border-0 shadow-sm rounded-4 p-4 text-center">
-      <p class="text-muted mb-3">Login to browse featured campus deals</p>
-      <div><button class="btn-or me-2" onclick="showAuth('login')">Login</button>
-      <button class="btn-out" onclick="showAuth('register')">Sign Up</button></div></div></div>`;
-    return;
-  }
-  if(!list.length){g.innerHTML='<div class="col-12 text-muted small">No featured items yet.</div>';return}
-  g.innerHTML=list.map(cardHtml).join('');
-}
-
-function renderItems(){
-  if(!currentUser)return;
-  const search=(document.getElementById('searchInput')?.value||'').toLowerCase();
-  const uni=document.getElementById('filterUniversity')?.value||'';
-  const cat=document.getElementById('filterCategory')?.value||'';
-  const maxP=document.getElementById('filterPrice')?.value||'';
-  const filtered=items.filter(item=>{
-    if(item.status!=='approved'||item.sold)return false;
-    if(search&&!item.title.toLowerCase().includes(search)&&!(item.description||'').toLowerCase().includes(search))return false;
-    if(uni&&item.university!==uni)return false;
-    if(cat&&item.category!==cat)return false;
-    if(maxP&&item.price>Number(maxP))return false;
-    return true;
-  });
-  const grid=document.getElementById('itemsGrid');
-  const no=document.getElementById('noItems');
-  if(!filtered.length){grid.innerHTML='';no.classList.remove('d-none');return}
-  no.classList.add('d-none');grid.innerHTML=filtered.map(cardHtml).join('');
-}
-
-function openProduct(id){
-  const item=items.find(i=>i.id===id);if(!item)return;
-  selectedItem=item; bumpViews(item.id);
-  const phone=(item.contact||'').replace(/\D/g,'');
-  document.getElementById('productDetail').innerHTML=`
-    <div class="col-lg-6"><div class="pd-img"><img src="${item.image_url||'https://via.placeholder.com/600x400?text=Bei+Poa'}" alt="" onerror="this.src='https://via.placeholder.com/600x400?text=Bei+Poa'"></div></div>
-    <div class="col-lg-6">
-      <div class="d-flex gap-2 mb-2"><span class="badge bg-dark">${esc(item.condition)}</span><span class="badge bg-secondary">${esc(item.category)}</span></div>
-      <h1 class="h3 fw-bold">${esc(item.title)}</h1>
-      <div class="d-flex align-items-baseline gap-2 mb-3">
-        <span class="price" style="font-size:1.6rem">KSh ${Number(item.price).toLocaleString()}</span>
-      </div>
-      <p class="text-muted small mb-1"><i class="fas fa-map-marker-alt me-1"></i>${esc(item.university||'Kenya')}</p>
-      <p class="text-muted small mb-3">Seller: <strong>${esc(item.seller_name)}</strong></p>
-      <div class="d-flex flex-wrap gap-2 mb-4">
-        <a href="https://wa.me/${phone}" target="_blank" class="btn-wa px-3 py-2"><i class="fab fa-whatsapp me-1"></i>WhatsApp</a>
-        <button class="btn-or px-3 py-2" onclick="startConversation('${item.id}')"><i class="fas fa-comment me-1"></i>Message</button>
-        <button class="btn-out" id="favBtn" onclick="toggleFavorite('${item.id}')"><i class="fas fa-heart me-1"></i>Save</button>
-        <button class="btn-out" onclick="startCheckout()">Deal guide</button>
-        <button class="btn-out" onclick="openReport('${item.id}')"><i class="fas fa-flag me-1"></i>Report</button>
-      </div>
-      <h6 class="fw-bold">Product details</h6>
-      <p class="text-muted">${esc(item.description||'No description provided.')}</p>
-      <div class="card border-0 bg-light rounded-3 p-3 mt-3">
-        <h6 class="fw-bold small">Safety tips</h6>
-        <ul class="safety mb-0 ps-3">
-          <li>Meet in a public place on campus</li>
-          <li>Check the item before payment</li>
-          <li>Use secure payment methods</li>
-          <li>Report suspicious activity</li>
-        </ul>
-      </div>
-    </div>`;
-  showSec('product');
-}
-
-function startCheckout(){
-  if(!selectedItem)return;
-  const item=selectedItem;
-  const phone=(item.contact||'').replace(/\D/g,'');
-  document.getElementById('checkoutBox').innerHTML=`
-    <div class="col-md-7">
-      <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
-        <h5 class="fw-bold mb-3">How campus deals work</h5>
-        <ol class="mb-4">
-          <li class="mb-2">Message the seller on WhatsApp</li>
-          <li class="mb-2">Agree on price, meeting place &amp; time</li>
-          <li class="mb-2">Inspect the item, then pay (M-Pesa / cash)</li>
-        </ol>
-        <a href="https://wa.me/${phone}?text=${encodeURIComponent('Hi, I saw your "'+item.title+'" on Bei Poa. Is it still available?')}" target="_blank" class="btn-wa w-100 py-2 mb-2 d-inline-block text-center"><i class="fab fa-whatsapp me-1"></i>Message seller on WhatsApp</a>
-        <button class="btn-out w-100" onclick="showSec('product')">Back to product</button>
-      </div></div>
-    </div>
-    <div class="col-md-5">
-      <div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4">
-        <h6 class="fw-bold">Order summary</h6>
-        <div class="d-flex gap-3 mb-3">
-          <img src="${item.image_url||'https://via.placeholder.com/80'}" width="72" height="72" class="rounded-3 object-fit-cover" style="object-fit:cover" onerror="this.src='https://via.placeholder.com/80'">
-          <div><div class="fw-semibold small">${esc(item.title)}</div><div class="price">KSh ${Number(item.price).toLocaleString()}</div></div>
-        </div>
-        <hr>
-        <div class="d-flex justify-content-between"><span class="text-muted">Item</span><span>KSh ${Number(item.price).toLocaleString()}</span></div>
-        <div class="d-flex justify-content-between mt-2 fw-bold"><span>Total</span><span>KSh ${Number(item.price).toLocaleString()}</span></div>
-        <p class="small text-muted mt-3 mb-0">Payment happens directly between you and the seller. Bei Poa does not process payments.</p>
-      </div></div>
-    </div>`;
-  showSec('checkout');
+function renderProfile(){
+  const g=document.getElementById('profileGuest');
+  const u=document.getElementById('profileUser');
+  if(!currentUser||!profile){g.style.display='block';u.style.display='none';return}
+  g.style.display='none';u.style.display='block';
+  document.getElementById('pName').textContent=profile.name;
+  document.getElementById('pEmail').textContent=profile.email;
+  document.getElementById('pAv').textContent=(profile.name||'U').charAt(0).toUpperCase();
+  const mine=items.filter(i=>i.seller_id===currentUser.id);
+  document.getElementById('statListings').textContent=mine.length;
+  document.getElementById('statActive').textContent=mine.filter(i=>i.status==='approved'&&!i.sold).length;
+  document.getElementById('statSold').textContent=mine.filter(i=>i.sold).length;
+  document.getElementById('adminLink').style.display=isStaff()?'flex':'none';
 }
 
 function renderDashboard(){
   if(!profile)return;
   const mine=items.filter(i=>i.seller_id===currentUser.id);
-  document.getElementById('statTotal').textContent=mine.length;
-  document.getElementById('statActive').textContent=mine.filter(i=>i.status==='approved'&&!i.sold).length;
-  document.getElementById('statPending').textContent=mine.filter(i=>i.status==='pending').length;
-  document.getElementById('statSold').textContent=mine.filter(i=>i.sold).length;
-  document.getElementById('dName').textContent=profile.name;
-  document.getElementById('dHello').textContent=profile.name.split(' ')[0];
-  document.getElementById('dAv').textContent=(profile.name||'U').charAt(0).toUpperCase();
-  document.getElementById('dRole').textContent=profile.role||'user';
-  const cont=document.getElementById('myListings'),empty=document.getElementById('noMyListings');
-  if(!mine.length){cont.innerHTML='';empty.classList.remove('d-none');return}
-  empty.classList.add('d-none');
-  cont.innerHTML=mine.map(item=>`<div class="col-md-6 col-xl-4">
-    <div class="card border-0 shadow-sm h-100 rounded-3"><div class="row g-0">
-      <div class="col-4"><img src="${item.image_url||'https://via.placeholder.com/120'}" class="img-fluid rounded-start h-100" style="object-fit:cover;min-height:90px" onerror="this.src='https://via.placeholder.com/120'"></div>
-      <div class="col-8"><div class="card-body py-2 px-3">
-        <div class="fw-semibold small text-truncate">${esc(item.title)}</div>
-        <div class="small fw-bold">KSh ${Number(item.price).toLocaleString()}</div>
-        <span class="badge status-${item.status}">${item.status}</span>
-        ${item.sold?'<span class="badge bg-secondary ms-1">Sold</span>':''}
-        <div class="mt-1">
-          ${item.status==='approved'&&!item.sold?`<button class="btn btn-outline-warning btn-sm me-1" onclick="markSold('${item.id}')">Sold</button>`:''}
-          <button class="btn btn-outline-danger btn-sm" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
-        </div>
-      </div></div>
-    </div></div></div>`).join('');
+  document.getElementById('dTotal').textContent=mine.length;
+  document.getElementById('dActive').textContent=mine.filter(i=>i.status==='approved'&&!i.sold).length;
+  document.getElementById('dPending').textContent=mine.filter(i=>i.status==='pending').length;
+  document.getElementById('dSold').textContent=mine.filter(i=>i.sold).length;
+  const cont=document.getElementById('myListings');
+  const empty=document.getElementById('noMy');
+  if(!mine.length){cont.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  cont.innerHTML=mine.map(item=>`<div class="pcard">
+    <div class="img"><img src="${item.image_url||'https://via.placeholder.com/400'}" onerror="this.src='https://via.placeholder.com/400'"></div>
+    <div class="body">
+      <div class="price">KSh ${Number(item.price).toLocaleString()}</div>
+      <div class="title">${esc(item.title)}</div>
+      <div class="meta">${item.status}${item.sold?' · sold':''}</div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        ${item.status==='approved'&&!item.sold?`<button class="sm-btn ok" onclick="markSold('${item.id}')">Sold</button>`:''}
+        <button class="sm-btn no" onclick="deleteItem('${item.id}')">Delete</button>
+      </div>
+    </div>
+  </div>`).join('');
 }
 
-async function markSold(id){const {error}=await sb.from('items').update({sold:true}).eq('id',id);if(error)alert(error.message);else await loadItems()}
-async function deleteItem(id){if(!confirm('Delete?'))return;const {error}=await sb.from('items').delete().eq('id',id);if(error)alert(error.message);else await loadItems()}
+async function markSold(id){await sb.from('items').update({sold:true}).eq('id',id);await loadItems();renderDashboard()}
+async function deleteItem(id){if(!confirm('Delete?'))return;await sb.from('items').delete().eq('id',id);await loadItems();renderDashboard()}
 
-function openReport(id){if(!currentUser){showAuth('login');return}document.getElementById('reportItemId').value=id;reportModal.show()}
-async function submitReport(e){
-  e.preventDefault();
-  const itemId=document.getElementById('reportItemId').value;
-  const item=items.find(i=>i.id===itemId);if(!item)return;
-  showLoading(true);
-  const {error}=await sb.from('reports').insert({
-    item_id:itemId,item_title:item.title,seller_id:item.seller_id,seller_name:item.seller_name,seller_email:item.seller_email,
-    reason:document.getElementById('reportReason').value,details:document.getElementById('reportDetails').value.trim(),
-    reporter_id:currentUser.id,reporter_name:profile.name,status:'open'
-  });
-  showLoading(false);
-  if(error){alert(error.message);return}
-  reportModal.hide();alert('Report submitted. Thank you!');
+function loadProfileForm(){
+  if(!profile)return;
+  document.getElementById('profileName').value=profile.name||'';
+  document.getElementById('profileEmail').value=profile.email||'';
+  document.getElementById('profileUniversity').value=profile.university||'';
+  document.getElementById('profilePhone').value=profile.phone||'';
+  document.getElementById('profileBio').value=profile.bio||'';
 }
-
-function renderAdminOverview(){
-  document.getElementById('aUsers').textContent=users.length;
-  document.getElementById('aItems').textContent=items.length;
-  document.getElementById('aPend').textContent=items.filter(i=>i.status==='pending').length;
-  document.getElementById('aRep').textContent=reports.filter(r=>r.status==='open').length;
+async function saveProfile(){
+  if(!profile)return;
+  const updates={
+    name:document.getElementById('profileName').value.trim(),
+    university:document.getElementById('profileUniversity').value.trim(),
+    phone:document.getElementById('profilePhone').value.trim(),
+    bio:document.getElementById('profileBio').value.trim()
+  };
+  load(true);
+  const {error}=await sb.from('profiles').update(updates).eq('id',profile.id);
+  load(false);
+  if(error){toast(error.message);return}
+  profile={...profile,...updates};updateUI();toast('Saved');showSec('profile');
 }
-function renderAdminListings(){
-  const filter=document.getElementById('listingStatusFilter')?.value||'';
-  let list=[...items];if(filter)list=list.filter(i=>i.status===filter);
-  const body=document.getElementById('adminListingsBody');
-  if(!list.length){body.innerHTML='<tr><td colspan="5" class="text-center text-muted py-4">No listings</td></tr>';return}
-  body.innerHTML=list.map(item=>`<tr>
-    <td><div class="fw-semibold small">${esc(item.title)}</div><div class="text-muted" style="font-size:.72rem">${esc(item.category)} · ${esc(item.university)}</div></td>
-    <td class="small">${esc(item.seller_name)}</td>
-    <td class="small">KSh ${Number(item.price).toLocaleString()}</td>
-    <td><span class="badge status-${item.status}">${item.status}</span></td>
-    <td>${item.status==='pending'?`<button class="btn btn-success btn-sm me-1" onclick="moderate('${item.id}','approved')">Approve</button>
-      <button class="btn btn-outline-danger btn-sm me-1" onclick="moderate('${item.id}','rejected')">Reject</button>`:''}
-      <button class="btn btn-outline-secondary btn-sm" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button></td>
-  </tr>`).join('');
-}
-async function moderate(id,status){const {error}=await sb.from('items').update({status}).eq('id',id);if(error)alert(error.message);else await loadItems()}
-async function approveAll(){
-  const pending=items.filter(i=>i.status==='pending');
-  if(!pending.length){alert('None pending');return}
-  if(!confirm(`Approve ${pending.length}?`))return;
-  showLoading(true);for(const i of pending)await sb.from('items').update({status:'approved'}).eq('id',i.id);
-  showLoading(false);await loadItems();
-}
-function renderAdminReports(){
-  const open=reports.filter(r=>r.status==='open');
-  const list=document.getElementById('adminReportsList'),empty=document.getElementById('noReports');
-  if(!open.length){list.innerHTML='';empty.classList.remove('d-none');return}
-  empty.classList.add('d-none');
-  list.innerHTML=open.map(r=>`<div class="card border-0 shadow-sm mb-3 rounded-3" style="border-left:4px solid #ef4444!important">
-    <div class="card-body"><span class="badge bg-danger mb-1">${esc(r.reason)}</span>
-    <h6 class="fw-bold">${esc(r.item_title)}</h6>
-    <p class="small text-muted mb-1">Seller: ${esc(r.seller_name)}</p>
-    <p class="small">${esc(r.details)||'No details'}</p>
-    <div class="d-flex gap-1 flex-wrap">
-      <button class="btn btn-sm btn-outline-success" onclick="resolveReport('${r.id}','resolved')">Resolve</button>
-      <button class="btn btn-sm btn-outline-danger" onclick="banUser('${r.seller_id}')">Ban seller</button>
-      <button class="btn btn-sm btn-outline-secondary" onclick="resolveReport('${r.id}','dismissed')">Dismiss</button>
-    </div></div></div>`).join('');
-}
-async function resolveReport(id,status){const {error}=await sb.from('reports').update({status}).eq('id',id);if(error)alert(error.message);else await loadAdminData()}
-async function banUser(userId){
-  if(!confirm('Ban user?'))return;
-  await sb.from('profiles').update({status:'banned'}).eq('id',userId);
-  await sb.from('items').update({status:'rejected'}).eq('seller_id',userId).eq('status','pending');
-  await loadAdminData();alert('Banned.');
-}
-function renderAdminUsers(){
-  document.getElementById('adminUsersBody').innerHTML=users.map(u=>`<tr>
-    <td><div class="fw-semibold small">${esc(u.name)}</div><div class="text-muted" style="font-size:.72rem">${esc(u.email)}</div></td>
-    <td class="small">${esc(u.university||'—')}</td>
-    <td><span class="badge ${u.role==='admin'?'bg-danger':u.role==='moderator'?'bg-warning text-dark':'bg-secondary'}">${u.role}</span></td>
-    <td><span class="badge ${u.status==='banned'?'status-banned':'bg-success'}">${u.status}</span></td>
-    <td>${isAdmin()&&u.id!==currentUser.id?`
-      ${u.role!=='admin'?`<button class="btn btn-outline-primary btn-sm me-1" onclick="setRole('${u.id}','moderator')">Make mod</button>`:''}
-      ${u.role==='moderator'?`<button class="btn btn-outline-secondary btn-sm me-1" onclick="setRole('${u.id}','user')">Demote</button>`:''}
-      ${u.status==='active'?`<button class="btn btn-outline-danger btn-sm" onclick="banUser('${u.id}')">Ban</button>`:`<button class="btn btn-outline-success btn-sm" onclick="unban('${u.id}')">Unban</button>`}
-    `:(u.id===currentUser.id?'<span class="text-muted small">You</span>':'')}</td>
-  </tr>`).join('');
-}
-async function setRole(id,role){const {error}=await sb.from('profiles').update({role}).eq('id',id);if(error)alert(error.message);else{await loadAdminData();alert('Updated')}}
-async function unban(id){await sb.from('profiles').update({status:'active'}).eq('id',id);await loadAdminData()}
-
-function updateUI(){
-  const logged=!!currentUser&&!!profile;
-  if(logged){ loadFavorites(); loadNotifications(); loadConversations(); }
-  const nb=document.getElementById('notifBtn');
-  if(nb) nb.classList.toggle('d-none', !logged);
-  document.getElementById('btnLogin').classList.toggle('d-none',logged);
-  document.getElementById('btnReg').classList.toggle('d-none',logged);
-  document.getElementById('btnOut').classList.toggle('d-none',!logged);
-  document.getElementById('btnSell').classList.toggle('d-none',!logged);
-  ['n-market','n-cats','n-dash','n-msg'].forEach(id=>document.getElementById(id)?.classList.toggle('d-none',!logged));
-  document.getElementById('n-admin')?.classList.toggle('d-none',!isStaff());
-  const g=document.getElementById('greet');
-  if(logged){g.textContent=profile.name.split(' ')[0];g.classList.remove('d-none')}else g.classList.add('d-none');
-}
-function populateUniversities(){
-  const unis=[...new Set(items.filter(i=>i.status==='approved').map(i=>i.university).filter(Boolean))].sort();
-  const sel=document.getElementById('filterUniversity');if(!sel)return;
-  const cur=sel.value;
-  sel.innerHTML='<option value="">All</option>'+unis.map(u=>`<option value="${esc(u)}">${esc(u)}</option>`).join('');
-  sel.value=cur;
-}
-function resetFilters(){
-  document.getElementById('searchInput').value='';
-  document.getElementById('filterUniversity').value='';
-  document.getElementById('filterCategory').value='';
-  document.getElementById('filterPrice').value='';
-  renderItems();
-}
-
-function toggleTheme(){
-  const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  document.body.setAttribute('data-theme', t);
-  localStorage.setItem('bp-theme', t);
-  const icon = document.getElementById('themeIcon');
-  if(icon) icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-}
-(function(){
-  const t = localStorage.getItem('bp-theme') || 'light';
-  document.body.setAttribute('data-theme', t);
-  const icon = document.getElementById('themeIcon');
-  if(icon) icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-})();
-function toast(msg, type){
-  const w = document.getElementById('toast-wrap');
-  if(!w){ alert(msg); return; }
-  const el = document.createElement('div');
-  el.className = 'toast-item';
-  el.innerHTML = '<div class="fw-semibold small">'+(type==='error'?'Error':type==='success'?'Success':'Bei Poa')+'</div><div class="small text-muted">'+msg+'</div>';
-  w.appendChild(el);
-  setTimeout(()=>el.remove(), 3500);
-}
-
-
-/* ===== Bei Poa v2: Favorites, Chat, Notifications ===== */
-let favorites=new Set();
-let conversations=[];
-let activeConvo=null;
-let chatChannel=null;
 
 async function loadFavorites(){
-  if(!currentUser){favorites=new Set();return;}
+  if(!currentUser){favorites=new Set();return}
   try{
     const {data,error}=await sb.from('favorites').select('item_id').eq('user_id',currentUser.id);
     if(error)throw error;
@@ -1096,34 +737,25 @@ async function loadFavorites(){
     favorites=new Set(raw?JSON.parse(raw):[]);
   }
 }
-
 async function toggleFavorite(itemId){
-  if(!currentUser){showAuth('login');return;}
+  if(!itemId)return;
+  if(!currentUser){openAuth('login');return}
   const isFav=favorites.has(itemId);
   try{
-    if(isFav){
-      await sb.from('favorites').delete().eq('user_id',currentUser.id).eq('item_id',itemId);
-      favorites.delete(itemId);
-      toast('Removed from saved','success');
-    }else{
-      await sb.from('favorites').insert({user_id:currentUser.id,item_id:itemId});
-      favorites.add(itemId);
-      toast('Saved to favorites','success');
-    }
+    if(isFav){await sb.from('favorites').delete().eq('user_id',currentUser.id).eq('item_id',itemId);favorites.delete(itemId)}
+    else{await sb.from('favorites').insert({user_id:currentUser.id,item_id:itemId});favorites.add(itemId)}
   }catch(e){
     if(isFav)favorites.delete(itemId);else favorites.add(itemId);
     localStorage.setItem('bp-fav-'+currentUser.id,JSON.stringify([...favorites]));
-    toast(isFav?'Removed (local)':'Saved (local)','success');
   }
-  const btn=document.getElementById('favBtn');
-  if(btn)btn.innerHTML=favorites.has(itemId)?'<i class="fas fa-heart me-1" style="color:#f97316"></i>Saved':'<i class="fas fa-heart me-1"></i>Save';
+  toast(favorites.has(itemId)?'Saved':'Removed');
+  renderItems();renderFeatured();
 }
 
 async function startConversation(itemId){
-  if(!currentUser){showAuth('login');return;}
-  const item=items.find(i=>i.id===itemId);
-  if(!item)return;
-  if(item.seller_id===currentUser.id){toast('This is your listing','error');return;}
+  if(!currentUser){openAuth('login');return}
+  const item=items.find(i=>i.id===itemId);if(!item)return;
+  if(item.seller_id===currentUser.id){toast('Your listing');return}
   try{
     let {data:existing}=await sb.from('conversations').select('*').eq('item_id',itemId).eq('buyer_id',currentUser.id).maybeSingle();
     if(!existing){
@@ -1136,12 +768,10 @@ async function startConversation(itemId){
       await sb.from('messages').insert({conversation_id:existing.id,sender_id:currentUser.id,body:'Hi, is this still available?'});
     }
     activeConvo=existing;
-    showSec('messages');
     await loadConversations();
     await openConversation(existing.id);
   }catch(e){
-    console.error(e);
-    toast((e.message||'Chat unavailable')+' — run upgrade-v2.sql','error');
+    toast('Chat needs upgrade-v2.sql — opening WhatsApp');
     const phone=(item.contact||'').replace(/\D/g,'');
     if(phone)window.open('https://wa.me/'+phone,'_blank');
   }
@@ -1155,118 +785,90 @@ async function loadConversations(){
       .order('last_message_at',{ascending:false});
     if(error)throw error;
     conversations=data||[];
-    renderConversationList();
-  }catch(e){
     const list=document.getElementById('msgList');
-    if(list)list.innerHTML='<div class="empty p-4"><p class="small">Run <code>sql/upgrade-v2.sql</code> in Supabase to enable chat. Use WhatsApp on listings for now.</p></div>';
+    if(!conversations.length){list.innerHTML='<div class="empty"><i class="fas fa-comments"></i><p>No chats yet</p></div>';return}
+    list.innerHTML=conversations.map(c=>`<div class="item" onclick="openConversation('${c.id}')">
+      <div class="av">${(c.last_message||'C').charAt(0)}</div>
+      <div class="info"><b>Chat</b><span>${esc(c.last_message||'')}</span></div>
+    </div>`).join('');
+  }catch(e){
+    document.getElementById('msgList').innerHTML='<div class="empty"><p>Run upgrade-v2.sql for chat. Use WhatsApp on listings.</p></div>';
   }
-}
-
-function renderConversationList(){
-  const list=document.getElementById('msgList');
-  if(!list)return;
-  if(!conversations.length){
-    list.innerHTML='<div class="empty p-4"><i class="fas fa-comments"></i><p class="small mb-0">No conversations yet.</p></div>';
-    return;
-  }
-  list.innerHTML=conversations.map(c=>{
-    const on=activeConvo&&activeConvo.id===c.id?'on':'';
-    return `<div class="msg-item ${on}" onclick="openConversation('${c.id}')">
-      <div class="fw-semibold small text-truncate">${esc(c.last_message||'Conversation')}</div>
-      <div class="text-muted" style="font-size:.7rem">${new Date(c.last_message_at||c.created_at).toLocaleString()}</div>
-    </div>`;
-  }).join('');
 }
 
 async function openConversation(id){
   activeConvo=conversations.find(c=>c.id===id)||{id};
+  showSec('chat');
   document.getElementById('msgTitle').textContent='Chat';
-  renderConversationList();
   try{
     const {data,error}=await sb.from('messages').select('*').eq('conversation_id',id).order('created_at',{ascending:true});
     if(error)throw error;
     const body=document.getElementById('msgBody');
     body.innerHTML=(data||[]).map(m=>{
       const me=m.sender_id===currentUser.id;
-      return `<div class="bubble ${me?'me':'them'}">${esc(m.body)}<div style="font-size:.65rem;opacity:.7;margin-top:4px">${new Date(m.created_at).toLocaleTimeString()}</div></div>`;
-    }).join('')||'<div class="empty small">No messages yet</div>';
+      return `<div class="bubble ${me?'me':'them'}">${esc(m.body)}</div>`;
+    }).join('')||'<div class="empty">No messages</div>';
     body.scrollTop=body.scrollHeight;
-    await sb.from('messages').update({read_at:new Date().toISOString()}).eq('conversation_id',id).neq('sender_id',currentUser.id).is('read_at',null);
-    subscribeChat(id);
-  }catch(e){toast(e.message,'error');}
-}
-
-function subscribeChat(convoId){
-  if(chatChannel){try{sb.removeChannel(chatChannel);}catch(_){}}
-  chatChannel=sb.channel('chat-'+convoId)
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'conversation_id=eq.'+convoId},payload=>{
-      const m=payload.new;
-      const body=document.getElementById('msgBody');
-      if(!body)return;
-      const me=m.sender_id===currentUser.id;
-      body.insertAdjacentHTML('beforeend',`<div class="bubble ${me?'me':'them'}">${esc(m.body)}<div style="font-size:.65rem;opacity:.7;margin-top:4px">${new Date(m.created_at).toLocaleTimeString()}</div></div>`);
+    if(chatChannel)try{sb.removeChannel(chatChannel)}catch(_){}
+    chatChannel=sb.channel('c-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'conversation_id=eq.'+id},p=>{
+      const m=p.new;const me=m.sender_id===currentUser.id;
+      body.insertAdjacentHTML('beforeend',`<div class="bubble ${me?'me':'them'}">${esc(m.body)}</div>`);
       body.scrollTop=body.scrollHeight;
     }).subscribe();
+  }catch(e){toast(e.message)}
 }
 
 async function sendChatMessage(){
   const input=document.getElementById('msgInput');
-  const text=(input&&input.value||'').trim();
-  if(!text||!activeConvo||!activeConvo.id||!currentUser)return;
+  const text=(input?.value||'').trim();
+  if(!text||!activeConvo?.id)return;
   input.value='';
   try{
-    const {error}=await sb.from('messages').insert({conversation_id:activeConvo.id,sender_id:currentUser.id,body:text});
-    if(error)throw error;
+    await sb.from('messages').insert({conversation_id:activeConvo.id,sender_id:currentUser.id,body:text});
     await sb.from('conversations').update({last_message:text,last_message_at:new Date().toISOString()}).eq('id',activeConvo.id);
-  }catch(e){toast(e.message||'Send failed','error');}
+  }catch(e){toast(e.message)}
 }
 
-async function loadNotifications(){
-  if(!currentUser)return;
-  try{
-    const {data,error}=await sb.from('notifications').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(30);
-    if(error)throw error;
-    renderNotifications(data||[]);
-  }catch(e){console.warn(e.message);}
+async function bumpViews(id){
+  try{const item=items.find(i=>i.id===id);if(!item)return;const v=(item.views||0)+1;await sb.from('items').update({views:v}).eq('id',id);item.views=v}catch(_){}
 }
 
-function renderNotifications(list){
-  const el=document.getElementById('notifList');
-  const dot=document.getElementById('notifDot');
-  if(!el)return;
-  const unread=list.filter(n=>!n.read).length;
-  if(dot)dot.classList.toggle('d-none',unread===0);
-  if(!list.length){el.innerHTML='<div class="empty p-3 small">No notifications</div>';return;}
-  el.innerHTML=list.map(n=>`<div class="p-2 mb-1 rounded-3" style="background:${n.read?'transparent':'var(--bg-soft,#f1f5f9)'}">
-    <div class="fw-semibold small">${esc(n.title)}</div>
-    <div class="small text-muted">${esc(n.body||'')}</div>
-    <div style="font-size:.65rem;color:#94a3b8">${new Date(n.created_at).toLocaleString()}</div>
-  </div>`).join('');
+function adminTab(t,btn){
+  ['listings','reports','users'].forEach(x=>{
+    const el=document.getElementById('admin-'+x);
+    if(el)el.style.display=x===t?'block':'none';
+  });
+  if(btn){document.querySelectorAll('.admin-nav button').forEach(b=>b.classList.remove('on'));btn.classList.add('on')}
+  if(t==='listings')renderAdminListings();
+  if(t==='reports')renderAdminReports();
+  if(t==='users')renderAdminUsers();
+}
+function renderAdminListings(){
+  const body=document.getElementById('adminListingsBody');
+  if(!body)return;
+  const list=items.slice(0,50);
+  body.innerHTML=list.map(i=>`<div class="row">
+    <div><b>${esc(i.title)}</b><div style="font-size:.7rem;color:var(--muted)">${i.status} · KSh ${Number(i.price).toLocaleString()}</div></div>
+    <div>${i.status==='pending'?`<button class="sm-btn ok" onclick="moderate('${i.id}','approved')">OK</button>
+      <button class="sm-btn no" onclick="moderate('${i.id}','rejected')">No</button>`:''}</div>
+  </div>`).join('')||'<div class="empty">No listings</div>';
+}
+async function moderate(id,status){await sb.from('items').update({status}).eq('id',id);await loadItems();renderAdminListings()}
+function renderAdminReports(){
+  const el=document.getElementById('adminReportsList');
+  const open=reports.filter(r=>r.status==='open');
+  el.innerHTML=open.map(r=>`<div class="row"><div><b>${esc(r.item_title)}</b><div style="font-size:.7rem;color:var(--muted)">${esc(r.reason)}</div></div>
+    <button class="sm-btn ok" onclick="resolveReport('${r.id}')">Resolve</button></div>`).join('')||'<div class="empty">No reports</div>';
+}
+async function resolveReport(id){await sb.from('reports').update({status:'resolved'}).eq('id',id);await loadAdminData()}
+function renderAdminUsers(){
+  const el=document.getElementById('adminUsersBody');
+  el.innerHTML=users.slice(0,40).map(u=>`<div class="row"><div><b>${esc(u.name)}</b><div style="font-size:.7rem;color:var(--muted)">${esc(u.email)} · ${u.role}</div></div></div>`).join('')||'';
 }
 
-function toggleNotifPanel(){
-  const p=document.getElementById('notifPanel');
-  if(!p)return;
-  p.classList.toggle('d-none');
-  if(!p.classList.contains('d-none'))loadNotifications();
+function updateUI(){
+  if(currentUser&&profile){loadFavorites();loadConversations()}
 }
-
-async function markAllNotifsRead(){
-  if(!currentUser)return;
-  try{await sb.from('notifications').update({read:true}).eq('user_id',currentUser.id).eq('read',false);loadNotifications();}
-  catch(e){toast(e.message,'error');}
-}
-
-async function bumpViews(itemId){
-  try{
-    const item=items.find(i=>i.id===itemId);
-    if(!item)return;
-    const v=(item.views||0)+1;
-    await sb.from('items').update({views:v}).eq('id',itemId);
-    item.views=v;
-  }catch(_){}
-}
-
 </script>
 </body>
 </html>
